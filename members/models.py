@@ -1,21 +1,24 @@
 from django.db import models
 
 # Create your models here.
-class Member(models.model):
-	first_name = models.Charfield(max_length=200)
-	last_name = models.Charfield(max_length=200)
-	preferred_name = models.Charfield(max_length=200)
-	pronouns = models.Charfield(max_length=200)
-	email_address = model.Charfield(max_length=200)
-	student_number
-	notes TextField
+class Member(models.Model):
+	first_name = models.CharField(max_length=200)
+	last_name = models.CharField(max_length=200)
+	preferred_name = models.CharField(max_length=200)
+	pronouns = models.CharField(max_length=200)
+	email_address = models.CharField(max_length=200)
+	student_number = models.CharField(max_length=10)
+	notes = models.TextField()
 	
-class Membership(models.model)
-	member FK
-	date
-	guild_member
+	def __str__(self):
+		return self.preferred_name + ' ' + self.last_name + ' (' + self.pronouns + ')'
 	
-class Ranks
-	rank_name unique
-	member M2M
-	permissions
+class Membership(models.Model):
+	member = models.ForeignKey(Member, on_delete=models.CASCADE)
+	date = models.DateTimeField()
+	guild_member = models.BooleanField()
+	
+class Ranks(models.Model):
+	rank_name = models.CharField(max_length=50)
+	member = models.ManyToManyField(Member)
+	
