@@ -4,7 +4,7 @@ from django.contrib import admin
 from .models import Member, Membership, Rank
 
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ('preferred_name', 'last_name', 'join_date', 'is_fresher')
+    list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
 
 
 admin.site.register(Member, MemberAdmin)
