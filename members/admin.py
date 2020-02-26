@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Member, Membership, Ranks
+from .models import Member, Membership, Rank
 admin.site.register(Member)
 admin.site.register(Membership)
-admin.site.register(Ranks)
+admin.site.register(Rank)

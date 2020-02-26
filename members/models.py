@@ -18,7 +18,6 @@ class Membership(models.Model):
 	date = models.DateTimeField()
 	guild_member = models.BooleanField()
 	
-class Ranks(models.Model):
+class Rank(models.Model):
 	rank_name = models.CharField(max_length=50)
 	member = models.ManyToManyField(Member)
-	
