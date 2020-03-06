@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+
 # Create your models here.
 class Member(models.Model):
 	first_name = models.CharField(max_length=200)
@@ -32,11 +33,13 @@ class Member(models.Model):
 	def is_fresher(self):
 		return self.join_date.year == timezone.now().year
 
+
 class Membership(models.Model):
 	member = models.ForeignKey(Member, on_delete=models.CASCADE)
 	date = models.DateField(default=timezone.now)
 	guild_member = models.BooleanField()
 	
+
 class Rank(models.Model):
 	RANK_CHOICES = [
 		('SUSPENDED', 'Suspended'),
@@ -54,6 +57,7 @@ class Rank(models.Model):
 
 	def __str__(self):
 		return self.rank_name
+
 
 class Interest(models.Model):
 	INTEREST_CHOICES = [
