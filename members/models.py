@@ -2,6 +2,7 @@ import datetime
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -15,6 +16,7 @@ class Member(models.Model):
 	phone_number = models.CharField(max_length=20, blank=True)
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
+	user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
 
 	def clean(self):
 		if not self.email_address and not self.student_number:
