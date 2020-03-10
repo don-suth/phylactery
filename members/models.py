@@ -12,7 +12,7 @@ class Member(models.Model):
 	preferred_name = models.CharField(max_length=200, blank=True)
 	pronouns = models.CharField(max_length=200, blank=True)
 	student_number = models.CharField(max_length=10, blank=True)
-	email_address = models.CharField(max_length=200, blank=True)
+	email_address = models.CharField(max_length=200, blank=True, unique=True)
 	phone_number = models.CharField(max_length=20, blank=True)
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
