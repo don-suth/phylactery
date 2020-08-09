@@ -17,23 +17,38 @@ def signup(request):
 	if request.method == 'POST':
 		form = SignupForm(request.POST)
 		if form.is_valid():
-			user = form.save(commit=False)
-			user.is_active = False
-			user.save()
-			current_site = get_current_site(request)
-			mail_subject = 'Activate your Unigames account.'
-			message = render_to_string('members/acc_active_email.html', {
-				'user': user,
-				'domain': current_site.domain,
-				'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-				'token': account_activation_token.make_token(user),
-			})
-			to_email = form.cleaned_data.get('email')
-			email = EmailMessage(
-				mail_subject, message, to=[to_email]
-			)
-			email.send()
-			return HttpResponse('Please confirm your email address to complete the registration.')
+			reg_email = form.cleaned_data['email']
+			try:
+				member = Member.objects.get(email_address=reg_email)
+			except Member.DoesNotExist:
+				member = None
+			if member is not None and member.has_rank("GATEKEEPER"):
+				# Member exists and they are a gatekeeper - sign them up!
+				user = form.save(commit=False)
+				user.is_active = False
+				user.save()
+				current_site = get_current_site(request)
+				mail_subject = 'Activate your Unigames account.'
+				message = render_to_string('members/acc_active_email.html', {
+					'user': user,
+					'domain': current_site.domain,
+					'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+					'token': account_activation_token.make_token(user),
+				})
+				to_email = form.cleaned_data.get('email')
+				email = EmailMessage(
+					mail_subject, message, to=[to_email]
+				)
+				email.send()
+			else:
+				# The form is valid, but the member either doesn't exist or is not a gatekeeper.
+				# We give them the same response, but don't do anything with the data to prevent leaking.
+				pass
+			return HttpResponse("""
+			Form submission complete.
+			If you are a gatekeeper, an email to confirm your registration will sent to the specified email address.
+			If you didn't receive an email, try checking your spam box. If you suspect an error has been made,
+			contact an admin.""")
 	else:
 		form = SignupForm()
 	return render(request, 'members/signup.html', {'form': form})

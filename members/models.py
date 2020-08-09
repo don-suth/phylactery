@@ -36,7 +36,7 @@ class Member(models.Model):
 		return self.join_date.year == timezone.now().year
 
 	def has_rank(self, rank_name):
-		for rank in self.ranks:
+		for rank in self.ranks.all():
 			if str(rank) == rank_name:
 				return True
 		return False
