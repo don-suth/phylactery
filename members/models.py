@@ -35,6 +35,12 @@ class Member(models.Model):
 	def is_fresher(self):
 		return self.join_date.year == timezone.now().year
 
+	def has_rank(self, rank_name):
+		for rank in self.ranks:
+			if str(rank) == rank_name:
+				return True
+		return False
+
 
 class Membership(models.Model):
 	member = models.ForeignKey(Member, on_delete=models.CASCADE)
