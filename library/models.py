@@ -11,6 +11,7 @@ class ItemTypes(models.Model):
 
 class Item(models.Model):
     item_name = models.CharField(max_length=200)
+    item_slug = models.SlugField(max_length=50, null=True)
     item_condition = models.TextField()
     item_notes = models.TextField()
     item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
