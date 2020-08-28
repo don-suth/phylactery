@@ -8,4 +8,9 @@
 <p>Notes: {{ item.item_notes }}</p>
 <p>Type: {{ item.item_type }}</p>
 <img src="{{ item.item_image.url }}">
+<p>Tags:</p><ul>
+    {% for itemtag in item.strtagvalues_set.all + item.inttagvalues_set.all %}
+        <li>{{ itemtag }}</li>
+    {% endfor %}
+</ul>
 {% endblock %}
