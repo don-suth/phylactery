@@ -4,7 +4,11 @@ from django.contrib import admin
 from .models import Item, ItemTypes, StrTag, StrTagValues, IntTagValues, IntTag, StaticTag
 
 
-admin.site.register(Item)
+class ItemAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"item_slug": ("item_name",)}
+
+
+admin.site.register(Item, ItemAdmin)
 admin.site.register(ItemTypes)
 admin.site.register(StrTag)
 admin.site.register(IntTag)

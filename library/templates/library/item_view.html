@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.item_name }}{% endblock %}
+
+{% block content %}
+<h2>{{ item.item_name }}</h2>
+<p>Condition: {{ item.item_condition }}</p>
+<p>Notes: {{ item.item_notes }}</p>
+<p>Type: {{ item.item_type }}</p>
+<img src="{{ item.item_image.url }}">
+{% endblock %}
