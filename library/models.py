@@ -14,7 +14,7 @@ class Item(models.Model):
     item_condition = models.TextField()
     item_notes = models.TextField()
     item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
-    item_image = models.ImageField()
+    item_image = models.ImageField(upload_to='library/', null=True)
 
     def __str__(self):
         return self.item_name
