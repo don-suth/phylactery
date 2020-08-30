@@ -17,6 +17,14 @@ class Item(models.Model):
     item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
     item_image = models.ImageField(upload_to='library/', null=True)
 
+    def get_tags(self):
+        returner = list()
+        returner += list(self.inttagvalues_set.all())
+        returner += list(self.strtagvalues_set.all())
+        returner += list(self.statictag_set.all())
+        returner.sort(key=lambda i:i.id)
+        return returner
+
     def __str__(self):
         return self.item_name
 
