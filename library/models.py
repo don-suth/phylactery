@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 
 class ItemTypes(models.Model):
@@ -24,6 +25,9 @@ class Item(models.Model):
         returner += list(self.statictag_set.all())
         returner.sort(key=lambda i:i.id)
         return returner
+
+    def get_absolute_url(self):
+        return reverse('library:detail-slug',args=[self.item_slug])
 
     def __str__(self):
         return self.item_name
