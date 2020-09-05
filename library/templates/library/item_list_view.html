@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Item List{% endblock %}
+
+{% block content %}
+<h2>{{ page_title|default:"All items:" }}</h2>
+<ul>
+    {% for item in items_list %}
+        <li><a href="{% url 'library:detail-slug' item.item_slug %}">{{ item.item_name }}</a></li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
