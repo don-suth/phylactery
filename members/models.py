@@ -46,7 +46,7 @@ class Membership(models.Model):
 	member = models.ForeignKey(Member, on_delete=models.CASCADE)
 	date = models.DateField(default=timezone.now)
 	guild_member = models.BooleanField()
-	
+
 
 class Rank(models.Model):
 	RANK_CHOICES = [
@@ -61,10 +61,17 @@ class Rank(models.Model):
 		max_length=20,
 		choices=RANK_CHOICES
 	)
-	member = models.ManyToManyField(Member, related_name='ranks')
+	member = models.ManyToManyField(Member, related_name='ranks', through="RankAssignments")
 
 	def __str__(self):
 		return self.rank_name
+
+
+class RankAssignments(models.Model):
+	member = models.ForeignKey(Member, on_delete=models.CASCADE)
+	rank = models.ForeignKey(Rank, on_delete=models.CASCADE)
+	assignment_date = models.DateField(auto_now_add=True)
+	rank_expired = models.BooleanField(default=False)
 
 
 class Interest(models.Model):
