@@ -16,15 +16,20 @@ class Item(models.Model):
     item_condition = models.TextField()
     item_notes = models.TextField()
     item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
-    item_image = models.ImageField(upload_to='library/', null=True)
+
+    def image_file_name(instance, filename):
+        fname, dot, extension = filename.rpartition('.')
+        return "library/item_images/{0}.{1}".format(instance.item_slug, extension)
+
+    item_image = models.ImageField(upload_to=image_file_name, null=True)
 
     def get_tags(self):
-        returner = list()
-        returner += list(self.inttagvalues_set.all())
-        returner += list(self.strtagvalues_set.all())
-        returner += list(self.statictag_set.all())
-        returner.sort(key=lambda i:i.id)
-        return returner
+        tag_list = list()
+        tag_list += list(self.inttagvalues_set.all())
+        tag_list += list(self.strtagvalues_set.all())
+        tag_list += list(self.statictag_set.all())
+        tag_list.sort(key=lambda i: i.id)
+        return tag_list
 
     def get_absolute_url(self):
         return reverse('library:detail-slug',args=[self.item_slug])
