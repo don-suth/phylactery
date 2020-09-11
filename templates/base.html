@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
     <title>{% block title %}Unigames Home Page{% endblock %}</title>
@@ -12,7 +14,11 @@
 <body>
     <main>
         <nav class="navbar navbar-expand-md navbar-{{ NAVBAR_THEME }}" style="background-color: {{ NAVBAR_COLOUR }}">
-            <a class="navbar-brand" href="#">Navbar</a>
+            <a class="navbar-brand" href="#">
+                {% load static %}
+                <img src="{% static 'phylactery/2019logo.png' %}" width="69" height="45" alt="" class="d-inline-block" loading="lazy">
+                Unigames
+            </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
