@@ -1,0 +1,8 @@
+@font-face {
+    font-family: newRocker;
+    src: url(NewRocker-Regular.otf);
+}
+
+.unigames-brand {
+    font-family: newRocker;
+}
