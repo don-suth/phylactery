@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'phylactery/base.html' %}
 
 {% block title %}{{ item.item_name }}{% endblock %}
 
 {% block content %}
-<h2>{{ item.item_name }}</h2>
+<h1 class="mt-3">{{ item.item_name }}</h1>
 <p>Condition: {{ item.item_condition }}</p>
 <p>Notes: {{ item.item_notes }}</p>
 <p>Type: {{ item.item_type }}</p>
