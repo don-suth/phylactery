@@ -15,7 +15,7 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-{{ NAVBAR_THEME }}" style="background-color: {{ NAVBAR_COLOUR }}">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="{% url 'home' %}">
 
                 <span class="unigames-brand">Unigames</span>
                 <img src="{% static 'phylactery/images/unigames-logo.svg' %}" width="69" height="45" alt="" class="d-inline-block" loading="lazy">
@@ -30,9 +30,9 @@
                             About Us
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarAboutUsDropdown">
-                            <a class="dropdown-item" href="#">FAQ</a>
-                            <a class="dropdown-item" href="#">Events</a>
-                            <a class="dropdown-item" href="#">What is Roleplaying?</a>
+                            <a class="dropdown-item" href="{% url 'faq' %}">FAQ</a>
+                            <a class="dropdown-item" href="{% url 'events' %}">Events</a>
+                            <a class="dropdown-item" href="{% url 'roleplaying' %}">What is Roleplaying?</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#">Our Committee</a>
                             <a class="dropdown-item" href="#">Life Members</a>
