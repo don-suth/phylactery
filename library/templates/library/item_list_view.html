@@ -6,7 +6,7 @@
 <h2 class="mt-3">{{ page_title|default:"All items:" }}</h2>
 <ul>
     {% for item in items_list %}
-        <li><a href="{% url 'library:detail-slug' item.item_slug %}">{{ item.item_name }}</a></li>
+        <li><a href="{% url 'library:detail-id' item.pk %}">{{ item.item_name }}</a></li>
     {% endfor %}
 </ul>
 

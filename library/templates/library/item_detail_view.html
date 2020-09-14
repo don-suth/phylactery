@@ -13,5 +13,5 @@
         <li>{{ itemtag }}</li>
     {% endfor %}
 </ul>
-<p>Here is the slug url for this item: <a href="{% url 'library:detail-slug' item.item_slug %}">Link</a> </p>
+<p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>
 {% endblock %}

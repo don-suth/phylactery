@@ -1,9 +1,22 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Item
 from django.http import HttpResponseBadRequest
+from django.views import generic
 
 
 # Create your views here.
+
+class IndexView(generic.ListView):
+    template_name = 'library/item_list_view.html'
+    context_object_name = 'items_list'
+    model = Item
+
+
+class ItemDetailView(generic.DetailView):
+    model = Item
+    template_name = 'library/item_detail_view.html'
+
+
 def item_detail(request, item_id=None, slug=None):
     if item_id is not None:
         item = get_object_or_404(Item, pk=item_id)
