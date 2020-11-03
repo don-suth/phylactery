@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Item, ItemTypes, StrTag, StrTagValues, IntTagValues, IntTag, StaticTag
+from .models import Item, ItemTypes, StrTag, StrTagValue, StrTagThrough, IntTagValues, IntTag, StaticTag
 
 
 class StrTagAdmin(admin.ModelAdmin):
@@ -16,9 +16,13 @@ class StaticTagAdmin(admin.ModelAdmin):
     search_fields = ('tag_name',)
 
 
-class StrTagValuesInline(admin.TabularInline):
-    model = StrTagValues
-    autocomplete_fields = ('tag',)
+class StrTagValueAdmin(admin.ModelAdmin):
+    search_fields = ('value',)
+
+
+class StrTagThroughInline(admin.TabularInline):
+    model = StrTagThrough
+    autocomplete_fields = ('tag', 'value')
     extra = 1
 
 
@@ -36,11 +40,12 @@ class StaticTagInline(admin.TabularInline):
 
 class ItemAdmin(admin.ModelAdmin):
     prepopulated_fields = {"item_slug": ("item_name",)}
-    inlines = (StrTagValuesInline, IntTagValuesInline, StaticTagInline)
+    inlines = (StrTagThroughInline, IntTagValuesInline, StaticTagInline)
 
 
 admin.site.register(Item, ItemAdmin)
 admin.site.register(ItemTypes)
 admin.site.register(StrTag, StrTagAdmin)
+admin.site.register(StrTagValue, StrTagValueAdmin)
 admin.site.register(IntTag, IntTagAdmin)
 admin.site.register(StaticTag, StaticTagAdmin)
