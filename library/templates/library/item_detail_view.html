@@ -3,15 +3,31 @@
 {% block title %}{{ item.item_name }}{% endblock %}
 
 {% block content %}
-<h1 class="mt-3">{{ item.item_name }}</h1>
+<h2 class="mt-3">{{ item.item_name }}</h2>
+<div class="card item-detail-card">
+    <img src="{{ item.item_image.url }}" class="card-img-top" alt="Image for {{ item.item_name }}">
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <span>Status</span>
+            </div>
+            <div class="col">
+                <span>Available!</span>
+            </div>
+        </div>
+    </div>
+</div>
+<p>
+    {% lorem %}
+</p>
+
 <p>Condition: {{ item.item_condition }}</p>
 <p>Notes: {{ item.item_notes }}</p>
 <p>Type: {{ item.item_type }}</p>
-<img src="{{ item.item_image.url }}">
-<p>Tags:</p><ul>
-    {% for itemtag in item.get_tags %}
-        <li>{{ itemtag }}</li>
-    {% endfor %}
-</ul>
+<p>Tags:
+{% for itemtag in item.get_tags %}
+<button type="button" class="btn btn-outline-dark">{{ itemtag }}</button>
+{% endfor %}
+</p>
 <p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>
 {% endblock %}
