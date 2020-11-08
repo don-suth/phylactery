@@ -48,7 +48,7 @@ class IntTag(models.Model):
 
 
 class IntTagValues(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.PROTECT)
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="inttags")
     tag = models.ForeignKey(IntTag, on_delete=models.PROTECT)
     value = models.IntegerField()
 
@@ -74,7 +74,7 @@ class StrTagValue(models.Model):
 
 
 class StrTagThrough(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.PROTECT)
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name="strtags")
     tag = models.ForeignKey(StrTag, on_delete=models.PROTECT)
     value = models.ForeignKey(StrTagValue, on_delete=models.PROTECT)
 
@@ -93,7 +93,7 @@ class StrTagThrough(models.Model):
 class StaticTag(models.Model):
     tag_name = models.CharField(max_length=30)
     tag_description = models.CharField(max_length=300)
-    items = models.ManyToManyField(Item)
+    items = models.ManyToManyField(Item, related_name="statictags")
 
     def __str__(self):
         return self.tag_name
