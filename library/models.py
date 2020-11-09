@@ -25,9 +25,9 @@ class Item(models.Model):
 
     def get_tags(self):
         tag_list = list()
-        tag_list += list(self.inttagvalues_set.all())
-        tag_list += list(self.strtagthrough_set.all())
-        tag_list += list(self.statictag_set.all())
+        tag_list += list(self.inttags.all())
+        tag_list += list(self.strtags.all())
+        tag_list += list(self.statictags.all())
         tag_list.sort(key=lambda i: i.id)
         return tag_list
 

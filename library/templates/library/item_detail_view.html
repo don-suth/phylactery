@@ -26,7 +26,7 @@
 <p>Type: {{ item.item_type }}</p>
 <p>Tags:
 {% for itemtag in item.get_tags %}
-<button type="button" class="btn btn-outline-dark">{{ itemtag }}</button>
+<a href="{% url 'library:strtag-all' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>
 {% endfor %}
 </p>
 <p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>
