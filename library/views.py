@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Item, StrTagValue, StaticTag, IntTagValues, StrTagThrough
 from django.http import HttpResponseBadRequest
 from django.views import generic
+from dal import autocomplete
 
 
 # Create your views here.
@@ -28,10 +29,26 @@ class AllItemsByStrTag(generic.ListView):
         return context
 
 
-
 class ItemDetailView(generic.DetailView):
     model = Item
     template_name = 'library/item_detail_view.html'
+
+
+class StrTagValueAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return StrTagValue.objects.none()
+        qs = StrTagValue.objects.all()
+
+        #strtag = self.forwarded.get('strtag', None)
+
+        #if self.q and strtag:
+        #    qs = qs.filter(value__istartswith=self.q, tag__pk=strtag)
+        if self.q:
+            qs = qs.filter(value__istartswith=self.q)
+        #elif strtag:
+        #    qs = qs.filter(tag__pk=strtag)
+        return qs
 
 
 def item_detail(request, item_id=None, slug=None):
