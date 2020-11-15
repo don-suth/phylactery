@@ -40,14 +40,14 @@ class StrTagValueAutocomplete(autocomplete.Select2QuerySetView):
             return StrTagValue.objects.none()
         qs = StrTagValue.objects.all()
 
-        #strtag = self.forwarded.get('strtag', None)
+        strtag = self.forwarded.get('tag', None)
 
-        #if self.q and strtag:
-        #    qs = qs.filter(value__istartswith=self.q, tag__pk=strtag)
-        if self.q:
+        if self.q and strtag:
+            qs = qs.filter(value__istartswith=self.q, tag=strtag)
+        if self.q and not strtag:
             qs = qs.filter(value__istartswith=self.q)
-        #elif strtag:
-        #    qs = qs.filter(tag__pk=strtag)
+        if not self.q and strtag:
+            qs = qs.filter(tag=strtag)
         return qs
 
 

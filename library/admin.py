@@ -2,6 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Item, ItemTypes, StrTag, StrTagValue, StrTagThrough, IntTagValues, IntTag, StaticTag
+from .forms import StrTagThroughForm
 
 
 class StrTagAdmin(admin.ModelAdmin):
@@ -22,7 +23,8 @@ class StrTagValueAdmin(admin.ModelAdmin):
 
 class StrTagThroughInline(admin.TabularInline):
     model = StrTagThrough
-    autocomplete_fields = ('tag', 'value')
+    autocomplete_fields = ('tag',)
+    form = StrTagThroughForm
     extra = 1
 
 
