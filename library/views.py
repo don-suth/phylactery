@@ -3,9 +3,9 @@ from .models import Item, StrTagValue, StaticTag, IntTagValues, StrTagThrough
 from django.http import HttpResponseBadRequest
 from django.views import generic
 from dal import autocomplete
-
-
+from taggit.models import Tag
 # Create your views here.
+
 
 class AllItemsView(generic.ListView):
     template_name = 'library/item_list_view.html'
@@ -48,6 +48,20 @@ class StrTagValueAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(value__istartswith=self.q)
         if not self.q and strtag:
             qs = qs.filter(tag=strtag)
+        return qs
+
+
+class TagAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Tag.objects.none()
+
+        qs = Tag.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
         return qs
 
 

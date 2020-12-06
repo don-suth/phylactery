@@ -2,6 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
+from taggit.managers import TaggableManager
+
 
 class ItemTypes(models.Model):
     type_name = models.CharField(max_length=30)
@@ -17,6 +19,7 @@ class Item(models.Model):
     item_condition = models.TextField(blank=True)
     item_notes = models.TextField(blank=True)
     item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
+    tags = TaggableManager()
 
     def image_file_name(instance, filename):
         fname, dot, extension = filename.rpartition('.')

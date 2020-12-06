@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Item, ItemTypes, StrTag, StrTagValue, StrTagThrough, IntTagValues, IntTag, StaticTag
-from .forms import StrTagThroughForm
+from .forms import StrTagThroughForm, ItemTaggitForm
 
 
 class StrTagAdmin(admin.ModelAdmin):
@@ -42,6 +42,7 @@ class StaticTagInline(admin.TabularInline):
 
 class ItemAdmin(admin.ModelAdmin):
     prepopulated_fields = {"item_slug": ("item_name",)}
+    form = ItemTaggitForm
     inlines = (StrTagThroughInline, IntTagValuesInline, StaticTagInline)
 
 
