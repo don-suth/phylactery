@@ -1,11 +1,11 @@
 {% extends 'phylactery/base.html' %}
 
-{% block title %}{{ item.item_name }}{% endblock %}
+{% block title %}{{ item.name }}{% endblock %}
 
 {% block content %}
-<h2 class="mt-3">{{ item.item_name }}</h2>
+<h2 class="mt-3">{{ item.name }}</h2>
 <div class="card item-detail-card">
-    <img src="{{ item.item_image.url }}" class="card-img-top" alt="Image for {{ item.item_name }}">
+    <img src="{{ item.image.url }}" class="card-img-top" alt="Image for {{ item.name }}">
     <div class="card-body">
         <div class="row">
             <div class="col">
@@ -18,12 +18,12 @@
     </div>
 </div>
 <p>
-    {{ item.item_description }}
+    {{ item.description }}
 </p>
 
-<p>Condition: {{ item.item_condition }}</p>
-<p>Notes: {{ item.item_notes }}</p>
-<p>Type: {{ item.item_type }}</p>
+<p>Condition: {{ item.condition }}</p>
+<p>Notes: {{ item.notes }}</p>
+<p>Type: {{ item.type }}</p>
 <p>Tags:
 {% for itemtag in item.tags.all %}
 <a href="{% url 'library:tag-list' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>

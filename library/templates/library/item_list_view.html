@@ -10,12 +10,12 @@
         <div class="card mb-3 item-list-card">
           <div class="row no-gutters">
             <div class="col-4 col-md-3">
-                <a href="{ url 'library:detail-id' item.pk }"><img src="{{ item.item_image.url }}" class="card-img list-card-image" alt="{{ item.item_name }}"></a>
+                <a href="{ url 'library:detail-id' item.pk }"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
             </div>
             <div class="col-8">
               <div class="card-body">
-                  <h5 class="card-title"><a href="{% url 'library:detail-id' item.pk %}">{{ item.item_name }}</a></h5>
-                <p class="card-text">{{ item.item_description|truncatewords:25 }}</p>
+                  <h5 class="card-title"><a href="{% url 'library:detail-id' item.pk %}">{{ item.name }}</a></h5>
+                <p class="card-text">{{ item.description|truncatewords:25 }}</p>
               </div>
             </div>
           </div>
@@ -26,12 +26,6 @@
     {% endif %}
     {% endfor %}
 </div>
-<!--<ul>
-    {% for item in items_list %}
-        <li><a href="{% url 'library:detail-id' item.pk %}">{{ item.item_name }}</a></li>
-    {% endfor %}
-</ul>-->
-
 
 <nav aria-label="Page navigation">
     <ul class="pagination">

@@ -9,10 +9,6 @@ urlpatterns = [
     path('item/<int:pk>/', views.ItemDetailView.as_view(), name='detail-id'),
     path('tag/<int:pk>/', views.AllItemsByTag.as_view(), name='tag-list'),
     path('item/<slug:slug>/', views.item_detail, name='detail-slug'),
-    path(
-        'test-autocomplete/',
-        views.TagAutocomplete.as_view(create_field=None),
-        name='select2_taggit',
-    ),
+    path('test-autocomplete/', views.TagAutocomplete.as_view(), name='select2_taggit'),
     path('', views.AllItemsView.as_view(), name='items-all'),
 ]

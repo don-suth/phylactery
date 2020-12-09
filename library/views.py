@@ -21,7 +21,7 @@ class AllItemsByTag(generic.ListView):
 
     def get_queryset(self):
         self.tagname = get_object_or_404(Tag, pk=self.kwargs['pk']).name
-        return Item.objects.filter(tags__name__in=[self.tagname]).order_by('item_name')
+        return Item.objects.filter(tags__name__in=[self.tagname]).order_by('name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,7 +53,7 @@ def item_detail(request, item_id=None, slug=None):
         item = get_object_or_404(Item, pk=item_id)
         return redirect(item)
     elif slug is not None:
-        item = get_object_or_404(Item, item_slug=slug)
+        item = get_object_or_404(Item, slug=slug)
     else:
         return HttpResponseBadRequest("Invalid request")
     return render(request, 'library/item_detail_view.html', {'item': item})
@@ -64,5 +64,5 @@ def item_list(request, page=1, qs=None):
     # 0-9, 10-19, etc.
     if not qs:
         qs = Item.objects.all()
-    items_list = qs.order_by('item_name')[(page-1)*10:(page*10)-1]
+    items_list = qs.order_by('name')[(page-1)*10:(page*10)-1]
     return render(request, 'library/item_list_view.html', {'items_list': items_list})

@@ -13,22 +13,22 @@ class ItemTypes(models.Model):
 
 
 class Item(models.Model):
-    item_name = models.CharField(max_length=200)
-    item_slug = models.SlugField(max_length=50, null=True)
-    item_description = models.TextField(blank=True)
-    item_condition = models.TextField(blank=True)
-    item_notes = models.TextField(blank=True)
-    item_type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=50, null=True)
+    description = models.TextField(blank=True)
+    condition = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
     tags = TaggableManager()
 
     def image_file_name(instance, filename):
         fname, dot, extension = filename.rpartition('.')
-        return "library/item_images/{0}.{1}".format(instance.item_slug, extension)
+        return "library/item_images/{0}.{1}".format(instance.slug, extension)
 
-    item_image = models.ImageField(upload_to=image_file_name, null=True)
+    image = models.ImageField(upload_to=image_file_name, null=True)
 
     def get_absolute_url(self):
-        return reverse('library:detail-slug', args=[self.item_slug])
+        return reverse('library:detail-slug', args=[self.slug])
 
     def __str__(self):
-        return self.item_name
+        return self.name
