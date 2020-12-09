@@ -25,8 +25,8 @@
 <p>Notes: {{ item.item_notes }}</p>
 <p>Type: {{ item.item_type }}</p>
 <p>Tags:
-{% for itemtag in item.get_tags %}
-<a href="{% url 'library:strtag-all' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>
+{% for itemtag in item.tags.all %}
+<a href="{% url 'library:tag-list' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>
 {% endfor %}
 </p>
 <p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>

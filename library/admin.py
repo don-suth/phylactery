@@ -1,8 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Item, ItemTypes, StrTag, StrTagValue, StrTagThrough, IntTagValues, IntTag, StaticTag
-from .forms import StrTagThroughForm, ItemTaggitForm
+from .models import Item, ItemTypes
+from .forms import ItemTaggitForm
+from taggit.models import Tag
 
 
 class StrTagAdmin(admin.ModelAdmin):
@@ -21,34 +22,16 @@ class StrTagValueAdmin(admin.ModelAdmin):
     search_fields = ('value',)
 
 
-class StrTagThroughInline(admin.TabularInline):
-    model = StrTagThrough
-    autocomplete_fields = ('tag',)
-    form = StrTagThroughForm
-    extra = 1
-
-
-class IntTagValuesInline(admin.TabularInline):
-    model = IntTagValues
-    autocomplete_fields = ('tag',)
-    extra = 1
-
-
-class StaticTagInline(admin.TabularInline):
-    model = StaticTag.items.through
-    autocomplete_fields = ('statictag',)
-    extra = 1
-
-
 class ItemAdmin(admin.ModelAdmin):
     prepopulated_fields = {"item_slug": ("item_name",)}
     form = ItemTaggitForm
-    inlines = (StrTagThroughInline, IntTagValuesInline, StaticTagInline)
+
+    class Media:
+        js = [
+            'admin/js/jquery.init.js',
+            'autocomplete_light/jquery.init.js',
+        ]
 
 
 admin.site.register(Item, ItemAdmin)
 admin.site.register(ItemTypes)
-admin.site.register(StrTag, StrTagAdmin)
-admin.site.register(StrTagValue, StrTagValueAdmin)
-admin.site.register(IntTag, IntTagAdmin)
-admin.site.register(StaticTag, StaticTagAdmin)
