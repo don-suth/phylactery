@@ -10,6 +10,9 @@ class ItemAdmin(admin.ModelAdmin):
     form = ItemTaggitForm
 
     class Media:
+        # These scripts were going to load anyway,
+        # but this needs to be here, otherwise
+        # they'd load in the wrong order.
         js = [
             'admin/js/jquery.init.js',
             'autocomplete_light/jquery.init.js',
