@@ -1,0 +1,25 @@
+@font-face {
+    font-family: newRocker;
+    src: url(NewRocker-Regular.otf);
+}
+
+.unigames-brand {
+    font-family: newRocker;
+    margin-right: -30px;
+}
+
+.item-detail-card {
+    width: 288px;
+    float: right;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 576px) {
+    .item-detail-card {
+        width: 50%;
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
