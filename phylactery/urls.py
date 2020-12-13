@@ -25,9 +25,10 @@ urlpatterns = [
     path('events/', TemplateView.as_view(template_name='phylactery/events.html'), name='events'),
     path('roleplaying/', TemplateView.as_view(template_name='phylactery/roleplaying.html'), name='roleplaying'),
     path('members/', include('members.urls')),
-    #path('library/', include('library.urls')),
+    path('library/', include('library.urls')),
     path('admin/', admin.site.urls),
-]
+    path('accounts/', include('django.contrib.auth.urls'))
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

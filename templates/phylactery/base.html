@@ -40,7 +40,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Our Library</a>
+                        <a class="nav-link" href="{% url 'library:library-home' %}">Our Library</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarOperationsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -60,8 +60,14 @@
                             Account
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarAccountDropdown">
+                            {% if user.is_authenticated %}
+                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Welcome {{ user.username }}!</span>
+                            <a class="dropdown-item" href="#">Logout</a>
+                            {% else %}
+                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">You are not currently signed in.</span>
                             <a class="dropdown-item" href="#">Sign-In</a>
                             <a class="dropdown-item" href="#">Sign-Up</a>
+                            {% endif %}
                         </div>
                     </li>
                 </ul>

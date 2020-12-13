@@ -10,5 +10,5 @@ urlpatterns = [
     path('tag/<int:pk>/', views.AllItemsByTag.as_view(), name='tag-list'),
     path('item/<slug:slug>/', views.item_detail, name='detail-slug'),
     path('test-autocomplete/', views.TagAutocomplete.as_view(), name='select2_taggit'),
-    path('', views.AllItemsView.as_view(), name='items-all'),
+    path('', views.AllItemsView.as_view(), name='library-home'),
 ]
