@@ -24,10 +24,10 @@ urlpatterns = [
     path('faq/', TemplateView.as_view(template_name='phylactery/faq.html'), name='faq'),
     path('events/', TemplateView.as_view(template_name='phylactery/events.html'), name='events'),
     path('roleplaying/', TemplateView.as_view(template_name='phylactery/roleplaying.html'), name='roleplaying'),
-    path('members/', include('members.urls')),
+    path('members/', include(('members.urls', 'members'), namespace='members')),
+    path('account/', include(('members.urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls'))
     ]
 
 if settings.DEBUG:

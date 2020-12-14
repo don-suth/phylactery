@@ -11,7 +11,7 @@
     We also have some chess sets, Mahjong, and at least 2 sets of Monopoly just in case.
     Check out our Library.</p>
 <p>Membership costs $5 per year for Guild Members (but $7 for everyone else) and entitles you to vote at the annual committee elections, join one of our many long-running campaigns, borrow our books and games, and receive a 10% discount when you buy from our generous sponsor Tactics.
-    We also keep a well stocked fidge in our clubroom for all your mid-game snacking needs.
+    We also keep a well stocked fridge in our clubroom for all your mid-game snacking needs.
     Our snacks are some of the cheapest on campus!</p>
 <p>The clubroom is currently located on the top level of Cameron Hall, which is above the Tavern.
     Ask for directions at the Guild Student Centre (ground floor in Guild Village).</p>
@@ -20,9 +20,9 @@
 
 {% if user.is_authenticated %}
     <p>Hi {{ user.username }}!</p>
-    <p><a href="{% url 'logout' %}">Logout</a> </p>
+    <p><a href="{% url 'account:logout' %}">Logout</a> </p>
 {% else %}
     <p>You are not logged in.</p>
-    <a href="{% url 'login' %}">Login</a>
+    <a href="{% url 'account:login' %}">Login</a>
 {% endif %}
 {% endblock %}

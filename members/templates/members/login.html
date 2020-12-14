@@ -1,0 +1,21 @@
+{% extends "phylactery/base.html" %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+
+{% csrf_token %}
+{% crispy form %}
+
+{% endblock %}

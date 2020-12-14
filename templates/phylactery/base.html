@@ -61,12 +61,13 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarAccountDropdown">
                             {% if user.is_authenticated %}
-                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Welcome {{ user.username }}!</span>
-                            <a class="dropdown-item" href="#">Logout</a>
+                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Logged in as {{ user.username }}!</span>
+                            <a class="dropdown-item" href="{% url 'admin:index' %}">Admin control panel</a>
+                            <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
                             {% else %}
                             <span class="dropdown-item disabled" style="font-weight:bold; color:black;">You are not currently signed in.</span>
-                            <a class="dropdown-item" href="#">Sign-In</a>
-                            <a class="dropdown-item" href="#">Sign-Up</a>
+                            <a class="dropdown-item" href="{% url 'account:login' %}">Sign-In</a>
+                            <a class="dropdown-item" href="{% url 'account:signup' %}">Sign-Up</a>
                             {% endif %}
                         </div>
                     </li>
@@ -78,7 +79,7 @@
             </div>
         </nav>
     </header>
-    <main role="main" class="container">
+    <main role="main" class="container mt-3">
         {% block content %}
         {% endblock %}
     </main>

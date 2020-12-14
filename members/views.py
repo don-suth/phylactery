@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import RegistrationEmail, SignupForm
+from django.contrib.auth.views import LoginView
+from .forms import SignupForm, LoginForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -13,7 +13,7 @@ from django.core.mail import send_mail, EmailMessage
 from .models import Member
 
 
-def signup(request):
+def signup_view(request):
 	if request.method == 'POST':
 		form = SignupForm(request.POST)
 		if form.is_valid():
@@ -51,10 +51,10 @@ def signup(request):
 			contact an admin.""")
 	else:
 		form = SignupForm()
-	return render(request, 'members/signup.html', {'form': form})
+		return render(request, 'members/signup.html', {'form': form})
 
 
-def activate(request, uidb64, token):
+def activate_view(request, uidb64, token):
 	try:
 		uid = force_text(urlsafe_base64_decode(uidb64))
 		user = User.objects.get(pk=uid)
@@ -68,41 +68,10 @@ def activate(request, uidb64, token):
 		return HttpResponse('Activation link is invalid!')
 
 
-def index(request):
-	return render(request, 'members/index.html')
+class MyLoginView(LoginView):
+	template_name = 'members/login.html'
+	authentication_form = LoginForm
 
 
-def register(request):
-	if request.method == "POST":
-		# Handle the processing of the form
-		form = RegistrationEmail(request.POST)
-		message = "If a gatekeeper exists with that email address. they will be sent an email with further instructions."
-		debugmessage = ""
-		if form.is_valid():
-			reg_email = form.cleaned_data['reg_email']
-			try:
-				member = Member.objects.get(email_address=reg_email)
-				debugmessage += "Found member %s. \n" % str(member)
-			except Member.DoesNotExist:
-				# No member found with that email address. Don't tell them that though.
-				member = None
-				debugmessage += "No member found with email of %s. \n" % reg_email
-			if member:
-				# Check permissions here - only send if gatekeeper.
-				send_mail('Test Email', 'This is a test message.', 'donald@sutherland.id.au', [reg_email], fail_silently=False)
-				pass
-			message = "You attempted to sign up with this email: %s" % reg_email + "\n" + message
-			if settings.DEBUG:
-				message += "\n %s" % debugmessage
-			return render(request, 'members/RegFormOne.html', {'form': form, 'message': message})
-		else:
-			message = "That email address was not valid. Please try again."
-			return render(request, 'members/RegFormOne.html', {'form': form, 'message': message})
-	else:
-		# Render an empty form
-		form = RegistrationEmail()
-		return render(request, 'members/RegFormOne.html', {'form': form})
-
-
-def login(request):
-	return HttpResponse("You will be able to login here!")
+def logout_view(request):
+	return HttpResponse("Logout here soon!")
