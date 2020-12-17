@@ -2,15 +2,23 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Button, HTML, Div
+from crispy_forms.layout import Layout, Fieldset, Button, HTML, Div, Submit
 
 
 class SignupForm(UserCreationForm):
+    """
+    Renders the signup form for gatekeepers.
+    """
     email = forms.EmailField(max_length=200, help_text='Required')
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+    def clean_email(self):
+        if User.objects.filter(email=self.cleaned_data['email']).exists():
+            raise forms.ValidationError("The given email is already registered.")
+        return self.cleaned_data['email']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,7 +40,7 @@ class SignupForm(UserCreationForm):
                     'email',
                     'password1',
                     'password2',
-                    Button('submit', 'Submit', type='submit', css_class='btn-primary'),
+                    Submit('submit', 'Submit', css_class='btn-primary'),
                 ),
                 style="max-width: 576px", css_class="container"
             )
@@ -40,6 +48,9 @@ class SignupForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
+    """
+    Renders the login form.
+    """
     username = UsernameField(widget=forms.TextInput(attrs={"autofocus": True, "class": "form-control-lg"}))
     password = forms.CharField(
         label="Password",
@@ -61,7 +72,7 @@ class LoginForm(AuthenticationForm):
                     """),
                     'username',
                     'password',
-                    Button('submit', 'Submit', type='submit', css_class='btn-primary'),
+                    Submit('submit', 'Submit', css_class='btn-primary'),
                 ),
                 style="max-width: 576px", css_class="container"
             )

@@ -1,8 +1,27 @@
 Tests:
     - TODO: Write tests
 
+Control Panel:
+    - Expire all financial memberships from before [date] (default=1/1/[this year]). (President, VP, Secretary)
+    - Gatekeeper Purge (President, VP)
+    - Webkeeper Purge (President, VP)
+    - Library Overview (OCM+)
+    - Replace Committee Member(s) (President, VP)
+    - Change website theme (President, VP)
+
+Questions to ask:
+    - What information do you want to store in the Member DB?
+    - What information do you want to store on borrowing records?
+    - When do you want what information to be deleted?
+    - Who do you want to be able to see what information? (For example, should gatekeepers see names of members? Should they see email addresses?)
+        - Coming off of that, do you want a way for people to see information that's they shouldn't need to, provided that it's logged?
+            (Example: A gatekeeper can get a members phone number to contact them about lost property, but that action will be put in the log)
+    -  I aim to have the majority of this finished by O-Day, would you folks be willing to make this the first digital O-Day for the club?
+
+
+
 Members:
-    - TODO: (Members) Make the gatekeeper sign-up/login form work again
+    - DONE: (Members) Make the gatekeeper sign-up/login form work again
     - TODO: (Members) Create membership items
     - TODO: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
         - Two buttons - new or returning member?
@@ -17,7 +36,7 @@ Library:
         - Make sure borrowable status is on item pages
         - Add a reservation form for events and external clubs, items aren't borrowable if reserved.
         - Add a "not-borrowable" flag
-        - High-demand flag for borrowable items
+        - High-demand flag for borrowable items (sets the default due date)
     - TODO: (Library) Add player numbers to library items
         - Allow null values.
         - If both null, display nothing.

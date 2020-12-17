@@ -1,6 +1,11 @@
 {% autoescape off %}
 Hi there {{ user.username }},
+
+You are receiving this email because you attempted to sign-up for an account on the Unigames website.
 Please click on this link to confirm your registration.
 
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+http://{{ domain }}{% url 'account:activate' uidb64=uid token=token %}
+
+Regards,
+Unigames
 {% endautoescape %}

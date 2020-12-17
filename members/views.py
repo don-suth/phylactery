@@ -49,6 +49,8 @@ def signup_view(request):
 			If you are a gatekeeper, an email to confirm your registration will sent to the specified email address.
 			If you didn't receive an email, try checking your spam box. If you suspect an error has been made,
 			contact an admin.""")
+		else:
+			return render(request, 'members/signup.html', {'form': form})
 	else:
 		form = SignupForm()
 		return render(request, 'members/signup.html', {'form': form})
