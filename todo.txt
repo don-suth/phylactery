@@ -1,6 +1,11 @@
 Tests:
     - TODO: Write tests
 
+- Things be removed after two years or upon request
+- Phone + Email on membership forms, address on borrowing form
+- Old borrowing records deleted after a year
+- Names + borrowing data only for gatekeepers
+
 Control Panel:
     - Expire all financial memberships from before [date] (default=1/1/[this year]). (President, VP, Secretary)
     - Gatekeeper Purge (President, VP)
@@ -9,7 +14,7 @@ Control Panel:
     - Replace Committee Member(s) (President, VP)
     - Change website theme (President, VP)
 
-Questions to ask:
+Questions to ask (Membership):
     - What information do you want to store in the Member DB?
     - What information do you want to store on borrowing records?
     - When do you want what information to be deleted?
@@ -18,6 +23,18 @@ Questions to ask:
             (Example: A gatekeeper can get a members phone number to contact them about lost property, but that action will be put in the log)
     -  I aim to have the majority of this finished by O-Day, would you folks be willing to make this the first digital O-Day for the club?
 
+Questions to ask (Library):
+    - Barcode field in library data?
+    - Current plan for library borrowing is:
+        - A Gatekeeper can log in, add items to their 'cart', and then 'checkout'.
+        - They'll put in the details of whoever is borrowing them.
+        - Items will be borrowed individually, in case someone wants/needs to return an item early.
+        - Due dates will be automatically set, keeping in mind any reservation forms in place, high-demand items, and the default time of two-weeks.
+        - When a person wants to return items, gatekeeper will log on, check a "library overview page",
+            find the member that wants to return things, and tick boxes to say they've returned them.
+        - Website will show an items borrowable status, if it is available or not.
+        - If not available, it will say the date that you can expect to be returned by, keeping in mind any reservation forms.
+    - Would the club consider getting a tablet for library purpose?
 
 
 Members:
@@ -49,6 +66,7 @@ Library:
         - Just a text box that you can put in a barcode (enables librarian quicksearch mode)
         - No need to generate barcodes.
         - Possible that two items could share a barcode, make sure to account for that.
+    - TODO: (Library) Make Tag non-mandatory
 
 Content Management System:
     - TODO (CMS): Figure out how the hell to do this.
@@ -56,3 +74,4 @@ Content Management System:
 Future future ideas:
     - Calender + events system?
     - Blog?
+    - Discord integration

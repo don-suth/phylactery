@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
 from .models import Member
+from .decorators import gatekeeper_required
 
 
 def signup_view(request):
@@ -73,6 +74,11 @@ def activate_view(request, uidb64, token):
 class MyLoginView(LoginView):
 	template_name = 'members/login.html'
 	authentication_form = LoginForm
+
+
+@gatekeeper_required
+def test_gatekeeper_only_view(request):
+	return HttpResponse("You should only be viewing this if you are a gatekeeper!")
 
 
 def logout_view(request):

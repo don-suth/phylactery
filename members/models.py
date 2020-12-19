@@ -6,6 +6,37 @@ from django.contrib.auth.models import User
 
 
 # Create your models here.
+class UnigamesUser(User):
+	# Extends the base user class to add more functionality,
+	class Meta:
+		proxy = True
+
+	@property
+	def has_member(self):
+		try:
+			return self.member
+		except Member.DoesNotExist:
+			return None
+
+	@property
+	def is_gatekeeper(self):
+		if self.is_superuser:
+			return True
+		member = self.has_member
+		if member:
+			return member.has_rank("GATEKEEPER")
+		return False
+
+	@property
+	def is_committee(self):
+		if self.is_superuser:
+			return True
+		member = self.has_member
+		if member:
+			return member.has_rank("COMMITTEE")
+		return False
+
+
 class Member(models.Model):
 	first_name = models.CharField(max_length=200)
 	last_name = models.CharField(max_length=200)
@@ -16,7 +47,7 @@ class Member(models.Model):
 	phone_number = models.CharField(max_length=20, blank=True)
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
-	user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
+	user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL, related_name='member')
 
 	def clean(self):
 		if not self.email_address and not self.student_number:
