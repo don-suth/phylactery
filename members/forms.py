@@ -61,8 +61,7 @@ class LoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_action = 'account:login'
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Div(
                 Fieldset(

@@ -8,14 +8,15 @@
 
 {% if next %}
     {% if user.is_authenticated %}
-    <div class="alert alert-danger" role="alert">Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</div>
+        <div class="alert alert-danger" role="alert">Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.</div>
     {% else %}
-    <div class="alert alert-danger" role="alert">Please login to see this page.</div>
+        <div class="alert alert-danger" role="alert">Please login to see this page.</div>
     {% endif %}
 {% endif %}
 
+<form action="{% url 'account:login' %}{% if next %}?next={{ next }}{% endif %}" method="post">
 {% csrf_token %}
 {% crispy form %}
-
+</form>
 {% endblock %}
