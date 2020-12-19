@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Button, HTML, Div, Submit
+from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 
 
 class SignupForm(UserCreationForm):
@@ -69,6 +69,8 @@ class LoginForm(AuthenticationForm):
                     'Login',
                     HTML("""
                         <p>Gatekeepers and Committee members can login for more features.</p>
+                        <p>Don't have an account yet? You might want to 
+                        <a href="{% url 'account:signup' %}">Sign Up</a>.</p>
                     """),
                     'username',
                     'password',
