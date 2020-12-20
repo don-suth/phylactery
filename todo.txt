@@ -2,9 +2,11 @@ Tests:
     - TODO: Write tests
 
 - Things be removed after two years or upon request
-- Phone + Email on membership forms, address on borrowing form
+- Phone + Email on membership forms, address + phone on borrowing form
 - Old borrowing records deleted after a year
 - Names + borrowing data only for gatekeepers
+
+Admin > Committee > Gatekeeper > everything else
 
 Control Panel:
     - Expire all financial memberships from before [date] (default=1/1/[this year]). (President, VP, Secretary)

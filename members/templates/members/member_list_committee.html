@@ -1,0 +1,35 @@
+{% extends "phylactery/base.html" %}
+
+{% block title %}Member List{% endblock %}
+
+{% block content %}
+<h2>Member List</h2>
+
+<table class="table table-responsive table-hover table-striped table-sm">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Pronouns</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Fresher?</th>
+            <th scope="col">Current Member?</th>
+            <th scope="col">Gatekeeper?</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+            <tr>
+                <th scope="row">{{ member.name }}</th>
+                <td>{{ member.pronouns }}</td>
+                <td>{{ member.email }}</td>
+                <td>{{ member.phone }}</td>
+                <td>{{ member.is_fresher }}</td>
+                <td>{{ member.is_member }}</td>
+                <td>{{ member.is_gatekeeper }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -21,6 +21,7 @@ class InterestInline(admin.TabularInline):
 
 class MemberAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
+    search_fields = ('first_name', 'last_name')
     inlines = [InterestInline, MembershipInline, RanksInline]
 
 

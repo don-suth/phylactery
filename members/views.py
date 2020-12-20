@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.views import LoginView
 from .forms import SignupForm, LoginForm
 from django.contrib.sites.shortcuts import get_current_site
@@ -8,10 +8,12 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
-from django.conf import settings
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from .models import Member
-from .decorators import gatekeeper_required
+from .decorators import gatekeeper_required, switch_to_proxy
+from django.views.generic import ListView
+from django.utils.decorators import method_decorator
+from django.db.models import Q, F
 
 
 def signup_view(request):
@@ -76,10 +78,24 @@ class MyLoginView(LoginView):
 	authentication_form = LoginForm
 
 
-@gatekeeper_required
-def test_gatekeeper_only_view(request):
-	return HttpResponse("You should only be viewing this if you are a gatekeeper!")
+@method_decorator(gatekeeper_required, name='dispatch')
+class MemberListView(ListView):
+	model = Member
+	context_object_name = 'members'
 
+	def get_template_names(self):
+		return ['members/member_list_gatekeeper.html']
 
-def logout_view(request):
-	return HttpResponse("Logout here soon!")
+	def get_queryset(self):
+		name_search = self.request.GET.get('name', None)
+		has_notes = self.request.GET.get('has_notes', None)
+		queryset = Member.objects.all()
+		if name_search is not None:
+			queryset = queryset.filter(
+				Q(first_name__icontains=name_search) |
+				Q(last_name__icontains=name_search) |
+				Q(preferred_name__icontains=name_search)
+			)
+		if (has_notes is not None) and (switch_to_proxy(self.request.user).is_committee is True):
+			pass
+		return queryset

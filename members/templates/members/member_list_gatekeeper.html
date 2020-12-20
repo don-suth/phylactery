@@ -1,0 +1,58 @@
+{% extends "phylactery/base.html" %}
+
+{% block title %}Member List{% endblock %}
+
+{% block content %}
+<h2>Member List</h2>
+<p>Note: You don't have access to see all member information. If you need information not listed here, please contact committee.</p>
+<form class="form-inline mb-2" action="{% url 'members:member_list' %}" method="get">
+    <label class="mr-2">Filters:</label>
+    <label class="sr-only" for="name">Name Search</label>
+    <input type="text" class="form-control mr-2" id="name" name="name" placeholder="Name Search" {% if request.GET.name %}value="{{ request.GET.name }}"{% endif %}>
+
+    <label class="sr-only" for="gatekeeper">Gatekeeper Filter</label>
+    <select class="form-control mr-2" id="gatekeeper" name="gatekeeper">
+        <option value="">Gatekeeper?</option>
+        <option value="1"{% if request.GET.gatekeeper == "1" %} selected{% endif %}>Yes</option>
+        <option value="0"{% if request.GET.gatekeeper == "0" %} selected{% endif %}>No</option>
+    </select>
+    <button type="submit" class="btn btn-primary mr-2">Filter</button>
+</form>
+<table class="table table-responsive table-hover table-striped table-sm">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Pronouns</th>
+            <th scope="col">Fresher?</th>
+            <th scope="col">Current Member?</th>
+            <th scope="col">Gatekeeper?</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if request.GET.gatekeeper %}
+            {% for member in members %}
+                {% if request.GET.gatekeeper == '1' and member.is_gatekeeper or request.GET.gatekeeper == '0' and not member.is_gatekeeper %}
+                    <tr>
+                        <th scope="row">{{ member }}</th>
+                        <td>{{ member.pronouns }}</td>
+                        <td>{{ member.is_fresher }}</td>
+                        <td>(not implemented){# member.is_member #}</td>
+                        <td>{{ member.is_gatekeeper }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% for member in members %}
+                <tr>
+                    <th scope="row">{{ member }}</th>
+                    <td>{{ member.pronouns }}</td>
+                    <td>{{ member.is_fresher }}</td>
+                    <td>(not implemented){# member.is_member #}</td>
+                    <td>{{ member.is_gatekeeper }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+{% endblock %}
