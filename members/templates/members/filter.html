@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="card-body card-body-sm">
+    <p class="card-text" style="font-weight:bold;">{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</p>
+</div>
+<div class="list-group list-group-flush">
+    {% for choice in choices %}
+        <a class="list-group-item list-group-item-action list-group-item-sm {% if choice.selected %}list-group-item-primary{% endif %}" href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a>
+    {% endfor %}
+</div>

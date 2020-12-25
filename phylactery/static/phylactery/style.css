@@ -23,3 +23,23 @@
         margin-right: auto;
     }
 }
+
+.list-group-item-sm {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+}
+
+.card-body-sm {
+    padding-top: 0.75rem;
+    padding-bottom: 0.2rem;
+}
+
+.card-body-sm .card-title {
+    margin-bottom: 0rem;
+}
+
+#changelist-filter {
+    position: relative;
+    top: 0px;
+    right: 0px;
+}

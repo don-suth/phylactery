@@ -4,6 +4,35 @@ from django.contrib import admin
 from .models import Member, Membership, Rank, Interest
 
 
+class MemberGatekeeperFilter(admin.SimpleListFilter):
+    title = 'gatekeeper status:'
+    parameter_name = 'gatekeeper'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('gate', 'Gatekeepers'),
+            ('notgate', 'Non-gatekeepers'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'gate':
+            return queryset.filter(rankassignments__rank__rank_name="GATEKEEPER")
+        if self.value() == 'notgate':
+            return queryset.exclude(rankassignments__rank__rank_name="GATEKEEPER")
+
+
+class MemberGatekeeperViewFilter(MemberGatekeeperFilter):
+    # Exactly the same as the above but with a different template for outside of admin things.
+    template = 'members/filter.html'
+
+
+class MemberListAdmin(admin.ModelAdmin):
+    # This exists for the filter feature in members.views
+    # While not used here, it is necessary.
+    list_filter = (MemberGatekeeperViewFilter,)
+    search_fields = ('first_name', 'last_name')
+
+
 class RanksInline(admin.TabularInline):
     model = Rank.member.through
     extra = 1
@@ -22,6 +51,7 @@ class InterestInline(admin.TabularInline):
 class MemberAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
     search_fields = ('first_name', 'last_name')
+    list_filter = (MemberGatekeeperFilter,)
     inlines = [InterestInline, MembershipInline, RanksInline]
 
 

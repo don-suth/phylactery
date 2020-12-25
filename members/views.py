@@ -10,10 +10,11 @@ from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from .models import Member
-from .decorators import gatekeeper_required, switch_to_proxy
+from .decorators import gatekeeper_required
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
-from django.db.models import Q, F
+from .admin import MemberListAdmin
+from django.contrib.admin import AdminSite
 
 
 def signup_view(request):
@@ -80,22 +81,53 @@ class MyLoginView(LoginView):
 
 @method_decorator(gatekeeper_required, name='dispatch')
 class MemberListView(ListView):
+	"""
+	For filtering, it pulls out all of the active filters on MemberAdmin,
+	runs the queryset through all of those, then turns that queryset into
+	the resulting listview.
+	Templates of the view can be customised here,
+	Templates of the filter are customised in admin.py
+	"""
 	model = Member
+	paginate_by = 100
+	adm_model = MemberListAdmin(Member, AdminSite())
+	changelist = None
+	template_name = "members/member_list.html"
 	context_object_name = 'members'
 
-	def get_template_names(self):
-		return ['members/member_list_gatekeeper.html']
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		self.changelist = self.adm_model.get_changelist_instance(self.request)
+
+		context['cl'] = self.changelist
+		return context
 
 	def get_queryset(self):
-		name_search = self.request.GET.get('name', None)
-		has_notes = self.request.GET.get('has_notes', None)
-		queryset = Member.objects.all()
-		if name_search is not None:
-			queryset = queryset.filter(
-				Q(first_name__icontains=name_search) |
-				Q(last_name__icontains=name_search) |
-				Q(preferred_name__icontains=name_search)
-			)
-		if (has_notes is not None) and (switch_to_proxy(self.request.user).is_committee is True):
+		qs = super().get_queryset()
+		get_params = self.request.GET.dict()
+
+		self.changelist = self.adm_model.get_changelist_instance(self.request)
+		(self.changelist.filter_specs, self.changelist.has_filters, remaining_lookup_params,
+			filters_use_distinct, has_filters) = self.changelist.get_filters(self.request)
+
+		# Then, we let every list filter modify the queryset to its liking.
+		qs = self.changelist.root_queryset
+		for filter_spec in self.changelist.filter_specs:
+			new_qs = filter_spec.queryset(self.request, qs)
+			if new_qs is not None:
+				qs = new_qs
+				print(qs)
+		try:
+			qs = qs.filter(**remaining_lookup_params)
+			print(qs)
+		except:
 			pass
-		return queryset
+
+		# Set ordering.
+		ordering = self.changelist.get_ordering(self.request, qs)
+		qs = qs.order_by(*ordering)
+
+		# Apply search results
+		qs, search_use_distinct = self.changelist.model_admin.get_search_results(self.request, qs, self.changelist.query)
+		print(qs)
+		return qs
