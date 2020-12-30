@@ -113,19 +113,11 @@ class RankAssignments(models.Model):
 	rank_expired = models.BooleanField(default=False)
 
 
-class Interest(models.Model):
-	INTEREST_CHOICES = [
-		('MAIL', 'Mailing List'),
-		('FRESHERCAMPAIGN', 'Fresher Campaign'),
-		('WARGAMING', 'Wargaming'),
-		('MAGIC', 'Magic')
-	]
+class MemberFlag(models.Model):
+	name = models.CharField(max_length=20)
+	description = models.CharField(max_length=200)
 
-	rank_name = models.CharField(
-		max_length=20,
-		choices=INTEREST_CHOICES
-	)
-	member = models.ManyToManyField(Member, related_name='interests')
+	member = models.ManyToManyField(Member, related_name='flags')
 
 	def __str__(self):
-		return self.rank_name
+		return self.name

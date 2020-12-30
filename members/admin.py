@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Member, Membership, Rank, Interest
+from .models import Member, Membership, Rank, MemberFlag
 
 
 class MemberGatekeeperFilter(admin.SimpleListFilter):
@@ -43,8 +43,8 @@ class MembershipInline(admin.TabularInline):
     extra = 0
 
 
-class InterestInline(admin.TabularInline):
-    model = Interest.member.through
+class MemberFlagsInline(admin.TabularInline):
+    model = MemberFlag.member.through
     extra = 4
 
 
@@ -52,7 +52,7 @@ class MemberAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
     search_fields = ('first_name', 'last_name')
     list_filter = (MemberGatekeeperFilter,)
-    inlines = [InterestInline, MembershipInline, RanksInline]
+    inlines = [MemberFlagsInline, MembershipInline, RanksInline]
 
 
 class RanksAdmin(admin.ModelAdmin):
@@ -60,12 +60,12 @@ class RanksAdmin(admin.ModelAdmin):
     exclude = ('member',)
 
 
-class InterestsAdmin(admin.ModelAdmin):
-    inlines = [InterestInline]
+class MemberFlagsAdmin(admin.ModelAdmin):
+    inlines = [MemberFlagsInline]
     exclude = ('member',)
 
 
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Rank, RanksAdmin)
 admin.site.register(Membership)
-admin.site.register(Interest, InterestsAdmin)
+admin.site.register(MemberFlag, MemberFlagsAdmin)
