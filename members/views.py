@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.views import LoginView
-from .forms import SignupForm, LoginForm
+from .forms import SignupForm, LoginForm, MembershipForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -131,3 +131,11 @@ class MemberListView(ListView):
 		qs, search_use_distinct = self.changelist.model_admin.get_search_results(self.request, qs, self.changelist.query)
 		print(qs)
 		return qs
+
+
+def membership_view(request):
+	if request.method == 'POST':
+		form = MembershipForm(request.POST)
+	else:
+		form = MembershipForm()
+	return render(request, 'members/membershipform.html', {'form': form})

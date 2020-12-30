@@ -8,6 +8,7 @@ urlpatterns = [
 	path('login/', views.MyLoginView.as_view(), name='login'),
 	path('logout/', LogoutView.as_view(), name='logout'),
 	path('list/', views.MemberListView.as_view(), name='member_list'),
+	path('membership/', views.membership_view, name='membership'),
 	# path('password_change/', views.PasswordChangeView.as_view(), name='password_change'),
 	# path('password_change/done/', views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 	# path('password_reset/', views.PasswordResetView.as_view(), name='password_reset'),

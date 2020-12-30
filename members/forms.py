@@ -3,6 +3,51 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
+from .models import MemberFlag
+
+
+class MembershipForm(forms.Form):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    pronouns = forms.CharField(required=False)
+    is_guild = forms.BooleanField(required=False, label="Are you a current Guild Member?")
+    student_number = forms.CharField(required=False)
+    email = forms.EmailField(required=True)
+    phone_number = forms.CharField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Become a member of Unigames!',
+                    Div(
+                        Div(
+                            'first_name',
+                            css_class="col"
+                        ),
+                        Div(
+                            'last_name',
+                            css_class="col"
+                        ),
+                        css_class="form-row"
+                    ),
+                    'pronouns',
+                    'is_guild',
+                    'student_number',
+                    'email',
+                    'phone_number',
+                ),
+                Submit('submit', 'Submit', css_class='btn-primary'),
+                style="max-width: 576px", css_class="container"
+            )
+        )
+        for flag in MemberFlag.objects.all():
+            fieldname = 'flag'+str(flag.pk)
+            self.fields[fieldname] = forms.BooleanField(label=flag.description, required=False)
+            self.helper.layout[0][0].append(fieldname)
 
 
 class SignupForm(UserCreationForm):
