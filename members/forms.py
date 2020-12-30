@@ -3,13 +3,17 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, User
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
+from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 from .models import MemberFlag
 
 
 class MembershipForm(forms.Form):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
-    pronouns = forms.CharField(required=False)
+    pronouns = forms.CharField(widget=forms.TextInput(
+        attrs={"id": "pronounField"}),
+        required=False,
+    )
     is_guild = forms.BooleanField(required=False, label="Are you a current Guild Member?")
     student_number = forms.CharField(required=False)
     email = forms.EmailField(required=True)
@@ -34,7 +38,19 @@ class MembershipForm(forms.Form):
                         ),
                         css_class="form-row"
                     ),
-                    'pronouns',
+                    FieldWithButtons(
+                        'pronouns',
+                        StrictButton(
+                            "He / Him",
+                            css_class="btn-outline-secondary",
+                            onclick='$("#pronounField").val("He / Him")'
+                        ),
+                        StrictButton(
+                            "She / Her",
+                            css_class="btn-outline-secondary",
+                            onclick='$("#pronounField").val("She / Her")'
+                        ),
+                    ),
                     'is_guild',
                     'student_number',
                     'email',
