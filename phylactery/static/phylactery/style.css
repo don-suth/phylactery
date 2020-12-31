@@ -43,3 +43,8 @@
     top: 0px;
     right: 0px;
 }
+
+.btn-card-footer {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}

@@ -15,7 +15,7 @@ from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from .admin import MemberListAdmin
 from django.contrib.admin import AdminSite
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 
 
 def signup_view(request):
@@ -146,3 +146,8 @@ def new_membership_view(request):
 
 class SignupHomeView(TemplateView):
 	template_name = 'members/signup_start.html'
+
+
+class MemberProfileView(DetailView):
+	template_name = 'members/profile.html'
+	model = Member

@@ -1,0 +1,73 @@
+{% extends "phylactery/base.html" %}
+
+{% block content %}
+
+<div class="container" style="max-width: 576px;">
+    <h2>{{ member }}</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Library Items</h5>
+            <p class="card-text">{{ member.first_name }} has two items borrowed currently.</p>
+        </div>
+        <table class="table table-hover table-striped table-sm mb-0">
+            <thead>
+                <tr>
+                    <th scope="col" class="pl-3">Item Name</th>
+                    <th scope="col">Borrow date</th>
+                    <th scope="col">Due date</th>
+                    <th scope="col">Gatekeeper</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-success">
+                    <td class="pl-3">Dungeons and Dragons 5th Edition Player's Handbook</td>
+                    <td>1/1/2020</td>
+                    <td>15/1/2020</td>
+                    <td>Donald Sutherland</td>
+                </tr>
+                <tr class="table-danger">
+                    <td class="pl-3">1st Jan 2019</td>
+                    <td>Yes</td>
+                    <td>$5</td>
+                    <td>Donald Sutherland</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Membership</h5>
+            <p class="card-text">{{ member.first_name }} is a current member!</p>
+        </div>
+        <table class="table table-hover table-striped table-sm mb-0">
+            <thead>
+                <tr>
+                    <th scope="col" class="pl-3">Date paid</th>
+                    <th scope="col">Guild?</th>
+                    <th scope="col">Amount paid</th>
+                    <th scope="col">Gatekeeper</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-success">
+                    <td class="pl-3">1st Jan 2020</td>
+                    <td>Yes</td>
+                    <td>$5</td>
+                    <td>Donald Sutherland</td>
+                </tr>
+                <tr class="table-danger">
+                    <td class="pl-3">1st Jan 2019</td>
+                    <td>Yes</td>
+                    <td>$5</td>
+                    <td>Donald Sutherland</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="btn-group">
+            <a href="#" class="btn btn-light btn-card-footer" role="button">Create new membership for {{ member.first_name }}</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
