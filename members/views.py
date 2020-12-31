@@ -9,8 +9,8 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
-from .models import Member
-from .decorators import gatekeeper_required
+from .models import Member, Membership
+from .decorators import gatekeeper_required, switch_to_proxy
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from .admin import MemberListAdmin
@@ -32,6 +32,8 @@ def signup_view(request):
 				user = form.save(commit=False)
 				user.is_active = False
 				user.save()
+				member.user = user
+				member.save()
 				current_site = get_current_site(request)
 				mail_subject = 'Activate your Unigames account.'
 				message = render_to_string('account/acc_active_email.html', {
@@ -138,7 +140,28 @@ def new_membership_view(request):
 	if request.method == 'POST':
 		form = MembershipForm(request.POST)
 		if form.is_valid():
-			return HttpResponse(str(request.POST))
+			try:
+				authorising_gatekeeper = request.user.member
+			except Member.DoesNotExist:
+				authorising_gatekeeper = None
+			new_member = Member(
+				first_name=form.cleaned_data['first_name'],
+				last_name=form.cleaned_data['last_name'],
+				pronouns=form.cleaned_data['pronouns'],
+				student_number=form.cleaned_data['student_number'],
+				email_address=form.cleaned_data['email'],
+			)
+			new_membership = Membership(
+				member=new_member,
+				guild_member=form.cleaned_data['is_guild'],
+				phone_number=form.cleaned_data['phone_number'],
+				expired=False,
+				amount_paid=5,
+				authorising_gatekeeper=authorising_gatekeeper
+			)
+			new_member.save()
+			new_membership.save()
+			return HttpResponse("Successfully added "+str(new_member))
 	else:
 		form = MembershipForm()
 	return render(request, 'members/membershipform.html', {'form': form})
