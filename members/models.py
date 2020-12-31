@@ -45,10 +45,10 @@ class Member(models.Model):
 	pronouns = models.CharField(max_length=200, blank=True)
 	student_number = models.CharField(max_length=10, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	email_address = models.CharField(max_length=200, blank=True, unique=True)
-	phone_number = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
 	user = models.OneToOneField(UnigamesUser, blank=True, null=True, on_delete=models.SET_NULL, related_name='member')
+	receive_emails = models.BooleanField(default=True)
 
 	def clean(self):
 		if not self.email_address and not self.student_number:
@@ -83,9 +83,13 @@ class Member(models.Model):
 
 
 class Membership(models.Model):
-	member = models.ForeignKey(Member, on_delete=models.CASCADE)
+	member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='member')
+	phone_number = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	date = models.DateField(default=timezone.now)
 	guild_member = models.BooleanField()
+	amount_paid = models.IntegerField()
+	expired = models.BooleanField(default=False)
+	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='gatekeeper')
 
 
 class Rank(models.Model):

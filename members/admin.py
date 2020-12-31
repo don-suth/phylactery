@@ -41,6 +41,7 @@ class RanksInline(admin.TabularInline):
 class MembershipInline(admin.TabularInline):
     model = Membership
     extra = 0
+    fk_name = 'member'
 
 
 class MemberFlagsInline(admin.TabularInline):
