@@ -15,6 +15,7 @@ from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from .admin import MemberListAdmin
 from django.contrib.admin import AdminSite
+from django.views.generic import TemplateView
 
 
 def signup_view(request):
@@ -33,7 +34,7 @@ def signup_view(request):
 				user.save()
 				current_site = get_current_site(request)
 				mail_subject = 'Activate your Unigames account.'
-				message = render_to_string('members/acc_active_email.html', {
+				message = render_to_string('account/acc_active_email.html', {
 					'user': user,
 					'domain': current_site.domain,
 					'uid': urlsafe_base64_encode(force_bytes(user.pk)),
@@ -54,10 +55,10 @@ def signup_view(request):
 			If you didn't receive an email, try checking your spam box. If you suspect an error has been made,
 			contact an admin.""")
 		else:
-			return render(request, 'members/signup.html', {'form': form})
+			return render(request, 'account/signup.html', {'form': form})
 	else:
 		form = SignupForm()
-		return render(request, 'members/signup.html', {'form': form})
+		return render(request, 'account/signup.html', {'form': form})
 
 
 def activate_view(request, uidb64, token):
@@ -75,7 +76,7 @@ def activate_view(request, uidb64, token):
 
 
 class MyLoginView(LoginView):
-	template_name = 'members/login.html'
+	template_name = 'account/login.html'
 	authentication_form = LoginForm
 
 
@@ -133,9 +134,15 @@ class MemberListView(ListView):
 		return qs
 
 
-def membership_view(request):
+def new_membership_view(request):
 	if request.method == 'POST':
 		form = MembershipForm(request.POST)
+		if form.is_valid():
+			return HttpResponse(str(request.POST))
 	else:
 		form = MembershipForm()
 	return render(request, 'members/membershipform.html', {'form': form})
+
+
+class SignupHomeView(TemplateView):
+	template_name = 'members/signup_start.html'

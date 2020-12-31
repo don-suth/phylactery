@@ -1,0 +1,10 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+{% csrf_token %}
+{% crispy form %}
+
+{% endblock %}

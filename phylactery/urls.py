@@ -24,8 +24,8 @@ urlpatterns = [
     path('faq/', TemplateView.as_view(template_name='phylactery/faq.html'), name='faq'),
     path('events/', TemplateView.as_view(template_name='phylactery/events.html'), name='events'),
     path('roleplaying/', TemplateView.as_view(template_name='phylactery/roleplaying.html'), name='roleplaying'),
-    path('members/', include(('members.urls', 'members'), namespace='members')),
-    path('account/', include(('members.urls', 'members'), namespace='account')),
+    path('members/', include(('members.membership_urls', 'members'), namespace='members')),
+    path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
     path('admin/', admin.site.urls),
     ]

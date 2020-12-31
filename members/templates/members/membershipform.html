@@ -3,7 +3,7 @@
 {% block content %}
 {% load crispy_forms_tags %}
 
-<form action="{% url 'members:membership' %}" method="post">
+<form action="{% url 'members:signup-new' %}" method="post">
 {% csrf_token %}
 {% crispy form %}
 </form>
