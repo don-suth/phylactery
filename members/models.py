@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 
 # Create your models here.
@@ -42,9 +43,9 @@ class Member(models.Model):
 	last_name = models.CharField(max_length=200)
 	preferred_name = models.CharField(max_length=200, blank=True)
 	pronouns = models.CharField(max_length=200, blank=True)
-	student_number = models.CharField(max_length=10, blank=True)
+	student_number = models.CharField(max_length=10, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	email_address = models.CharField(max_length=200, blank=True, unique=True)
-	phone_number = models.CharField(max_length=20, blank=True)
+	phone_number = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
 	user = models.OneToOneField(UnigamesUser, blank=True, null=True, on_delete=models.SET_NULL, related_name='member')

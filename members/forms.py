@@ -1,10 +1,14 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 from .models import MemberFlag
+
+
+number_validator = RegexValidator(regex="^[0-9]+$")
 
 
 class MembershipForm(forms.Form):
@@ -15,9 +19,17 @@ class MembershipForm(forms.Form):
         required=False,
     )
     is_guild = forms.BooleanField(required=False, label="Are you a current Guild Member?")
-    student_number = forms.CharField(required=False)
+    student_number = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"type": "tel"}),
+        validators=[number_validator]
+    )
     email = forms.EmailField(required=True)
-    phone_number = forms.CharField(required=True)
+    phone_number = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={"type": "tel"}),
+        validators=[number_validator]
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,9 +73,16 @@ class MembershipForm(forms.Form):
             )
         )
         for flag in MemberFlag.objects.all():
-            fieldname = 'flag'+str(flag.pk)
-            self.fields[fieldname] = forms.BooleanField(label=flag.description, required=False)
-            self.helper.layout[0][0].append(fieldname)
+            field_name = 'flag'+str(flag.pk)
+            self.fields[field_name] = forms.BooleanField(label=flag.description, required=False)
+            self.helper.layout[0][0].append(field_name)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_guild = cleaned_data.get('is_guild')
+        student_number = cleaned_data.get('student_number')
+        if is_guild is True and not student_number:
+            self.add_error('student_number', 'If you are a guild member, a student number is required.')
 
 
 class SignupForm(UserCreationForm):
