@@ -119,10 +119,8 @@ class MemberListView(ListView):
 			new_qs = filter_spec.queryset(self.request, qs)
 			if new_qs is not None:
 				qs = new_qs
-				print(qs)
 		try:
 			qs = qs.filter(**remaining_lookup_params)
-			print(qs)
 		except:
 			pass
 
@@ -132,7 +130,6 @@ class MemberListView(ListView):
 
 		# Apply search results
 		qs, search_use_distinct = self.changelist.model_admin.get_search_results(self.request, qs, self.changelist.query)
-		print(qs)
 		return qs
 
 
