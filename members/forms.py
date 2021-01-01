@@ -15,7 +15,7 @@ class MembershipForm(forms.Form):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     pronouns = forms.CharField(widget=forms.TextInput(
-        attrs={"id": "pronounField"}),
+        attrs={"id": "pronounField", "placeholder": "Type your own, or use the preset ones ->"}),
         required=False,
     )
     is_guild = forms.BooleanField(required=False, label="Are you a current Guild Member?")
