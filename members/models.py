@@ -81,15 +81,23 @@ class Member(models.Model):
 	def is_committee(self):
 		return self.has_rank('COMMITTEE')
 
+	@property
+	def is_financial_member(self):
+		return self.memberships.filter(expired=False).exists()
+
+	@property
+	def is_member(self):
+		return self.is_financial_member() or self.has_rank('LIFEMEMBER')
+
 
 class Membership(models.Model):
-	member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='member')
+	member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='memberships')
 	phone_number = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
 	date = models.DateField(default=timezone.now)
 	guild_member = models.BooleanField()
 	amount_paid = models.IntegerField()
 	expired = models.BooleanField(default=False)
-	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='gatekeeper')
+	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='authorised')
 
 
 class Rank(models.Model):

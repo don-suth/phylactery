@@ -37,8 +37,9 @@
     <div class="card mt-3">
         <div class="card-body">
             <h5 class="card-title">Membership</h5>
-            <p class="card-text">{{ member.first_name }} is a current member!</p>
+            <p class="card-text">{{ member.first_name }} {% if member.is_financial_member %}is a current member!{% else %}is not a current member.{% endif %}</p>
         </div>
+        {% if member.memberships.exists %}
         <table class="table table-hover table-striped table-sm mb-0">
             <thead>
                 <tr>
@@ -49,6 +50,15 @@
                 </tr>
             </thead>
             <tbody>
+                {% for membership in member.memberships.all %}
+                <tr class="{% if membership.expired %}table-danger{% else %}table-success{% endif %}">
+                    <td class="pl-3">{{ membership.date }}</td>
+                    <td>{{ membership.guild_member }}</td>
+                    <td>${{ membership.amount_paid }}</td>
+                    <td>{{ membership.authorising_gatekeeper }}</td>
+                </tr>
+                {% endfor %}
+                {% comment %}
                 <tr class="table-success">
                     <td class="pl-3">1st Jan 2020</td>
                     <td>Yes</td>
@@ -61,8 +71,10 @@
                     <td>$5</td>
                     <td>Donald Sutherland</td>
                 </tr>
+                {% endcomment %}
             </tbody>
         </table>
+        {% endif %}
         <div class="btn-group">
             <a href="#" class="btn btn-light btn-card-footer" role="button">Create new membership for {{ member.first_name }}</a>
         </div>

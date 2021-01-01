@@ -41,12 +41,12 @@
     <tbody>
         {% for member in members %}
             <tr>
-                <th scope="row">{{ member }}</th>
+                <th scope="row"><a href="{% url 'members:profile' pk=member.pk %}">{{ member }}</a></th>
                 <td>{{ member.pronouns }}</td>
                 <td>{{ member.is_fresher }}</td>
-                <td>(not implemented){# member.is_member #}</td>
+                <td>{{ member.is_financial_member }}</td>
                 <td>{{ member.is_gatekeeper }}</td>
-            </tr>
+            </a>
         {% endfor %}
     </tbody>
 </table>
