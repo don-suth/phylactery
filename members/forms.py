@@ -7,28 +7,58 @@ from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 from .models import MemberFlag
 
-
-number_validator = RegexValidator(regex="^[0-9]+$")
+number_validator = RegexValidator(regex=r"^[0-9]+$")
+no_student_number = RegexValidator(
+    regex=r"@student\.uwa\.edu\.au",
+    message="Your email cannot be a student email.",
+    inverse_match=True
+)
 
 
 class MembershipForm(forms.Form):
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
-    pronouns = forms.CharField(widget=forms.TextInput(
-        attrs={"id": "pronounField", "placeholder": "Type your own, or use the preset ones ->"}),
-        required=False,
+    first_name = forms.CharField(
+        required=True,
+        max_length=200,
     )
-    is_guild = forms.BooleanField(required=False, label="Are you a current Guild Member?")
+    last_name = forms.CharField(
+        required=True,
+        max_length=200,
+    )
+    preferred_name = forms.CharField(
+        required=False,
+        label="Preferred Name (leave blank if your first name is fine)",
+        max_length=200,
+    )
+    pronouns = forms.CharField(
+        widget=forms.TextInput(
+            attrs={"id": "pronounField", "placeholder": "Type your own here"}
+        ),
+        required=False,
+        label="Pronouns (Type your own, or use the preset ones &darr;)",
+        max_length=200,
+    )
+    is_guild = forms.BooleanField(
+        required=False,
+        label="Are you a current Guild Member?"
+    )
     student_number = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={"type": "tel"}),
-        validators=[number_validator]
+        validators=[number_validator],
+        max_length=10,
     )
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(
+        required=True,
+        validators=[no_student_number],
+    )
     phone_number = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={"type": "tel"}),
         validators=[number_validator]
+    )
+    receive_emails = forms.BooleanField(
+        required=False,
+        label="Would you like to receive emails from us?"
     )
 
     def __init__(self, *args, **kwargs):
@@ -50,6 +80,7 @@ class MembershipForm(forms.Form):
                         ),
                         css_class="form-row"
                     ),
+                    'preferred_name',
                     FieldWithButtons(
                         'pronouns',
                         StrictButton(
@@ -62,10 +93,16 @@ class MembershipForm(forms.Form):
                             css_class="btn-outline-secondary",
                             onclick='$("#pronounField").val("She / Her")'
                         ),
+                        StrictButton(
+                            "They / Them",
+                            css_class="btn-outline-secondary",
+                            onclick='$("#pronounField").val("They / Them")'
+                        ),
                     ),
                     'is_guild',
                     'student_number',
                     'email',
+                    'receive_emails',
                     'phone_number',
                 ),
                 Submit('submit', 'Submit', css_class='btn-primary'),
@@ -73,7 +110,7 @@ class MembershipForm(forms.Form):
             )
         )
         for flag in MemberFlag.objects.all():
-            field_name = 'flag'+str(flag.pk)
+            field_name = 'flag' + str(flag.pk)
             self.fields[field_name] = forms.BooleanField(label=flag.description, required=False)
             self.helper.layout[0][0].append(field_name)
 
@@ -81,6 +118,7 @@ class MembershipForm(forms.Form):
         cleaned_data = super().clean()
         is_guild = cleaned_data.get('is_guild')
         student_number = cleaned_data.get('student_number')
+        email = cleaned_data.get('email')
         if is_guild is True and not student_number:
             self.add_error('student_number', 'If you are a guild member, a student number is required.')
 

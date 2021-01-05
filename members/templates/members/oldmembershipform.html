@@ -1,0 +1,10 @@
+{% extends "phylactery/base.html" %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+<form action="{% url 'members:signup-old' %}" method="post">
+{% csrf_token %}
+{% crispy form %}
+</form>
+{% endblock %}

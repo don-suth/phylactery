@@ -57,8 +57,6 @@ class Member(models.Model):
 	def save(self, *args, **kwargs):
 		if not self.preferred_name:
 			self.preferred_name = self.first_name
-		if not self.email_address and self.student_number:
-			self.email_address = self.student_number+"@student.uwa.edu.au"
 		super(Member, self).save(*args, **kwargs)
 
 	def __str__(self):
@@ -88,6 +86,18 @@ class Member(models.Model):
 	@property
 	def is_member(self):
 		return self.is_financial_member() or self.has_rank('LIFEMEMBER')
+
+	def get_most_recent_membership(self):
+		# Returns the most recent membership object of this member, or None if they have none.
+		return self.memberships.order_by('-date').first()
+
+	@property
+	def bought_membership_this_year(self):
+		membership = self.get_most_recent_membership()
+		if membership is not None:
+			if membership.date.year == timezone.now().year:
+				return True
+		return False
 
 
 class Membership(models.Model):

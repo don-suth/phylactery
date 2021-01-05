@@ -1,5 +1,5 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView
 from .forms import SignupForm, LoginForm, MembershipForm
 from django.contrib.sites.shortcuts import get_current_site
@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from .admin import MemberListAdmin
 from django.contrib.admin import AdminSite
 from django.views.generic import TemplateView, DetailView
+from django.contrib import messages
 
 
 def signup_view(request):
@@ -133,6 +134,7 @@ class MemberListView(ListView):
 		return qs
 
 
+@gatekeeper_required
 def new_membership_view(request):
 	if request.method == 'POST':
 		form = MembershipForm(request.POST)
@@ -141,12 +143,19 @@ def new_membership_view(request):
 				authorising_gatekeeper = request.user.member
 			except Member.DoesNotExist:
 				authorising_gatekeeper = None
+
+			if Member.objects.filter(email_address=form.cleaned_data['email']).exists():
+				form.add_error('email', "This email is already in use. Are you sure you're a fresher?")
+				return render(request, 'members/membershipform.html', {'form': form})
+
 			new_member = Member(
 				first_name=form.cleaned_data['first_name'],
 				last_name=form.cleaned_data['last_name'],
+				preferred_name=form.cleaned_data['preferred_name'],
 				pronouns=form.cleaned_data['pronouns'],
 				student_number=form.cleaned_data['student_number'],
 				email_address=form.cleaned_data['email'],
+				receive_emails=form.cleaned_data['receive_emails'],
 			)
 			new_membership = Membership(
 				member=new_member,
@@ -164,10 +173,72 @@ def new_membership_view(request):
 	return render(request, 'members/membershipform.html', {'form': form})
 
 
+@gatekeeper_required
+def old_membership_view(request, pk=None):
+	"""
+	Covers the handling of new memberships for existing members.
+	"""
+	if request.method == 'GET':
+		member = get_object_or_404(Member, pk=pk)
+		# We have our member, render a membership form with most details filled out
+
+		if member.bought_membership_this_year:
+			messages.error(request, "This member already bought a membership this year.")
+			return redirect('members:profile', pk=pk)
+
+		data = {
+			'first_name': member.first_name,
+			'last_name': member.last_name,
+			'preferred_name': member.preferred_name,
+			'pronouns': member.pronouns,
+			'student_number': member.student_number,
+			'email': member.email_address,
+			'receive_emails': member.receive_emails,
+		}
+
+		recent_membership = member.get_most_recent_membership()
+		if recent_membership:
+			data['is_guild'] = recent_membership.guild_member
+
+		form = MembershipForm(data)
+
+		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
+		form.add_error('is_guild', 'Please verify that this is still correct.')
+		request.session['editing_memberid'] = pk
+		return render(request, 'members/oldmembershipform.html', {'form': form, 'member': member})
+	if request.method == 'POST':
+		if request.session.get('editing_memberid', None) is None:
+			return redirect('members:signup-home')
+		else:
+			pk = request.session.get('editing_memberid')
+			del request.session['editing_memberid']
+			member = get_object_or_404(Member, pk=pk)
+
+			if member.bought_membership_this_year:
+				messages.error(request, "This member already bought a membership this year.")
+				return redirect('members:profile', pk=pk)
+
+			init = {
+				'first_name': member.first_name,
+				'last_name': member.last_name,
+				'pronouns': member.pronouns,
+				'student_number': member.student_number,
+				'email': member.email_address
+			}
+			form = MembershipForm(request.POST, initial=init)
+
+			if form.is_valid():
+				pass
+
+			return HttpResponse("You are making a new membership for "+str(member))
+
+
+@method_decorator(gatekeeper_required, name='dispatch')
 class SignupHomeView(TemplateView):
 	template_name = 'members/signup_start.html'
 
 
+@method_decorator(gatekeeper_required, name='dispatch')
 class MemberProfileView(DetailView):
 	template_name = 'members/profile.html'
 	model = Member
