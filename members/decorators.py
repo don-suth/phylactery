@@ -1,15 +1,5 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import User
-from .models import UnigamesUser
-
-
-def switch_to_proxy(user):
-    """
-    Takes a User object and returns the UnigamesUser equivalent.
-    """
-    if user.__class__ == User:
-        user.__class__ = UnigamesUser
-    return user
+from .models import switch_to_proxy
 
 
 def gatekeeper_required(function=None, login_url=None):

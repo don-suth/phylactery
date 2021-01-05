@@ -38,6 +38,15 @@ class UnigamesUser(User):
 		return False
 
 
+def switch_to_proxy(user):
+	"""
+	Takes a User object and returns the UnigamesUser equivalent.
+	"""
+	if user.__class__ == User:
+		user.__class__ = UnigamesUser
+	return user
+
+
 class Member(models.Model):
 	first_name = models.CharField(max_length=200)
 	last_name = models.CharField(max_length=200)
