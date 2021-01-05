@@ -204,6 +204,7 @@ def old_membership_view(request, pk=None):
 
 		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
 		form.add_error('is_guild', 'Please verify that this is still correct.')
+		form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
 		request.session['editing_memberid'] = pk
 		return render(request, 'members/oldmembershipform.html', {'form': form, 'member': member})
 	if request.method == 'POST':
@@ -238,7 +239,17 @@ class SignupHomeView(TemplateView):
 	template_name = 'members/signup_start.html'
 
 
+@gatekeeper_required
+def old_member_signup_redirect(request):
+	messages.info(
+		request,
+		"Search for the member in the list below, go to their profile, and click the 'New Membership' button."
+	)
+	return redirect('members:member-list')
+
+
 @method_decorator(gatekeeper_required, name='dispatch')
 class MemberProfileView(DetailView):
 	template_name = 'members/profile.html'
 	model = Member
+
