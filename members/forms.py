@@ -34,7 +34,7 @@ class MembershipForm(forms.Form):
             attrs={"id": "pronounField", "placeholder": "Type your own here"}
         ),
         required=False,
-        label="Pronouns (Type your own, or use the preset ones &darr;)",
+        label="Pronouns (Type your own, or use the preset ones &#9660;)",
         max_length=200,
     )
     is_guild = forms.BooleanField(
