@@ -44,7 +44,7 @@ class Member(models.Model):
 	preferred_name = models.CharField(max_length=200, blank=True)
 	pronouns = models.CharField(max_length=200, blank=True)
 	student_number = models.CharField(max_length=10, blank=True, validators=[RegexValidator(regex="^[0-9]+$")])
-	email_address = models.CharField(max_length=200, blank=True, unique=True)
+	email_address = models.EmailField(unique=True)
 	join_date = models.DateField(default=datetime.date(2019, 1, 1))
 	notes = models.TextField(blank=True)
 	user = models.OneToOneField(UnigamesUser, blank=True, null=True, on_delete=models.SET_NULL, related_name='member')
