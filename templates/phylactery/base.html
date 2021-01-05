@@ -61,13 +61,17 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarAccountDropdown">
                             {% if user.is_authenticated %}
-                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Logged in as {{ user.username }}!</span>
-                            <a class="dropdown-item" href="{% url 'admin:index' %}">Admin control panel</a>
-                            <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
+                                <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Logged in as {{ user.username }}!</span>
+                                {% if user.is_staff %}<a class="dropdown-item" href="{% url 'admin:index' %}">Admin control panel</a>{% endif %}
+                                {% if user.is_gatekeeper %}
+                                    <a class="dropdown-item" href="{% url 'members:signup-home' %}">New Membership</a>
+                                    <a class="dropdown-item" href="{% url 'members:member-list' %}">Member List</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
                             {% else %}
-                            <span class="dropdown-item disabled" style="font-weight:bold; color:black;">You are not currently signed in.</span>
-                            <a class="dropdown-item" href="{% url 'account:login' %}">Sign-In</a>
-                            <a class="dropdown-item" href="{% url 'account:signup' %}">Sign-Up</a>
+                                <span class="dropdown-item disabled" style="font-weight:bold; color:black;">You are not currently signed in.</span>
+                                <a class="dropdown-item" href="{% url 'account:login' %}">Sign-In</a>
+                                <a class="dropdown-item" href="{% url 'account:signup' %}">Sign-Up</a>
                             {% endif %}
                         </div>
                     </li>
