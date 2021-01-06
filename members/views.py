@@ -1,4 +1,4 @@
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView
 from .forms import SignupForm, LoginForm, MembershipForm
@@ -10,7 +10,7 @@ from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from .models import Member, Membership
-from .decorators import gatekeeper_required, switch_to_proxy
+from .decorators import gatekeeper_required
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from .admin import MemberListAdmin
@@ -146,7 +146,7 @@ def new_membership_view(request):
 
 			if Member.objects.filter(email_address=form.cleaned_data['email']).exists():
 				form.add_error('email', "This email is already in use. Are you sure you're a fresher?")
-				return render(request, 'members/membershipform.html', {'form': form})
+				return render(request, 'members/new_membership_form.html', {'form': form})
 
 			new_member = Member(
 				first_name=form.cleaned_data['first_name'],
@@ -162,7 +162,7 @@ def new_membership_view(request):
 				guild_member=form.cleaned_data['is_guild'],
 				phone_number=form.cleaned_data['phone_number'],
 				expired=False,
-				amount_paid=5,
+				amount_paid=form.cleaned_data['amount_paid'],
 				authorising_gatekeeper=authorising_gatekeeper
 			)
 			new_member.save()
@@ -170,7 +170,7 @@ def new_membership_view(request):
 			return HttpResponse("Successfully added "+str(new_member))
 	else:
 		form = MembershipForm()
-	return render(request, 'members/membershipform.html', {'form': form})
+	return render(request, 'members/new_membership_form.html', {'form': form})
 
 
 @gatekeeper_required
@@ -205,14 +205,14 @@ def old_membership_view(request, pk=None):
 		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
 		form.add_error('is_guild', 'Please verify that this is still correct.')
 		form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
-		request.session['editing_memberid'] = pk
-		return render(request, 'members/oldmembershipform.html', {'form': form, 'member': member})
+		request.session['editing_member_id'] = pk
+		return render(request, 'members/old_membership_form.html', {'form': form, 'member': member})
 	if request.method == 'POST':
-		if request.session.get('editing_memberid', None) is None:
+		if request.session.get('editing_member_id', None) is None:
 			return redirect('members:signup-home')
 		else:
-			pk = request.session.get('editing_memberid')
-			del request.session['editing_memberid']
+			pk = request.session.get('editing_member_id')
+			del request.session['editing_member_id']
 			member = get_object_or_404(Member, pk=pk)
 
 			if member.bought_membership_this_year:
@@ -222,16 +222,49 @@ def old_membership_view(request, pk=None):
 			init = {
 				'first_name': member.first_name,
 				'last_name': member.last_name,
+				'preferred_name': member.preferred_name,
 				'pronouns': member.pronouns,
 				'student_number': member.student_number,
-				'email': member.email_address
+				'email': member.email_address,
+				'receive_emails': member.receive_emails
 			}
 			form = MembershipForm(request.POST, initial=init)
 
 			if form.is_valid():
-				pass
+				if form.cleaned_data['email'] != member.email_address:
+					if Member.objects.filter(email_address=form.cleaned_data['email']).exists():
+						form.add_error('email', "This email is already in use. Are you sure you're a fresher?")
+						form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
+						return render(request, 'members/old_membership_form.html', {'form': form})
+				if form.has_changed():
+					member.first_name = form.cleaned_data['first_name']
+					member.last_name = form.cleaned_data['last_name']
+					member.preferred_name = form.cleaned_data['preferred_name']
+					member.pronouns = form.cleaned_data['pronouns']
+					member.student_number = form.cleaned_data['student_number']
+					member.email_address = form.cleaned_data['email']
+					member.receive_emails = form.cleaned_data['receive_emails']
+					member.save()
 
-			return HttpResponse("You are making a new membership for "+str(member))
+				try:
+					authorising_gatekeeper = request.user.member
+				except Member.DoesNotExist:
+					authorising_gatekeeper = None
+
+				new_membership = Membership(
+					member=member,
+					guild_member=form.cleaned_data['is_guild'],
+					phone_number=form.cleaned_data['phone_number'],
+					expired=False,
+					amount_paid=form.cleaned_data['amount_paid'],
+					authorising_gatekeeper=authorising_gatekeeper
+				)
+				new_membership.save()
+				messages.success(request, "New membership added for {0}!".format(member.first_name))
+				return redirect('members:profile', pk=pk)
+			else:
+				form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
+				return render(request, 'members/old_membership_form.html', {'form': form})
 
 
 @method_decorator(gatekeeper_required, name='dispatch')

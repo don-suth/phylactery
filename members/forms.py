@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
-from crispy_forms.bootstrap import FieldWithButtons, StrictButton
+from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
 from .models import MemberFlag
 
 number_validator = RegexValidator(regex=r"^[0-9]+$")
@@ -60,6 +60,16 @@ class MembershipForm(forms.Form):
         required=False,
         label="Would you like to receive emails from us?"
     )
+    amount_paid = forms.IntegerField(
+        min_value=0,
+        max_value=20,
+        required=True,
+        label="How much has this member paid for Membership?"
+    )
+    sticker_received = forms.BooleanField(
+        required=True,
+        label="Has the member received their sticker?"
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -105,7 +115,41 @@ class MembershipForm(forms.Form):
                     'receive_emails',
                     'phone_number',
                 ),
-                Submit('submit', 'Submit', css_class='btn-primary'),
+                Div(
+                    Div(
+                        Div(
+                            Div(
+                                HTML('''<h5 class="modal-title" id="confirmModalLabel">
+                                Please pass the device back to {{ user.member.first_name }}.</h5>'''),
+                                StrictButton('&times;', css_class='btn-close', data_dismiss='modal', aria_label='Close'),
+                                css_class="modal-header"
+                            ),
+                            Div(
+                                HTML('''
+                                <p>{{ user.member.first_name }}, please fill out the following:</p>
+                                <p>Note: Make sure this process is 100% done and the form is 
+                                submitted before the member departs.</p>
+                                '''),
+                                PrependedText('amount_paid', '$'),
+                                'sticker_received',
+                                HTML('''
+                                <p>By clicking the submit button below, you ({{ user.member.first_name }})
+                                verify that this information is correct to the best of your knowledge.'''),
+                                css_class="modal-body"
+                            ),
+                            Div(
+                                StrictButton('Close', css_class='btn-secondary', data_dismiss='modal'),
+                                Submit('submit', 'Save Changes and Submit', css_class='btn-primary'),
+                                css_class="modal-footer"
+                            ),
+                            css_class="modal-content"
+                        ),
+                        css_class="modal-dialog"
+                    ),
+                    css_class="modal fade", css_id="confirmModal", aria_labelledby="confirmModalLabel", tabindex="-1",
+                    aria_hidden="true",
+                ),
+                StrictButton('Submit', css_class='btn-primary', data_toggle='modal', data_target='#confirmModal'),
                 style="max-width: 576px", css_class="container"
             )
         )
@@ -118,7 +162,6 @@ class MembershipForm(forms.Form):
         cleaned_data = super().clean()
         is_guild = cleaned_data.get('is_guild')
         student_number = cleaned_data.get('student_number')
-        email = cleaned_data.get('email')
         if is_guild is True and not student_number:
             self.add_error('student_number', 'If you are a guild member, a student number is required.')
 
