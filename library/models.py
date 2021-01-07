@@ -20,6 +20,8 @@ class Item(models.Model):
     condition = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
+    is_borrowable = models.BooleanField(default=True)
+    high_demand = models.BooleanField(default=False)
     tags = TaggableManager()
 
     def image_file_name(self, filename):
