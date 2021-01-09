@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Item
+from .forms import ItemSelectForm
 from django.http import HttpResponseBadRequest
 from django.views import generic
 from dal import autocomplete
@@ -48,6 +49,15 @@ class TagAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+class LibraryItemAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # We don't care if the user is authenticated here
+        qs = Item.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
+
+
 def item_detail(request, item_id=None, slug=None):
     if item_id is not None:
         item = get_object_or_404(Item, pk=item_id)
@@ -66,3 +76,8 @@ def item_list(request, page=1, qs=None):
         qs = Item.objects.all()
     items_list = qs.order_by('name')[(page-1)*10:(page*10)-1]
     return render(request, 'library/item_list_view.html', {'items_list': items_list})
+
+
+def borrow_view(request):
+    form = ItemSelectForm
+    return render(request, 'library/borrow_form.html', {'form': form})
