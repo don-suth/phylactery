@@ -36,6 +36,67 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
+    def get_availability_info(self):
+        # Returns a dict, containing keys
+        # 'in_clubroom', 'is_available', 'expected_availability_date'
+        # If is_available is True, or if the item is never borrowable,
+        # then expected_availability_date will be None
+        # For this, we assume that if you can't borrow an item overnight, then it's not available
+        info = {
+            'in_clubroom': True,
+            'is_available': True,
+            'expected_availability_date': None,
+        }
+
+        if not self.is_borrowable:
+            info['is_available'] = False
+            return info
+
+        today = timezone.now()
+        next_day = datetime.timedelta(days=1)
+
+        # Check the internal and external records to see if the item is currently borrowed out
+        # Only one of these should be the case
+        if info['is_available'] is True:
+            records = self.borrow_records \
+                .filter(date_borrowed__lte=today, date_returned=None) \
+                .order_by('-due_date')
+            if records.exists():
+                info['in_clubroom'] = False
+                info['is_available'] = False
+                info['expected_availability_date'] = records.first().due_date
+        if info['is_available'] is True:
+            ext_records = self.ext_borrow_records \
+                .exclude(due_date=None) \
+                .filter(date_borrowed__lte=today, date_returned=None) \
+                .order_by('-due_date')
+            if ext_records.exists():
+                info['in_clubroom'] = False
+                info['is_available'] = False
+                info['expected_availability_date'] = ext_records.first().due_date
+        if info['is_available'] is True:
+            # We also check if an external form is lodged for tomorrow
+            tomorrow_ext_records = self.ext_borrow_records \
+                .exclude(due_date=None) \
+                .filter(requested_borrow_date=today+next_day) \
+                .order_by('-due_date')
+            if tomorrow_ext_records.exists():
+                info['is_available'] = False
+                info['expected_availability_date'] = tomorrow_ext_records.first().due_date+next_day
+
+        if info['is_available'] is False:
+            # We check here to see how the chain of external borrowing forms could affect the due date
+            while True:
+                qs = self.ext_borrow_records \
+                    .exclude(due_date=None) \
+                    .filter(requested_borrow_date=info['expected_availability_date'] + next_day) \
+                    .order_by('-due_date')
+                if qs.exists() is False:
+                    break
+                info['expected_availability_date'] = qs.first().due_date
+
+        return info
+
     @property
     def is_available(self):
         # Returns True if the item is both borrowable and available
