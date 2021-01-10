@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Item, ItemTypes, BorrowRecord, ExternalBorrowingRecord
+from .models import Item, BorrowRecord, ExternalBorrowingRecord
 from .forms import ItemTaggitForm
 
 
@@ -20,6 +20,5 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Item, ItemAdmin)
-admin.site.register(ItemTypes)
 admin.site.register(BorrowRecord)
 admin.site.register(ExternalBorrowingRecord)

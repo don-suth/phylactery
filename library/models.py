@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from taggit.managers import TaggableManager
 from members.models import Member
@@ -82,14 +83,15 @@ class Item(models.Model):
                 .order_by('-due_date')
             if tomorrow_ext_records.exists():
                 info['is_available'] = False
-                info['expected_availability_date'] = tomorrow_ext_records.first().due_date+next_day
+                info['expected_availability_date'] = tomorrow_ext_records.first().due_date
 
         if info['is_available'] is False:
             # We check here to see how the chain of external borrowing forms could affect the due date
             while True:
                 qs = self.ext_borrow_records \
                     .exclude(due_date=None) \
-                    .filter(requested_borrow_date=info['expected_availability_date'] + next_day) \
+                    .filter(Q(requested_borrow_date=info['expected_availability_date'] + next_day)
+                            | Q(requested_borrow_date=info['expected_availability_date'])) \
                     .order_by('-due_date')
                 if qs.exists() is False:
                     break
