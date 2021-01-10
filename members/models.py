@@ -69,7 +69,7 @@ class Member(models.Model):
 		super(Member, self).save(*args, **kwargs)
 
 	def __str__(self):
-		return self.preferred_name + ' ' + self.last_name
+		return str(self.preferred_name) + ' ' + str(self.last_name)
 
 	def is_fresher(self):
 		return self.join_date.year == timezone.now().year

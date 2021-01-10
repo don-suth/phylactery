@@ -7,20 +7,24 @@ import datetime
 from django.utils import timezone
 
 
-class ItemTypes(models.Model):
-    type_name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.type_name
-
-
 class Item(models.Model):
+    BOOK = 'BK'
+    BOARD_GAME = 'BG'
+    CARD_GAME = 'CG'
+    OTHER = '??'
+    ITEM_TYPE_CHOICES = [
+        (BOOK, 'Book'),
+        (BOARD_GAME, 'Board Game'),
+        (CARD_GAME, 'Card Game'),
+        (OTHER, 'Other')
+    ]
+
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=50, null=True)
     description = models.TextField(blank=True)
     condition = models.TextField(blank=True)
     notes = models.TextField(blank=True)
-    type = models.ForeignKey(ItemTypes, on_delete=models.PROTECT)
+    type = models.CharField(max_length=2, choices=ITEM_TYPE_CHOICES)
     is_borrowable = models.BooleanField(default=True)
     high_demand = models.BooleanField(default=False)
     tags = TaggableManager(blank=True)
@@ -139,6 +143,7 @@ class BorrowRecord(models.Model):
         on_delete=models.SET_NULL,
         related_name='authorised_borrowing'
     )
+
 
     def default_due_date():
         return timezone.now() + datetime.timedelta(weeks=2)
