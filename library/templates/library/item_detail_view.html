@@ -5,17 +5,31 @@
 {% block content %}
 <h2 class="">{{ item.name }}</h2>
 <div class="card item-detail-card">
-    <img src="{{ item.image.url }}" class="card-img-top" alt="Image for {{ item.name }}">
-    <div class="card-body">
-        <div class="row">
-            <div class="col">
-                <span>Status</span>
-            </div>
-            <div class="col">
-                <span>Available!</span>
-            </div>
-        </div>
-    </div>
+    <img src="{{ item.image.url }}" class="card-img-top item-detail-img" alt="Image for {{ item.name }}">
+    <table class="table table-sm mb-0">
+        <tbody>
+            <tr class="">
+                <td class="pl-2"><b>Borrowing status:</b></td>
+            </tr>
+            <tr class="">
+                {% if item_info.is_available %}
+                    <td class="pl-2 table-success">Available to borrow!</td>
+                {% else %}
+                    <td class="pl-2 table-danger">Unavailable to borrow</td>
+                {% endif %}
+            </tr>
+            <tr class="">
+                <td class="pl-2"><b>Clubroom status:</b></td>
+            </tr>
+            <tr class="">
+                {% if item_info.in_clubroom %}
+                    <td class="pl-2 table-success">Available in the clubroom!</td>
+                {% else %}
+                    <td class="pl-2 table-danger">Due back {{ item_info.expected_availability_date|date:"jS M Y" }}</td>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
 </div>
 <p>
     {{ item.description }}
@@ -23,7 +37,7 @@
 
 <p>Condition: {{ item.condition }}</p>
 <p>Notes: {{ item.notes }}</p>
-<p>Type: {{ item.type }}</p>
+<p>Type: {{ item.get_type_display }}</p>
 <p>Tags:
 {% for itemtag in item.tags.all %}
 <a href="{% url 'library:tag-list' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>

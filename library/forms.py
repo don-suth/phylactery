@@ -9,8 +9,8 @@ class ItemTaggitForm(autocomplete.FutureModelForm):
         model = Item
         fields = (
             'name', 'slug', 'description',
-            'condition', 'notes', 'type',
-            'image', 'tags'
+            'condition', 'type', 'image',
+            'is_borrowable', 'high_demand', 'tags', 'notes'
         )
         widgets = {
             'tags': autocomplete.TaggitSelect2('library:select2_taggit')

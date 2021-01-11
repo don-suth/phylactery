@@ -34,6 +34,11 @@ class ItemDetailView(generic.DetailView):
     model = Item
     template_name = 'library/item_detail_view.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item_info'] = self.object.get_availability_info()
+        return context
+
 
 class TagAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
