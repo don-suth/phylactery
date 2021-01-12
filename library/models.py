@@ -2,9 +2,16 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from taggit.managers import TaggableManager
+from taggit.models import Tag
 from members.models import Member
 import datetime
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+
+
+class TagParent(models.Model):
+    child_tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name='parents')
+    parent_tag = models.ManyToManyField(Tag, related_name='children')
 
 
 class Item(models.Model):
@@ -27,13 +34,26 @@ class Item(models.Model):
     type = models.CharField(max_length=2, choices=ITEM_TYPE_CHOICES)
     is_borrowable = models.BooleanField(default=True)
     high_demand = models.BooleanField(default=False)
-    tags = TaggableManager(blank=True)
 
     def image_file_name(self, filename):
         filename, dot, extension = filename.rpartition('.')
         return "library/item_images/{0}.{1}".format(self.slug, extension)
 
     image = models.ImageField(upload_to=image_file_name, null=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            computed_tags = self.computed_tags.computed_tags
+        except ObjectDoesNotExist:
+            computed_tags = ItemComputedTags.objects.create(item=self).computed_tags
+
+        try:
+            base_tags = self.base_tags.base_tags
+        except ObjectDoesNotExist:
+            base_tags = ItemBaseTags.objects.create(item=self).base_tags
+
+        computed_tags.set(*base_tags.all(), clear=True)
+        super(Item, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('library:detail-slug', args=[self.slug])
@@ -123,6 +143,16 @@ class Item(models.Model):
         if self.ext_borrow_records.filter(requested_borrow_date=tomorrow).exists():
             return False
         return True
+
+
+class ItemBaseTags(models.Model):
+    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='base_tags')
+    base_tags = TaggableManager(blank=True)
+
+
+class ItemComputedTags(models.Model):
+    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='computed_tags')
+    computed_tags = TaggableManager(blank=True)
 
 
 class BorrowRecord(models.Model):
