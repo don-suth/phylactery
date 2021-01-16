@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item
 from .forms import ItemSelectForm
 from django.http import HttpResponseBadRequest
@@ -68,6 +69,28 @@ class LibraryItemAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs
+
+
+class SearchView(generic.ListView):
+    template_name = 'library/item_list_view.html'
+    context_object_name = 'items_list'
+    model = Item
+    paginate_by = 20
+
+
+    def get_queryset(self):
+        vector = SearchVector('name', weight='A') + \
+                 SearchVector('description', weight='B')
+        search_query = SearchQuery(self.request.GET.get('q', ''))
+        print(search_query)
+        if search_query:
+            return Item.objects.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.3).order_by('rank')
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Results for the search '{0}'".format(self.request.GET.get('q',''))
+        return context
 
 
 def item_detail(request, item_id=None, slug=None):
