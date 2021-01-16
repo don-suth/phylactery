@@ -39,8 +39,8 @@
 <p>Notes: {{ item.notes }}</p>
 <p>Type: {{ item.get_type_display }}</p>
 <p>Tags:
-{% for itemtag in item.tags.all %}
-<a href="{% url 'library:tag-list' itemtag.pk %}" role="button" class="btn btn-outline-dark">{{ itemtag }}</a>
+{% for tag in item.all_tags %}
+<a href="{% url 'library:tag-list' tag.pk %}" role="button" class="btn btn-outline-dark">{{ tag }}</a>
 {% endfor %}
 </p>
 <p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>

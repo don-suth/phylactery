@@ -21,6 +21,10 @@ class ItemAdmin(admin.ModelAdmin):
     form = ItemTaggitForm
     inlines = [ItemBaseTagInline, ItemComputedTagInline]
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.save()
+
     class Media:
         # These scripts were going to load anyway,
         # but this needs to be here, otherwise

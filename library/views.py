@@ -5,6 +5,7 @@ from django.http import HttpResponseBadRequest
 from django.views import generic
 from dal import autocomplete
 from taggit.models import Tag
+from django.db.models import Q
 # Create your views here.
 
 
@@ -19,14 +20,20 @@ class AllItemsByTag(generic.ListView):
     template_name = 'library/item_list_view.html'
     context_object_name = 'items_list'
     model = Item
+    paginate_by = 20
+
 
     def get_queryset(self):
-        self.tagname = get_object_or_404(Tag, pk=self.kwargs['pk']).name
-        return Item.objects.filter(tags__name__in=[self.tagname]).order_by('name')
+        self.tag_name = get_object_or_404(Tag, pk=self.kwargs['pk']).name
+        return Item.objects.filter(
+            Q(base_tags__base_tags__name__in=[self.tag_name]) |
+            Q(computed_tags__computed_tags__name__in=[self.tag_name])) \
+            .distinct() \
+            .order_by('name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "All items with the tag {0}".format(self.tagname)
+        context['page_title'] = "All items with the tag {0}".format(self.tag_name)
         return context
 
 

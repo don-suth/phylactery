@@ -13,6 +13,9 @@ class TagParent(models.Model):
     child_tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name='parents')
     parent_tag = models.ManyToManyField(Tag, related_name='children')
 
+    def __str__(self):
+        return 'Parents of '+str(self.child_tag)
+
 
 class Item(models.Model):
     BOOK = 'BK'
@@ -41,19 +44,45 @@ class Item(models.Model):
 
     image = models.ImageField(upload_to=image_file_name, null=True)
 
-    def save(self, *args, **kwargs):
-        try:
-            computed_tags = self.computed_tags.computed_tags
-        except ObjectDoesNotExist:
-            computed_tags = ItemComputedTags.objects.create(item=self).computed_tags
-
+    @property
+    def get_base_tags(self):
+        # Returns the base tag TaggableManager, or creates it if it doesn't exist
         try:
             base_tags = self.base_tags.base_tags
         except ObjectDoesNotExist:
             base_tags = ItemBaseTags.objects.create(item=self).base_tags
+        return base_tags
 
-        computed_tags.set(*base_tags.all(), clear=True)
+    @property
+    def get_computed_tags(self):
+        # Returns the computed tag TaggableManager, or creates it if it doesn't exist
+        try:
+            computed_tags = self.computed_tags.computed_tags
+        except ObjectDoesNotExist:
+            computed_tags = ItemComputedTags.objects.create(item=self).computed_tags
+        return computed_tags
+
+    def compute_tags(self):
+        # Takes the base tags and computes all parent tags
+        base_tags = self.get_base_tags
+        computed_tags = self.get_computed_tags
+
+        tags_to_search = list(base_tags.all().values_list('pk', flat=True))
+        already_searched = list()
+        while True:
+            tags_to_search = list(set(tags_to_search) - set(already_searched))
+            if len(tags_to_search) == 0:
+                break
+            already_searched += tags_to_search
+            tags_to_search = list(Tag.objects.filter(children__child_tag__in=tags_to_search)
+                                  .values_list('pk', flat=True))
+        already_searched = Tag.objects.filter(pk__in=already_searched)
+        computed_tags.set(*already_searched, clear=True)
+
+    def save(self, *args, **kwargs):
+        # On item save, compute the tags as well
         super(Item, self).save(*args, **kwargs)
+        self.compute_tags()
 
     def get_absolute_url(self):
         return reverse('library:detail-slug', args=[self.slug])
@@ -144,15 +173,25 @@ class Item(models.Model):
             return False
         return True
 
+    @property
+    def all_tags(self):
+        return self.get_base_tags.all().union(self.get_computed_tags.all())
+
 
 class ItemBaseTags(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='base_tags')
     base_tags = TaggableManager(blank=True)
 
+    def __str__(self):
+        return 'Base tags for '+self.item.name
+
 
 class ItemComputedTags(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='computed_tags')
     computed_tags = TaggableManager(blank=True)
+
+    def __str__(self):
+        return 'Computed tags for '+self.item.name
 
 
 class BorrowRecord(models.Model):
