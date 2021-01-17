@@ -79,12 +79,21 @@ class SearchView(generic.ListView):
 
 
     def get_queryset(self):
-        vector = SearchVector('name', weight='A') + \
-                 SearchVector('description', weight='B')
-        search_query = SearchQuery(self.request.GET.get('q', ''))
-        print(search_query)
-        if search_query:
-            return Item.objects.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.3).order_by('rank')
+        q = self.request.GET.get('q', '')
+        if not q:
+            return redirect('library:library-home')
+        vector = \
+            SearchVector('name', weight='A') + \
+            SearchVector('description', weight='B') + \
+            SearchVector('base_tags__base_tags__name', weight='B') + \
+            SearchVector('computed_tags__computed_tags__name', weight='B')
+        search_query = SearchQuery(q)
+        qs = Item.objects \
+            .annotate(rank=SearchRank(vector, search_query, weights=[0.5, 0.7, 0.9, 1.0])) \
+            .filter(rank__gte=0.2) \
+            .order_by('pk', 'rank') \
+            .distinct('pk')
+        return qs
 
 
     def get_context_data(self, **kwargs):
