@@ -79,6 +79,19 @@ class Item(models.Model):
         already_searched = Tag.objects.filter(pk__in=already_searched)
         computed_tags.set(*already_searched, clear=True)
 
+        try:
+            tag = Tag.objects.get(name='Item: '+str(self.name))
+        except ObjectDoesNotExist:
+            tag = Tag.objects.create(name='Item: '+str(self.name))
+
+        try:
+            tag_parents = TagParent.objects.get(child_tag=tag)
+        except ObjectDoesNotExist:
+            tag_parents = TagParent.objects.create(child_tag=tag)
+
+        tag_parents.parent_tag.set([*base_tags.all(), *already_searched])
+
+
     def save(self, *args, **kwargs):
         # On item save, compute the tags as well
         super(Item, self).save(*args, **kwargs)
