@@ -118,6 +118,9 @@ class Membership(models.Model):
 	expired = models.BooleanField(default=False)
 	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='authorised')
 
+	def __str__(self):
+		return 'Membership for '+str(self.member)+' ('+str(self.date.__format__('%Y'))+')'
+
 
 class Rank(models.Model):
 	RANK_CHOICES = [
@@ -143,6 +146,9 @@ class RankAssignments(models.Model):
 	rank = models.ForeignKey(Rank, on_delete=models.CASCADE)
 	assignment_date = models.DateField(auto_now_add=True)
 	rank_expired = models.BooleanField(default=False)
+
+	def __str__(self):
+		return str(self.member) + ' (' + str(self.rank) + ')'
 
 
 class MemberFlag(models.Model):

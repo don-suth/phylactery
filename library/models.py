@@ -226,7 +226,6 @@ class BorrowRecord(models.Model):
         related_name='authorised_borrowing'
     )
 
-
     def default_due_date():
         return timezone.now() + datetime.timedelta(weeks=2)
 
@@ -247,6 +246,12 @@ class BorrowRecord(models.Model):
 
     # Finally, the librarian verifies that it was returned
     verified_returned = models.BooleanField(default=False)
+
+    def __str__(self):
+        if self.verified_returned:
+            return '(RETURNED)'+str(self.borrowing_member)+' - '+str(self.item)
+        else:
+            return str(self.borrowing_member)+' - '+str(self.item)+' (Due '+self.due_date.strftime('%a %b %d')+')'
 
 
 class ExternalBorrowingRecord(models.Model):
