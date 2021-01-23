@@ -62,3 +62,8 @@
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
 }
+
+.crispymodelselect2, .crispymodelselect2multiple {
+    height: auto;
+    padding: 0px;
+}

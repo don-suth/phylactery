@@ -105,7 +105,7 @@ class Item(models.Model):
 
     def get_availability_info(self):
         # Returns a dict, containing keys
-        # 'in_clubroom', 'is_available', 'expected_availability_date'
+        # 'in_clubroom', 'is_available', 'expected_availability_date', 'max_due_date'
         # If is_available is True, or if the item is never borrowable,
         # then expected_availability_date will be None
         # For this, we assume that if you can't borrow an item overnight, then it's not available
@@ -113,6 +113,7 @@ class Item(models.Model):
             'in_clubroom': True,
             'is_available': True,
             'expected_availability_date': None,
+            'max_due_date': None,
         }
 
         if not self.is_borrowable:
@@ -152,7 +153,7 @@ class Item(models.Model):
                 info['expected_availability_date'] = tomorrow_ext_records.first().due_date
 
         if info['is_available'] is False:
-            # We check here to see how the chain of external borrowing forms could affect the due date
+            # We check here to see how the chain of external borrowing forms could affect the availability date
             while True:
                 qs = self.ext_borrow_records \
                     .exclude(due_date=None) \
@@ -162,6 +163,31 @@ class Item(models.Model):
                 if qs.exists() is False:
                     break
                 info['expected_availability_date'] = qs.first().due_date
+
+        if info['is_available'] is True:
+            # The item is confirmed available, so calculate the maximum due date for it.
+            due_dates = [today+datetime.timedelta(weeks=2)]
+
+            if self.high_demand:
+                if today.weekday() in [4, 5, 6]:
+                    # High-demand items are borrowable until the next weekday.
+                    # So if today is a Friday or a Weekend, it's borrowable until Monday
+                    due_dates.append(today+datetime.timedelta(days=7-today.weekday()))
+                else:
+                    # Else just until tomorrow
+                    due_dates.append(today+next_day)
+
+            # Finally, if there's a pending external borrowing form,
+            # make sure to have the item returned before then
+            qs = self.ext_borrow_records \
+                .exclude(due_date=None) \
+                .filter(date_returned=None) \
+                .order_by('-due_date')
+
+            if qs.exists():
+                due_dates.append(qs.first().requested_borrow_date+datetime.timedelta(days=-1))
+
+            info['max_due_date'] = min(due_dates)
 
         return info
 

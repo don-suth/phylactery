@@ -12,6 +12,7 @@ urlpatterns = [
     path('test-autocomplete/', views.TagAutocomplete.as_view(), name='select2_taggit'),
     path('item_q/', views.LibraryItemAutocomplete.as_view(), name='item-autocomplete'),
     path('borrow/', views.borrow_view, name='borrow'),
+    path('borrow/2/', views.borrow_view_confirm, name='borrow-2'),
     path('search/', views.SearchView.as_view(), name='search'),
     path('', views.AllItemsView.as_view(), name='library-home'),
 ]
