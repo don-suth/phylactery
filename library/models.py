@@ -29,7 +29,7 @@ class Item(models.Model):
         (OTHER, 'Other')
     ]
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=50, null=True)
     description = models.TextField(blank=True)
     condition = models.TextField(blank=True)
