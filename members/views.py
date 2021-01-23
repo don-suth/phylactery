@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
-from .models import Member, Membership
+from .models import Member, Membership, switch_to_proxy
 from .decorators import gatekeeper_required
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
@@ -17,6 +17,8 @@ from .admin import MemberListAdmin
 from django.contrib.admin import AdminSite
 from django.views.generic import TemplateView, DetailView
 from django.contrib import messages
+from dal import autocomplete
+from django.db.models import Q
 
 
 def signup_view(request):
@@ -286,3 +288,14 @@ class MemberProfileView(DetailView):
 	template_name = 'members/profile.html'
 	model = Member
 
+
+class MemberAutocomplete(autocomplete.Select2QuerySetView):
+	def get_queryset(self):
+		u = switch_to_proxy(self.request.user)
+		if u.is_authenticated and u.is_gatekeeper:
+			qs = Member.objects.all()
+		else:
+			qs = Member.objects.none()
+		if self.q:
+			qs = qs.filter(Q(first_name__icontains=self.q) | Q(last_name__icontains=self.q))
+		return qs
