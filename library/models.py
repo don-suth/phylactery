@@ -119,7 +119,7 @@ class Item(models.Model):
             info['is_available'] = False
             return info
 
-        today = timezone.now()
+        today = datetime.date.today()
         next_day = datetime.timedelta(days=1)
 
         # Check the internal and external records to see if the item is currently borrowed out
