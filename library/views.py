@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item
 from .forms import ItemSelectForm, ItemDueDateForm
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
 from django.views import generic
 from dal import autocomplete
@@ -25,7 +25,6 @@ class AllItemsByTag(generic.ListView):
     context_object_name = 'items_list'
     model = Item
     paginate_by = 20
-
 
     def get_queryset(self):
         self.tag_name = get_object_or_404(Tag, pk=self.kwargs['pk']).name
@@ -80,7 +79,6 @@ class SearchView(generic.ListView):
     model = Item
     paginate_by = 20
 
-
     def get_queryset(self):
         q = self.request.GET.get('q', '')
         if not q:
@@ -97,7 +95,6 @@ class SearchView(generic.ListView):
             .order_by('pk', 'rank') \
             .distinct('pk')
         return qs
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -132,18 +129,54 @@ def borrow_view(request):
 
 
 @gatekeeper_required
-def borrow_view_confirm(request):
+def borrow_view_2(request):
     if request.method == 'POST':
         form = ItemSelectForm(request.POST)
         if form.is_valid():
             item_formset = formset_factory(ItemDueDateForm, extra=0)
             formset_data = []
+            rejected_items = []
             for item in form.cleaned_data['items']:
                 # Make a new form for each item
-                formset_data.append({'item': item, 'due_date': item.get_availability_info()['max_due_date']})
-            formset = item_formset(initial=formset_data)
-            return render(request, 'library/borrow_form_2.html', {'formset': formset})
+                item_info = item.get_availability_info()
+                if not item_info['is_available']:
+                    rejected_items.append(item.name)
+                else:
+                    formset_data.append({'item': item, 'due_date': item.get_availability_info()['max_due_date']})
+            if rejected_items and formset_data:
+                messages.error(
+                    request,
+                    'The following items are not available at the moment, and are thus not included: '
+                    + ', '.join(rejected_items)
+                )
+                formset = item_formset(initial=formset_data)
+                return render(request, 'library/borrow_form_2.html', {'formset': formset})
+            elif rejected_items and not formset_data:
+                messages.error(
+                    request,
+                    "All items you selected are not available, and can't be borrowed. "
+                    "If you believe this to be an error, contact the Librarian."
+                )
+                return redirect('library:borrow')
+            elif formset_data:
+                formset = item_formset(initial=formset_data)
+                return render(request, 'library/borrow_form_2.html', {'formset': formset})
+            else:
+                return redirect('library:borrow')
         else:
             return render(request, 'library/borrow_form.html', {'form': form})
-    elif request.method == 'GET':
+    else:
+        return redirect('library:borrow')
+
+
+@gatekeeper_required
+def borrow_view_3(request):
+    item_formset = formset_factory(ItemDueDateForm)
+    if request.method == 'POST':
+        formset = item_formset(request.POST)
+        if formset.is_valid():
+            return HttpResponse('Valid form yay')
+        else:
+            return render(request, 'library/borrow_form_2.html', {'formset': formset})
+    else:
         return redirect('library:borrow')

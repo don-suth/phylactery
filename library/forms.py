@@ -6,6 +6,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
 from django.conf import settings
 from django.contrib.admin import widgets
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+import datetime
 
 
 class CrispyModelSelect2(autocomplete.ModelSelect2):
@@ -69,8 +72,30 @@ class CrispyModelSelect2Multiple(autocomplete.ModelSelect2Multiple):
 
 
 class ItemDueDateForm(forms.Form):
-    item = forms.ModelChoiceField(widget=forms.HiddenInput, required=True, queryset=Item.objects.all())
+    item = forms.ModelChoiceField(
+        widget=forms.HiddenInput,
+        required=True,
+        queryset=Item.objects.all(),
+    )
     due_date = forms.DateField(required=True, widget=widgets.AdminDateWidget)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        item = cleaned_data['item']
+        due_date = cleaned_data['due_date']
+        item_info = item.get_availability_info()
+        if not item_info['is_available']:
+            raise ValidationError("{0} is not available to borrow at the moment.".format(item.name))
+        if due_date > item_info['max_due_date']:
+            self.add_error(
+                'due_date',
+                "Due date can't go past the max due date for this item ({0})".format(str(item_info['max_due_date']))
+            )
+        if due_date < datetime.date.today():
+            self.add_error(
+                'due_date',
+                "Due date can't be in the past."
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -79,9 +104,10 @@ class ItemDueDateForm(forms.Form):
             HTML('''
             {% load library_extras %}
             <tr>
-                <td class="image-col"><img class="list-card-image-sm" src="{{ form.item|get_attr:'image.url' }}"></td>
-                <td>{{ form.item|get_attr:'name' }}</td>
-                <td>'''),
+                <td class="image-col"><img class="list-card-image-sm" src="{{ form.item|get_item_attr:'image.url' }}"></td>
+                <td>{{ form.item|get_item_attr:'name' }}</td>
+                <td class="date-col">
+            '''),
             'item',
             'due_date',
             HTML('</td></tr>')
