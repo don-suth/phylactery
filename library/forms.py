@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.admin import widgets
 
 
-
 class CrispyModelSelect2(autocomplete.ModelSelect2):
     @property
     def media(self):
@@ -80,8 +79,8 @@ class ItemDueDateForm(forms.Form):
             HTML('''
             {% load library_extras %}
             <tr>
-                <td><img class="list-card-image" src="{{ form.item|get_attr:"image.url" }}"></td>"
-                <td>{{ form.item|get_attr:"name" }}</td>
+                <td class="image-col"><img class="list-card-image-sm" src="{{ form.item|get_attr:'image.url' }}"></td>
+                <td>{{ form.item|get_attr:'name' }}</td>
                 <td>'''),
             'item',
             'due_date',

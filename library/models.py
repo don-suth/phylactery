@@ -91,7 +91,6 @@ class Item(models.Model):
 
         tag_parents.parent_tag.set([*base_tags.all(), *already_searched])
 
-
     def save(self, *args, **kwargs):
         # On item save, compute the tags as well
         super(Item, self).save(*args, **kwargs)

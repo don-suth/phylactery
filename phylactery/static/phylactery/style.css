@@ -38,6 +38,19 @@
     border-bottom-right-radius: 0;
 }
 
+.list-card-image-sm {
+    object-fit: contain;
+    max-height: 110px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+@media (max-width: 576px) {
+    .image-col {
+        display: none;
+    }
+}
+
 .list-group-item-sm {
     padding-top: 0.2rem;
     padding-bottom: 0.2rem;
@@ -67,3 +80,4 @@
     height: auto;
     padding: 0px;
 }
+
