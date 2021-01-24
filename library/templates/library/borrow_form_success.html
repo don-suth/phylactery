@@ -1,0 +1,46 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+
+<h2>Success!</h2>
+<p>{{ member }} has successfully borrowed the following items:</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Item Name</th>
+            <th scope="col">Due Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item, due_date in items %}
+            <tr>
+                <td>{{ item }}</td>
+                <td>{{ due_date|date:"l js M Y" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        <tr>
+            <th colspan="2">Other Information</th>
+        </tr>
+        <tr>
+            <td>Address:</td>
+            <td>{{ address }}</td>
+        </tr>
+        <tr>
+            <td>Phone Number:</td>
+            <td>{{ phone_number }}</td>
+        </tr>
+        <tr>
+            <td>Gatekeeper:</td>
+            <td>{{ gatekeeper }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p></p>
+
+{% endblock %}

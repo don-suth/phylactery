@@ -94,7 +94,7 @@ class Member(models.Model):
 
 	@property
 	def is_member(self):
-		return self.is_financial_member() or self.has_rank('LIFEMEMBER')
+		return self.is_financial_member or self.has_rank('LIFEMEMBER')
 
 	def get_most_recent_membership(self):
 		# Returns the most recent membership object of this member, or None if they have none.

@@ -209,11 +209,11 @@ class MemberBorrowDetailsForm(forms.Form):
                     ),
                     Div(
                         'phone_number',
-                        css_class="col-md"
+                        css_class="col-sm"
                     ),
                     Div(
                         'address',
-                        css_class="col-md"
+                        css_class="col-sm"
                     ),
                     css_class="form-row"
                 ),

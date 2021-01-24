@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from .models import Item
+from .models import Item, BorrowRecord
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -198,7 +198,29 @@ def borrow_view_3(request):
         borrow_form = MemberBorrowDetailsForm(request.POST)
         formset = item_formset(request.POST)
         if formset.is_valid() and borrow_form.is_valid():
-            return HttpResponse('Valid form yay')
+            context = {'items': []}
+            borrowing_member = borrow_form.cleaned_data['member']
+            member_address = borrow_form.cleaned_data['address']
+            member_phone_number = borrow_form.cleaned_data['phone_number']
+            auth_gatekeeper_borrow = request.user.member
+            for form in formset:
+                item = form.cleaned_data['item']
+                due_date = form.cleaned_data['due_date']
+                # Create a new borrowing entry for each item
+                BorrowRecord.objects.create(
+                    borrowing_member=borrowing_member,
+                    member_address=member_address,
+                    member_phone_number=member_phone_number,
+                    auth_gatekeeper_borrow=auth_gatekeeper_borrow,
+                    item=item,
+                    due_date=due_date,
+                )
+                context['items'].append([str(item), str(due_date)])
+            context['member'] = str(borrowing_member)
+            context['address'] = str(member_address)
+            context['phone_number'] = str(member_phone_number)
+            context['gatekeeper'] = str(auth_gatekeeper_borrow)
+            return render(request, 'library/borrow_form_success.html', context)
         else:
             return render(request, 'library/borrow_form_2.html', {'formset': formset, 'borrow_form': borrow_form})
     else:
