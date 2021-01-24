@@ -124,8 +124,7 @@ class Membership(models.Model):
 
 class Rank(models.Model):
 	RANK_CHOICES = [
-		('SUSPENDED', 'Suspended'),
-		('EXPELLED', 'Expelled'),
+		('EXCLUDED', 'Excluded'),
 		('GATEKEEPER', 'Gatekeeper'),
 		('WEBKEEPER', 'Webkeeper'),
 		('COMMITTEE', 'Committee'),
