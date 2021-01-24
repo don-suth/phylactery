@@ -7,6 +7,7 @@ from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
 from django.conf import settings
 from django.contrib.admin import widgets
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.utils import timezone
 import datetime
 
@@ -103,9 +104,9 @@ class ItemDueDateForm(forms.Form):
         self.helper.layout = Layout(
             HTML('''
             {% load library_extras %}
-            <tr>
-                <td class="image-col"><img class="list-card-image-sm" src="{{ form.item|get_item_attr:'image.url' }}"></td>
-                <td>{{ form.item|get_item_attr:'name' }}</td>
+            <tr{% if forloop.counter0|warn_different_due:diff %} class="table-warning"{% endif %}>
+                <td class="image-col"><img class="list-card-image-sm" src="{{ item_form.item|get_item_attr:'image.url' }}"></td>
+                <td>{{ item_form.item|get_item_attr:'name' }}</td>
                 <td class="date-col">
             '''),
             'item',
@@ -146,10 +147,6 @@ class ComputedTagForm(autocomplete.FutureModelForm):
 
 class ItemSelectForm(forms.Form):
     # Used to select items for borrowing purposes
-    member = forms.ModelChoiceField(
-        queryset=Member.objects.all(),
-        widget=CrispyModelSelect2(url='members:autocomplete', attrs={'style': 'width:100%'})
-    )
     items = forms.ModelMultipleChoiceField(
         queryset=Item.objects.all(),
         widget=CrispyModelSelect2Multiple(url='library:item-autocomplete', attrs={'style': 'width: 100%;'})
@@ -163,10 +160,62 @@ class ItemSelectForm(forms.Form):
             Fieldset(
                 'Borrow Items',
                 HTML("""
-                    <p>Choose the member that's borrowing items, and the items to borrow below.</p>
+                    <p>Choose the items that the member is borrowing. Member details will be filled out later.</p>
                 """),
-                'member',
                 'items',
                 Submit('submit', 'Submit', css_class='btn-primary'),
             ),
+        )
+
+
+class MemberBorrowDetailsForm(forms.Form):
+    member = forms.ModelChoiceField(
+        queryset=Member.objects.all(),
+        widget=CrispyModelSelect2(url='members:autocomplete', attrs={'style': 'width:100%'})
+    )
+    address = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3}),
+        required=True
+    )
+    phone_number = forms.CharField(
+        required=True,
+        max_length=20,
+        widget=forms.TextInput(attrs={'type': 'tel'}),
+        validators=[RegexValidator(
+            regex="^[0-9]+$",
+            message="Please enter your phone number without any special characters."
+        )]
+    )
+
+    def clean_member(self):
+        member = self.cleaned_data['member']
+        if member.has_rank('EXCLUDED'):
+            raise ValidationError('This member cannot borrow items.')
+        if not member.is_member:
+            raise ValidationError("This member's membership is not valid.")
+        return member
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Fieldset(
+                'Enter the member details below',
+                Div(
+                    Div(
+                        'member',
+                        css_class="col-md"
+                    ),
+                    Div(
+                        'phone_number',
+                        css_class="col-md"
+                    ),
+                    Div(
+                        'address',
+                        css_class="col-md"
+                    ),
+                    css_class="form-row"
+                ),
+            )
         )

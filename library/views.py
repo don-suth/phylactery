@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item
-from .forms import ItemSelectForm, ItemDueDateForm
+from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
 from django.views import generic
@@ -10,6 +10,7 @@ from taggit.models import Tag
 from django.db.models import Q
 from django.contrib import messages
 from members.decorators import gatekeeper_required
+import datetime
 # Create your views here.
 
 
@@ -131,26 +132,43 @@ def borrow_view(request):
 @gatekeeper_required
 def borrow_view_2(request):
     if request.method == 'POST':
-        form = ItemSelectForm(request.POST)
-        if form.is_valid():
+        received_form = ItemSelectForm(request.POST)
+        if received_form.is_valid():
             item_formset = formset_factory(ItemDueDateForm, extra=0)
             formset_data = []
             rejected_items = []
-            for item in form.cleaned_data['items']:
+            differing_due_date = []
+            for item in received_form.cleaned_data['items']:
                 # Make a new form for each item
                 item_info = item.get_availability_info()
                 if not item_info['is_available']:
                     rejected_items.append(item.name)
                 else:
-                    formset_data.append({'item': item, 'due_date': item.get_availability_info()['max_due_date']})
+                    if item_info['max_due_date'] != datetime.date.today()+datetime.timedelta(weeks=2):
+                        # A due date different than usual is among us. Make sure the gatekeeper knows.
+                        differing_due_date.append(True)
+                    else:
+                        differing_due_date.append(False)
+                    formset_data.append({'item': item, 'due_date': item_info['max_due_date']})
+            if True in differing_due_date:
+                messages.warning(
+                    request,
+                    'Note: One or more items below has a due date earlier than two weeks from now. '
+                    'Make sure that this due date still suits the borrower.'
+                )
             if rejected_items and formset_data:
                 messages.error(
                     request,
                     'The following items are not available at the moment, and are thus not included: '
                     + ', '.join(rejected_items)
+                    + '. Is you believe this to be an error, contact the Librarian.'
                 )
                 formset = item_formset(initial=formset_data)
-                return render(request, 'library/borrow_form_2.html', {'formset': formset})
+                borrow_form = MemberBorrowDetailsForm()
+                return render(
+                    request, 'library/borrow_form_2.html',
+                    {'formset': formset, 'borrow_form': borrow_form, 'diff': differing_due_date}
+                )
             elif rejected_items and not formset_data:
                 messages.error(
                     request,
@@ -160,11 +178,15 @@ def borrow_view_2(request):
                 return redirect('library:borrow')
             elif formset_data:
                 formset = item_formset(initial=formset_data)
-                return render(request, 'library/borrow_form_2.html', {'formset': formset})
+                borrow_form = MemberBorrowDetailsForm()
+                return render(
+                    request, 'library/borrow_form_2.html',
+                    {'formset': formset, 'borrow_form': borrow_form, 'diff': differing_due_date}
+                )
             else:
                 return redirect('library:borrow')
         else:
-            return render(request, 'library/borrow_form.html', {'form': form})
+            return render(request, 'library/borrow_form.html', {'form': received_form})
     else:
         return redirect('library:borrow')
 
@@ -173,10 +195,11 @@ def borrow_view_2(request):
 def borrow_view_3(request):
     item_formset = formset_factory(ItemDueDateForm)
     if request.method == 'POST':
+        borrow_form = MemberBorrowDetailsForm(request.POST)
         formset = item_formset(request.POST)
-        if formset.is_valid():
+        if formset.is_valid() and borrow_form.is_valid():
             return HttpResponse('Valid form yay')
         else:
-            return render(request, 'library/borrow_form_2.html', {'formset': formset})
+            return render(request, 'library/borrow_form_2.html', {'formset': formset, 'borrow_form': borrow_form})
     else:
         return redirect('library:borrow')

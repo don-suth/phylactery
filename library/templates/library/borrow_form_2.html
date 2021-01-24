@@ -21,10 +21,11 @@
     <p>The maximum due dates for each item have been preset for you. If you need to input a shorter due date, type it manually or use the calendar button.</p>
     <p>Enter the borrowing member details down below.</p>
     <table class="table">
-    {% for form in formset %}
-        {% crispy form %}
+    {% for item_form in formset %}
+        {% crispy item_form %}
     {% endfor %}
     </table>
+    {% crispy borrow_form %}
     <button type="submit" role="button" class="btn btn-primary">Submit</button>
 </form>
 

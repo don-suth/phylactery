@@ -41,6 +41,7 @@
 .list-card-image-sm {
     object-fit: contain;
     max-height: 110px;
+    max-width: 130px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
