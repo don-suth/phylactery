@@ -7,26 +7,31 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Library Items</h5>
-            <p class="card-text">{{ member.first_name }} has two items borrowed currently.</p>Although, you would still have
+            <p class="card-text">{{ member.first_name }} has {{ borrowed_items|length }} item{{ borrowed_items|length|pluralize }} borrowed currently.</p>
         </div>
+        {% if borrowed_items.exists %}
         <table class="table table-hover table-striped table-sm mb-0">
             <thead>
                 <tr>
-                    <th scope="col" class="pl-3">Item Name</th>
-                    <th scope="col">Borrow date</th>
+                    <th scope="col" class="pl-3">Borrow date</th>
+                    <th scope="col">Item name</th>
                     <th scope="col">Due date</th>
-                    <th scope="col">Gatekeeper</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="table-success">
-                    <td class="pl-3">Dungeons and Dragons 5th Edition Player's Handbook</td>
-                    <td>1/1/2020</td>
-                    <td>15/1/2020</td>
-                    <td>Donald Sutherland</td>
+            {% for record in borrowed_items %}
+                <tr{% if today > record.due_date %} class="table-danger"{% else %} class="table-info"{% endif %}>
+                    <td class="pl-3">{{ record.date_borrowed }}</td>
+                    <td>{{ record.item }}</td>
+                    <td>{{ record.due_date }}</td>
                 </tr>
+            {% endfor %}
             </tbody>
         </table>
+        <div class="btn-group">
+            <a href="{% url 'members:signup-old' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Return items for {{ member.first_name }}</a>
+        </div>
+        {% endif %}
     </div>
     <div class="card mt-3">
         <div class="card-body">
@@ -52,20 +57,6 @@
                     <td>{{ membership.authorising_gatekeeper }}</td>
                 </tr>
                 {% endfor %}
-                {% comment %}
-                <tr class="table-success">
-                    <td class="pl-3">1st Jan 2020</td>
-                    <td>Yes</td>
-                    <td>$5</td>
-                    <td>Donald Sutherland</td>
-                </tr>
-                <tr class="table-danger">
-                    <td class="pl-3">1st Jan 2019</td>
-                    <td>Yes</td>
-                    <td>$5</td>
-                    <td>Donald Sutherland</td>
-                </tr>
-                {% endcomment %}
             </tbody>
         </table>
         {% endif %}

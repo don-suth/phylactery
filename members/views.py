@@ -19,6 +19,8 @@ from django.views.generic import TemplateView, DetailView
 from django.contrib import messages
 from dal import autocomplete
 from django.db.models import Q
+from library.models import BorrowRecord
+import datetime
 
 
 def signup_view(request):
@@ -287,6 +289,15 @@ def old_member_signup_redirect(request):
 class MemberProfileView(DetailView):
 	template_name = 'members/profile.html'
 	model = Member
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['borrowed_items'] = BorrowRecord.objects.filter(
+			borrowing_member=self.object,
+			date_returned=None,
+		)
+		context['today'] = datetime.date.today()
+		return context
 
 
 class MemberAutocomplete(autocomplete.Select2QuerySetView):
