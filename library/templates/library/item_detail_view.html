@@ -12,8 +12,10 @@
                 <td class="pl-2"><b>Borrowing status:</b></td>
             </tr>
             <tr class="">
-                {% if item_info.is_available %}
-                    <td class="pl-2 table-success">Available to borrow!</td>
+                {% if item_info.is_available and item.high_demand %}
+                    <td class="pl-2 table-warning">Available to borrow!<br />(High Demand Item)</td>
+                {% elif item_info.is_available %}
+                    <td class="pl2 table-success">Available to borrow!</td>
                 {% else %}
                     <td class="pl-2 table-danger">Unavailable to borrow</td>
                 {% endif %}
@@ -25,7 +27,14 @@
                 {% if item_info.in_clubroom %}
                     <td class="pl-2 table-success">Available in the clubroom!</td>
                 {% else %}
-                    <td class="pl-2 table-danger">Due back {{ item_info.expected_availability_date|date:"jS M Y" }}</td>
+                    <td class="pl-2 table-danger">Due back
+                        {% if today %}
+                            today
+                        {% elif tomorrow %}
+                            tomorrow
+                        {% else %}
+                            {{ item_info.expected_availability_date|date:"jS M Y" }}
+                        {% endif %}</td>
                 {% endif %}
             </tr>
         </tbody>

@@ -48,6 +48,9 @@ class ItemDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['item_info'] = self.object.get_availability_info()
+        today = datetime.date.today()
+        context['today'], context['tomorrow'] = [date == context['item_info']['expected_availability_date'] for date in [today, today+datetime.timedelta(days=1)]]
+
         return context
 
 
