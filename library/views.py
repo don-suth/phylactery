@@ -49,7 +49,9 @@ class ItemDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['item_info'] = self.object.get_availability_info()
         today = datetime.date.today()
-        context['today'], context['tomorrow'] = [date == context['item_info']['expected_availability_date'] for date in [today, today+datetime.timedelta(days=1)]]
+        tomorrow = today+datetime.timedelta(days=1)
+        context['today'] = True if today == context['item_info']['expected_availability_date'] else False
+        context['tomorrow'] = True if tomorrow == context['item_info']['expected_availability_date'] else False
 
         return context
 
