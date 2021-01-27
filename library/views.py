@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from .models import Item, BorrowRecord
+from .models import Item, BorrowRecord, ExternalBorrowingRecord
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -231,6 +231,12 @@ def borrow_view_3(request):
     else:
         return redirect('library:borrow')
 
-
+@gatekeeper_required
 def overview_view(request):
+    context = {
+        'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
+        'needing_return': BorrowRecord.objects.exclude(date_returned=None, verified_returned=True),
+        'unapproved_borrow_requests': ExternalBorrowingRecord.objects.filter(due_date=None),
+        'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None)
+    }
     return render(request, 'library/overview.html')

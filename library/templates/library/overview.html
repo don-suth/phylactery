@@ -4,26 +4,59 @@
 
 {% block content %}
 
-<ul class="nav nav-tabs nav-fill mb-3" id="pills-tab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link active" id="tabs-home-tab" data-toggle="tab" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Borrowed
-<span class="badge badge-secondary">18</span></a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" id="tabs-profile-tab" data-toggle="tab" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Profile
-<span class="badge badge-secondary">3</span></a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" id="tabs-contact-tab" data-toggle="tab" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Contact
-<span class="badge badge-secondary">19</span></a>
-    </li>
-</ul>
-<div class="tab-content" id="pills-tabContent">
-    <div class="tab-pane show active" id="tab-borrowed" role="tabpanel" aria-labelledby="pills-home-tab">insert table here</div>
-    <div class="tab-pane" id="tab-return" role="tabpanel" aria-labelledby="pills-profile-tab">insert table here</div>
-    <div class="tab-pane" id="tab-external" role="tabpanel" aria-labelledby="pills-contact-tab">insert table here</div>
+<nav>
+    <div class="nav nav-tabs nav-justified" id="nav-tab" role="tablist">
+        <a class="nav-link active" id="nav-currently-borrowed-tab" data-toggle="tab" href="#nav-currently-borrowed" role="tab" aria-controls="nav-currently-borrowed" aria-selected="true">
+            Currently Borrowed
+            <span class="badge badge-success">99+</span>
+        </a>
+        <a class="nav-link" id="nav-needing-return-tab" data-toggle="tab" href="#nav-needing-return" role="tab" aria-controls="nav-needing-return" aria-selected="false">
+            Verify Returns
+            <span class="badge badge-secondary">99+</span>
+        </a>
+        <a class="nav-link" id="nav-borrow-requests-tab" data-toggle="tab" href="#nav-borrow-requests" role="tab" aria-controls="nav-borrow-requests" aria-selected="false">
+            Borrow Requests
+            <span class="badge badge-secondary">99+</span>
+        </a>
+        <a class="nav-link" id="nav-member-borrowing-tab" data-toggle="tab" href="#nav-member-borrowing" role="tab" aria-controls="nav-member-borrowing" aria-selected="false">
+            Members Borrowing
+            <span class="badge badge-secondary">99+</span>
+        </a>
+        <a class="nav-link" id="nav-overdue-tab" data-toggle="tab" href="#nav-overdue" role="tab" aria-controls="nav-overdue" aria-selected="false">
+            Overdue Items
+            <span class="badge badge-secondary">99+</span>
+        </a>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane show active" id="nav-currently-borrowed" role="tabpanel" aria-labelledby="nav-currently-borrowed-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
+    <div class="tab-pane" id="nav-needing-return" role="tabpanel" aria-labelledby="nav-needing-return-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
+    <div class="tab-pane" id="nav-borrow-requests" role="tabpanel" aria-labelledby="nav-borrow-requests-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
+    <div class="tab-pane" id="nav-member-borrowing" role="tabpanel" aria-labelledby="nav-member-borrowing-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
+    <div class="tab-pane" id="nav-overdue" role="tabpanel" aria-labelledby="nav-overdue-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
 </div>
-<!--<div class="container" style="max-width: 800px;">
+
+<!-- <div class="container" style="max-width: 800px;">
     <div class="row row-cols-2 row-cols-md-3">
         <div class="col mb-4">
             <div class="card text-center stat-card">
