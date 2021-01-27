@@ -15,5 +15,6 @@ urlpatterns = [
     path('borrow/2/', views.borrow_view_2, name='borrow-2'),
     path('borrow/3/', views.borrow_view_3, name='borrow-3'),
     path('search/', views.SearchView.as_view(), name='search'),
+    path('overview/', views.overview_view, name='overview'),
     path('', views.AllItemsView.as_view(), name='library-home'),
 ]

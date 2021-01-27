@@ -1,0 +1,78 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}Library Overview - {% endblock %}
+
+{% block content %}
+
+<ul class="nav nav-tabs nav-fill mb-3" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="tabs-home-tab" data-toggle="tab" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Borrowed
+<span class="badge badge-secondary">18</span></a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="tabs-profile-tab" data-toggle="tab" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Profile
+<span class="badge badge-secondary">3</span></a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="tabs-contact-tab" data-toggle="tab" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Contact
+<span class="badge badge-secondary">19</span></a>
+    </li>
+</ul>
+<div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane show active" id="tab-borrowed" role="tabpanel" aria-labelledby="pills-home-tab">insert table here</div>
+    <div class="tab-pane" id="tab-return" role="tabpanel" aria-labelledby="pills-profile-tab">insert table here</div>
+    <div class="tab-pane" id="tab-external" role="tabpanel" aria-labelledby="pills-contact-tab">insert table here</div>
+</div>
+<!--<div class="container" style="max-width: 800px;">
+    <div class="row row-cols-2 row-cols-md-3">
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">18</h5>
+                    <h6 class="card-subtitle">Items currently borrowed</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">3</h5>
+                    <h6 class="card-subtitle">Needing return verification</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">1</h5>
+                    <h6 class="card-subtitle text-muted">Unapproved borrowing requests</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">8</h5>
+                    <h6 class="card-subtitle text-muted">Members borrowing items</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">4</h5>
+                    <h6 class="card-subtitle text-muted">Overdue Items</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div class="card text-center stat-card">
+                <div class="card-body">
+                    <h5 class="card-title">400</h5>
+                    <h6 class="card-subtitle text-muted">Total library items</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>-->
+{% endblock %}

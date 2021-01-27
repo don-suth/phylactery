@@ -230,3 +230,7 @@ def borrow_view_3(request):
             return render(request, 'library/borrow_form_2.html', {'formset': formset, 'borrow_form': borrow_form})
     else:
         return redirect('library:borrow')
+
+
+def overview_view(request):
+    return render(request, 'library/overview.html')
