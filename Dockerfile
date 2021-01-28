@@ -4,14 +4,11 @@ FROM tiangolo/uwsgi-nginx:python3.8
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir --requirement requirements.txt
 
-# Copy app
-COPY . .
-
 # Install utility so we can easily use docker secrets in local_settings.py
 RUN pip install --no-cache-dir get-docker-secret
 
-# Collect static files
-RUN echo yes | python3 manage.py collectstatic
+# Copy app
+COPY . .
 
 # Replace entrypoint
 COPY entrypoint.sh /entrypoint.sh
