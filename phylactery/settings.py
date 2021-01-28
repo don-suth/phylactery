@@ -175,7 +175,8 @@ MESSAGE_TAGS = {
 }
 
 try:
-    from .local_settings import *
-except ImportError:
+    with open(os.path.join(os.path.dirname(__file__), 'local_settings.py')) as f:
+        exec(f.read(), globals())
+except IOError:
     pass
 
