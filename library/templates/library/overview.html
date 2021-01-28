@@ -8,11 +8,15 @@
     <div class="nav nav-tabs nav-justified" id="nav-tab" role="tablist">
         <a class="nav-link active" id="nav-currently-borrowed-tab" data-toggle="tab" href="#nav-currently-borrowed" role="tab" aria-controls="nav-currently-borrowed" aria-selected="true">
             Currently Borrowed
-            <span class="badge badge-success">99+</span>
+            {% if currently_borrowed.exists %}
+                <span class="badge badge-secondary">{{ currently_borrowed.count }}</span>
+            {% endif %}
         </a>
         <a class="nav-link" id="nav-needing-return-tab" data-toggle="tab" href="#nav-needing-return" role="tab" aria-controls="nav-needing-return" aria-selected="false">
             Verify Returns
-            <span class="badge badge-secondary">99+</span>
+            {% if needing_return.exists %}
+                <span class="badge badge-secondary">{{ needing_return.count }}</span>
+            {% endif %}
         </a>
         <a class="nav-link" id="nav-borrow-requests-tab" data-toggle="tab" href="#nav-borrow-requests" role="tab" aria-controls="nav-borrow-requests" aria-selected="false">
             Borrow Requests
@@ -26,23 +30,85 @@
             Overdue Items
             <span class="badge badge-secondary">99+</span>
         </a>
+        <a class="nav-link" id="nav-past-entries-tab" data-toggle="tab" href="#nav-past-entries" role="tab" aria-controls="nav-past-entries" aria-selected="false">
+            Past Entries
+        </a>
     </div>
 </nav>
 <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane show active" id="nav-currently-borrowed" role="tabpanel" aria-labelledby="nav-currently-borrowed-tab">
-        {% comment %}
-        Insert table here
-        {% endcomment %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Item Name</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in currently_borrowed %}
+                        <tr{% if today > record.due_date %} class="table-danger"{% endif %}>
+                            <td>{{ record.borrowing_member }}</td>
+                            <td>{{ record.item.name }}</td>
+                            <td>{{ record.date_borrowed }}</td>
+                            <td>{{ record.due_date }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="table-info text-center">There are no items currently borrrowed</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="tab-pane" id="nav-needing-return" role="tabpanel" aria-labelledby="nav-needing-return-tab">
-        {% comment %}
-        Insert table here
-        {% endcomment %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Item Name</th>
+                        <th>Date Returned</th>
+                        <th>Returning Gatekeeper</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in needing_return %}
+                        <tr>
+                            <td>{{ record.borrowing_member }}</td>
+                            <td>{{ record.item.name }}</td>
+                            <td>{{ record.date_returned }}</td>
+                            <td>{{ record.auth_gatekeeper_return }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="table-info text-center">There are no items that need return verification</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="tab-pane" id="nav-borrow-requests" role="tabpanel" aria-labelledby="nav-borrow-requests-tab">
-        {% comment %}
-        Insert table here
-        {% endcomment %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="4">Not implemented</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="4">Not implemented</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="tab-pane" id="nav-member-borrowing" role="tabpanel" aria-labelledby="nav-member-borrowing-tab">
         {% comment %}
@@ -50,6 +116,11 @@
         {% endcomment %}
     </div>
     <div class="tab-pane" id="nav-overdue" role="tabpanel" aria-labelledby="nav-overdue-tab">
+        {% comment %}
+        Insert table here
+        {% endcomment %}
+    </div>
+    <div class="tab-pane" id="nav-past-entries" role="tabpanel" aria-labelledby="nav-past-entries-tab">
         {% comment %}
         Insert table here
         {% endcomment %}

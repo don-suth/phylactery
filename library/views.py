@@ -231,12 +231,14 @@ def borrow_view_3(request):
     else:
         return redirect('library:borrow')
 
+
 @gatekeeper_required
 def overview_view(request):
     context = {
+        'today': datetime.date.today(),
         'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
-        'needing_return': BorrowRecord.objects.exclude(date_returned=None, verified_returned=True),
+        'needing_return': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
         'unapproved_borrow_requests': ExternalBorrowingRecord.objects.filter(due_date=None),
         'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None)
     }
-    return render(request, 'library/overview.html')
+    return render(request, 'library/overview.html', context)
