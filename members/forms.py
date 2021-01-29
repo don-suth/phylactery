@@ -153,7 +153,7 @@ class MembershipForm(forms.Form):
                 style="max-width: 576px", css_class="container"
             )
         )
-        for flag in MemberFlag.objects.all():
+        for flag in MemberFlag.objects.filter(active=True):
             field_name = 'flag' + str(flag.pk)
             self.fields[field_name] = forms.BooleanField(label=flag.description, required=False)
             self.helper.layout[0][0].append(field_name)

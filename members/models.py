@@ -153,6 +153,7 @@ class RankAssignments(models.Model):
 class MemberFlag(models.Model):
 	name = models.CharField(max_length=20)
 	description = models.CharField(max_length=200)
+	active = models.BooleanField(default=True, help_text='Control whether this flag appears on membership forms')
 
 	member = models.ManyToManyField(Member, related_name='flags')
 
