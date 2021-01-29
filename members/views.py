@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
-from .models import Member, Membership, switch_to_proxy
+from .models import Member, Membership, MemberFlag, switch_to_proxy
 from .decorators import gatekeeper_required
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
@@ -171,7 +171,15 @@ def new_membership_view(request):
 			)
 			new_member.save()
 			new_membership.save()
-			return HttpResponse("Successfully added "+str(new_member))
+
+			# Add in the extra MemberFlag fields
+			for flag_pk in form.extra_fields:
+				flag_val = form.cleaned_data.get('flag_' + str(flag_pk), False)
+				if flag_val:
+					MemberFlag.objects.get(pk=flag_pk).member.add(new_member)
+
+			messages.success(request, "Successfully added "+str(new_member))
+			return redirect('members:signup-home')
 	else:
 		form = MembershipForm()
 	return render(request, 'members/new_membership_form.html', {'form': form})
@@ -264,6 +272,15 @@ def old_membership_view(request, pk=None):
 					authorising_gatekeeper=authorising_gatekeeper
 				)
 				new_membership.save()
+
+				# Add in the extra MemberFlag fields
+				for flag_pk in form.extra_fields:
+					flag_val = form.cleaned_data.get('flag_' + str(flag_pk), None)
+					if flag_val is False:
+						MemberFlag.objects.get(pk=flag_pk).member.remove(member)
+					elif flag_val is True:
+						MemberFlag.objects.get(pk=flag_pk).member.add(member)
+
 				messages.success(request, "New membership added for {0}!".format(member.first_name))
 				return redirect('members:profile', pk=pk)
 			else:

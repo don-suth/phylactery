@@ -73,6 +73,7 @@ class MembershipForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.extra_fields = []
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
@@ -154,7 +155,8 @@ class MembershipForm(forms.Form):
             )
         )
         for flag in MemberFlag.objects.filter(active=True):
-            field_name = 'flag' + str(flag.pk)
+            field_name = 'flag_' + str(flag.pk)
+            self.extra_fields.append(flag.pk)
             self.fields[field_name] = forms.BooleanField(label=flag.description, required=False)
             self.helper.layout[0][0].append(field_name)
 
@@ -162,8 +164,15 @@ class MembershipForm(forms.Form):
         cleaned_data = super().clean()
         is_guild = cleaned_data.get('is_guild')
         student_number = cleaned_data.get('student_number')
+        amount_paid = cleaned_data.get('amount_paid')
         if is_guild is True and not student_number:
             self.add_error('student_number', 'If you are a guild member, a student number is required.')
+        if is_guild is True and amount_paid != 5:
+            self.add_error('is_guild', 'If you are a guild member, you should be paying $5')
+            self.add_error('amount_paid', 'If you are a guild member, you should be paying $5')
+        if is_guild is False and amount_paid != 7:
+            self.add_error('is_guild', 'If you are a guild member, you should be paying $7')
+            self.add_error('amount_paid', 'If you are a guild member, you should be paying $7')
 
 
 class SignupForm(UserCreationForm):
