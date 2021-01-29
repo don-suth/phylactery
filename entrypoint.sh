@@ -15,6 +15,10 @@ NGINX_WORKER_CONNECTIONS=${NGINX_WORKER_CONNECTIONS:-1024}
 USE_STATIC_URL=${STATIC_URL:-'/static'}
 # Get the absolute path of the static files from the environment variable
 USE_STATIC_PATH=${STATIC_PATH:-'/app/static'}
+# Get the URL for media files from the environment variable
+USE_MEDIA_URL=${MEDIA_URL:-'/media'}
+# Get the absolute path of the media files from the environment variable
+USE_MEDIA_PATH=${MEDIA_PATH:-'/app/media'}
 # Get the listen port for Nginx, default to 80
 USE_LISTEN_PORT=${LISTEN_PORT:-80}
 
@@ -59,6 +63,9 @@ else
     content_server=$content_server'    }\n'
     content_server=$content_server"    location $USE_STATIC_URL {\n"
     content_server=$content_server"        alias $USE_STATIC_PATH;\n"
+    content_server=$content_server'    }\n'
+    content_server=$content_server"    location $USE_MEDIA_URL {\n"
+    content_server=$content_server"        alias $USE_MEDIA_PATH;\n"
     content_server=$content_server'    }\n'
     content_server=$content_server'}\n'
     # Save generated server /etc/nginx/conf.d/nginx.conf
