@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
 
-
+app_name = 'account'
 urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
     path('activate/<uidb64>/<token>/', views.activate_view, name='activate'),
