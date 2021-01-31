@@ -115,7 +115,7 @@ class Item(models.Model):
             'max_due_date': None,
         }
 
-        if not self.is_borrowable:
+        if self.is_borrowable is False:
             info['is_available'] = False
             return info
 

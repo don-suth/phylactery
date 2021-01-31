@@ -1,6 +1,6 @@
 {% extends 'phylactery/base.html' %}
 
-{% block title %}{{ item.name }}{% endblock %}
+{% block title %}{{ item.name }} - {% endblock %}
 
 {% block content %}
 <h2 class="">{{ item.name }}</h2>
@@ -12,9 +12,9 @@
                 <td class="pl-2"><b>Borrowing status:</b></td>
             </tr>
             <tr class="">
-                {% if item_info.is_available and item.high_demand %}
+                {% if item_info.is_available is True and item.high_demand is True %}
                     <td class="pl-2 table-warning">Available to borrow!<br />(High Demand Item)</td>
-                {% elif item_info.is_available %}
+                {% elif item_info.is_available is True %}
                     <td class="pl2 table-success">Available to borrow!</td>
                 {% else %}
                     <td class="pl-2 table-danger">Unavailable to borrow</td>
@@ -24,7 +24,7 @@
                 <td class="pl-2"><b>Clubroom status:</b></td>
             </tr>
             <tr class="">
-                {% if item_info.in_clubroom %}
+                {% if item_info.in_clubroom is True %}
                     <td class="pl-2 table-success">Available in the clubroom!</td>
                 {% else %}
                     <td class="pl-2 table-danger">Due back

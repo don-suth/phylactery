@@ -1,6 +1,6 @@
 {% extends 'phylactery/base.html' %}
 
-{% block title %}Item List{% endblock %}
+{% block title %}{{ page_title|default:"Search results" }} - {% endblock %}
 
 {% block content %}
 <h2 class="mt-3">{{ page_title|default:"All items:" }}</h2>
