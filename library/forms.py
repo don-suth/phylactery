@@ -1,6 +1,6 @@
 from django import forms
 from dal import autocomplete
-from .models import Item, ItemBaseTags, ItemComputedTags
+from .models import Item, ItemBaseTags, ItemComputedTags, BorrowRecord
 from members.models import Member
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
@@ -219,3 +219,11 @@ class MemberBorrowDetailsForm(forms.Form):
                 ),
             )
         )
+
+
+class VerifyReturnForm (forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for record in BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True):
+            field_name = 'return_' + str(record.pk)
+            self.fields[field_name] = forms.BooleanField(required=False)

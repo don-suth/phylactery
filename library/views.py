@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingRecord
-from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm
+from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
 from django.views import generic
@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.contrib import messages
 from members.decorators import gatekeeper_required
 import datetime
+from django.core.exceptions import ObjectDoesNotExist
 # Create your views here.
 
 
@@ -104,7 +105,7 @@ class SearchView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "Results for the search '{0}'".format(self.request.GET.get('q',''))
+        context['page_title'] = "Results for the search '{0}'".format(self.request.GET.get('q', ''))
         return context
 
 
@@ -241,4 +242,37 @@ def overview_view(request):
         'unapproved_borrow_requests': ExternalBorrowingRecord.objects.filter(due_date=None),
         'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None)
     }
+    errors = False
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type', None)
+        form = None
+        if form_type == 'return_items':
+            form = VerifyReturnForm(request.POST)
+            if form.is_valid():
+                validated = []
+                for field_name in form.cleaned_data.keys():
+                    if form.cleaned_data[field_name] is True:
+                        try:
+                            pk = field_name.split('return_')[1]
+                            print(pk)
+                            record = BorrowRecord.objects.get(pk=pk)
+                        except (IndexError, ObjectDoesNotExist) as e:
+                            errors = True
+                            continue
+                        if record.verified_returned is False and record.date_returned is not None:
+                            record.verified_returned = True
+                            record.save()
+                            validated.append(pk)
+                if validated:
+                    messages.success(
+                        request,
+                        "Successfully verified {0} item{1} as returned."
+                            .format(len(validated), 's' if len(validated) > 1 else '')
+                    )
+    if errors:
+        messages.error(
+            request,
+            'There were one or more errors with your request. Please try again.'
+            'If you repeatedly get this error, please contact a WebKeeper.'
+        )
     return render(request, 'library/overview.html', context)
