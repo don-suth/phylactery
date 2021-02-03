@@ -2,12 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingRecord
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm
+from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
 from django.views import generic
 from dal import autocomplete
 from taggit.models import Tag
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib import messages
 from members.decorators import gatekeeper_required
 import datetime
@@ -240,7 +241,12 @@ def overview_view(request):
         'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
         'needing_return': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
         'unapproved_borrow_requests': ExternalBorrowingRecord.objects.filter(due_date=None),
-        'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None)
+        'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None),
+        'members_borrowing': Member.objects.annotate(
+            num_borrowed=Count('borrowed', filter=Q(borrowed__date_returned=None))
+        ).filter(
+            num_borrowed__gt=0
+        )
     }
     errors = False
     if request.method == 'POST':
