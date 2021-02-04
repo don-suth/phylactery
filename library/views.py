@@ -236,17 +236,21 @@ def borrow_view_3(request):
 
 @gatekeeper_required
 def overview_view(request):
+    today = datetime.date.today()
+    three_weeks_ago = today - datetime.timedelta(weeks=3)
     context = {
-        'today': datetime.date.today(),
+        'today': today,
         'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
-        'needing_return': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
+        'needing_return_verification': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
         'unapproved_borrow_requests': ExternalBorrowingRecord.objects.filter(due_date=None),
         'approved_borrow_requests': ExternalBorrowingRecord.objects.exclude(due_date=None).filter(date_returned=None),
         'members_borrowing': Member.objects.annotate(
             num_borrowed=Count('borrowed', filter=Q(borrowed__date_returned=None))
-        ).filter(
-            num_borrowed__gt=0
-        )
+            ).filter(
+                num_borrowed__gt=0
+        ),
+        'overdue': BorrowRecord.objects.filter(date_returned=None, due_date__lt=today).order_by('due_date'),
+        'recent_records': BorrowRecord.objects.filter(date_borrowed__gte=three_weeks_ago).order_by('date_borrowed')
     }
     errors = False
     if request.method == 'POST':
@@ -260,7 +264,6 @@ def overview_view(request):
                     if form.cleaned_data[field_name] is True:
                         try:
                             pk = field_name.split('return_')[1]
-                            print(pk)
                             record = BorrowRecord.objects.get(pk=pk)
                         except (IndexError, ObjectDoesNotExist) as e:
                             errors = True

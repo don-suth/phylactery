@@ -221,7 +221,7 @@ class MemberBorrowDetailsForm(forms.Form):
         )
 
 
-class VerifyReturnForm (forms.Form):
+class VerifyReturnForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for record in BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True):
