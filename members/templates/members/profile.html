@@ -31,7 +31,7 @@
             </tbody>
         </table>
         <div class="btn-group">
-            <a href="{% url 'members:signup-old' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Return items for {{ member.first_name }}</a>
+            <a href="{% url 'library:return-items' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Return items for {{ member.first_name }}</a>
         </div>
         {% endif %}
     </div>

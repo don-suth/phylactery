@@ -6,7 +6,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
 from django.conf import settings
 from django.contrib.admin import widgets
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.validators import RegexValidator
 from django.utils import timezone
 import datetime
@@ -227,3 +227,16 @@ class VerifyReturnForm(forms.Form):
         for record in BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True):
             field_name = 'return_' + str(record.pk)
             self.fields[field_name] = forms.BooleanField(required=False)
+
+
+class ReturnItemsForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.member_pk = kwargs.pop('member_pk', None)
+        super().__init__(*args, **kwargs)
+        if self.member_pk:
+            self.qs = BorrowRecord.objects.filter(date_returned=None, borrowing_member=self.member_pk)
+            for record in self.qs:
+                field_name = 'return_' + str(record.pk)
+                self.fields[field_name] = forms.BooleanField(required=False)
+        else:
+            raise ImproperlyConfigured('No Member pk was given')

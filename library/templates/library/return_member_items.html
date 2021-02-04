@@ -1,0 +1,36 @@
+{% extends "phylactery/base.html" %}
+
+{% block title %}Return items for {{ member.first_name }} - {% endblock %}
+
+{% block content %}
+
+
+<h2>Return items for {{ member }}</h2>
+<p>Select items to return, then click the button below.</p>
+<form method="post" action="{% url 'library:return-items' pk=member.pk %}">
+    {% csrf_token %}
+    <table class="table table-hover table-striped table-sm mb-0 table-responsive-sm" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>&#9745;</th>
+                <th scope="col">Borrow date</th>
+                <th scope="col">Item name</th>
+                <th scope="col">Due date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for record in borrowed_items %}
+            <tr>
+                <td><input type="checkbox" name="return_{{ record.pk }}"></td>
+                <td>{{ record.date_borrowed }}</td>
+                <td>{{ record.item }}</td>
+                <td>{{ record.due_date }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success mt-3">Return Items!</button>
+    <a class="btn btn-secondary mt-3" role="button" href="{% url 'members:profile' pk=member.pk %}">Cancel</a>
+</form>
+
+{% endblock %}

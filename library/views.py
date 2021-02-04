@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingRecord
-from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm
+from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm
 from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -285,3 +285,59 @@ def overview_view(request):
             'If you repeatedly get this error, please contact a WebKeeper.'
         )
     return render(request, 'library/overview.html', context)
+
+
+@gatekeeper_required
+def return_item_view(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+    if request.method == 'GET':
+        form = ReturnItemsForm(member_pk=pk)
+        if form.qs.exists():
+            context = {
+                'member': member,
+                'borrowed_items': form.qs,
+            }
+            return render(request, template_name='library/return_member_items.html', context=context)
+        else:
+            messages.error(request, 'This member has no items to return.')
+            return redirect('members:profile', pk=pk)
+    elif request.method == 'POST':
+        form = ReturnItemsForm(request.POST, member_pk=pk)
+        context = {
+            'member': member,
+            'borrowed_items': form.qs,
+        }
+        if form.is_valid():
+            successfully_returned = []
+            errors = False
+            today = datetime.date.today()
+            for field in form.cleaned_data:
+                if form.cleaned_data[field] is True:
+                    try:
+                        record_pk = field.split('return_')[1]
+                        record = BorrowRecord.objects.get(pk=int(record_pk), borrowing_member=member)
+                    except (IndexError, ObjectDoesNotExist):
+                        print('errors')
+                        errors = True
+                        continue
+                    record.date_returned = today
+                    record.auth_gatekeeper_return = request.user.member
+                    record.save()
+                    successfully_returned.append(record_pk)
+            if successfully_returned:
+                messages.success(
+                    request,
+                    "Successfully returned {0} item{1}."
+                        .format(len(successfully_returned), 's' if len(successfully_returned) > 1 else '')
+                )
+            if errors:
+                messages.error(
+                    request,
+                    'There were one or more errors with your request. Please try again.'
+                    'If you repeatedly get this error, please contact a WebKeeper.'
+                )
+                context['borrowed_items'] = context['borrowed_items'].all()
+                return render(request, template_name='library/return_member_items.html', context=context)
+            return redirect('members:profile', pk=pk)
+        else:
+            return render(request, template_name='library/return_member_items.html', context=context)
