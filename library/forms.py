@@ -240,3 +240,62 @@ class ReturnItemsForm(forms.Form):
                 self.fields[field_name] = forms.BooleanField(required=False)
         else:
             raise ImproperlyConfigured('No Member pk was given')
+
+
+class ExternalBorrowingRequestForm(forms.Form):
+    applicant_name = forms.CharField(
+        required=True,
+        label='Your name',
+    )
+    applicant_org = forms.CharField(
+        required=False,
+        label='Your organisation name (optional)',
+    )
+    event_details = forms.CharField(
+        required=True,
+        label='Enter additional details about your event and organisation (if applicable) here.',
+        widget=forms.Textarea(attrs={'rows': '5'}),
+    )
+    contact_phone = forms.CharField(
+        required=True,
+        label='Contact Phone Number',
+        widget=forms.TextInput(attrs={'type': 'tel'})
+    )
+    contact_email = forms.EmailField(
+        required=True,
+        label='Contact Email',
+    )
+    requested_borrow_date = forms.DateField(
+        required=True,
+        widget=widgets.AdminDateWidget,
+    )
+    requested_items = forms.ModelMultipleChoiceField(
+        queryset=Item.objects.all(),
+        widget=CrispyModelSelect2Multiple(url='library:item-autocomplete', attrs={'style': 'width: 100%;'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Fieldset(
+                'External Borrowing Request Form',
+                HTML("""
+                    <p>Unigames allows other clubs, organisations and people to borrow items for their events.
+                    This is a form to request items to borrow for such an event.</p>
+                    <p>To guarantee that we can provide all items that your request, we ask that this form 
+                    be submitted with a minimum of two weeks notice, with ideally three weeks notice.</p>
+                    <p>Make sure the contact information you enter is correct, as the Librarian will
+                    contact you to discuss your request.</p>
+                """),
+                'applicant_name',
+                'applicant_org',
+                'event_details',
+                'contact_phone',
+                'contact_email',
+                'requested_borrow_date',
+                'requested_items',
+                Submit('submit', 'Submit', css_class='btn-primary'),
+            ),
+        )
