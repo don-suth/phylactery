@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'django.contrib.postgres',
+    'markdownify',
 ]
 
 MIDDLEWARE = [
@@ -173,6 +174,15 @@ MESSAGE_TAGS = {
     messages.DEBUG: 'alert-warning',
     messages.SUCCESS: 'alert-success',
 }
+
+
+MARKDOWNIFY_STRIP = False
+MARKDOWNIFY_WHITELIST_TAGS = [
+ 'a', 'p',
+ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
+ 'ul', 'li', 'span',
+]
+
 
 try:
     with open(os.path.join(os.path.dirname(__file__), 'local_settings.py')) as f:

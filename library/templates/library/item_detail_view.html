@@ -2,6 +2,8 @@
 
 {% block title %}{{ item.name }} - {% endblock %}
 
+{% load markdownify %}
+
 {% block content %}
 <h2 class="">{{ item.name }}</h2>
 <div class="card item-detail-card">
@@ -41,7 +43,7 @@
     </table>
 </div>
 <p>
-    {{ item.description }}
+    {{ item.description|markdownify }}
 </p>
 
 <p>Condition: {{ item.condition }}</p>

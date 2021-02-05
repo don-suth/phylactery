@@ -1,5 +1,7 @@
 from django import template
 from library.models import Item
+from markdown import Markdown
+from io import StringIO
 
 register = template.Library()
 
@@ -35,3 +37,27 @@ def warn_different_due(counter, iterable):
         return iterable[counter]
     except IndexError:
         return ''
+
+
+# Helper function for the un_markdownify filter
+def un_mark_element(element, stream=None):
+    if stream is None:
+        stream = StringIO()
+    if element.text:
+        stream.write(element.text)
+    for sub in element:
+        un_mark_element(sub, stream)
+    if element.tail:
+        stream.write(element.tail)
+    return stream.getvalue()
+
+
+Markdown.output_formats["plain"] = un_mark_element
+__md = Markdown(output_format="plain")
+__md.stripTopLevelTags = False
+
+
+@register.filter(name='un_markdownify')
+def un_markdownify(markdown_text):
+    # Returns text, without any markdown tags in it
+    return __md.convert(markdown_text)
