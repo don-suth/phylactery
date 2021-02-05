@@ -278,6 +278,7 @@ class ExternalBorrowingRequestForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.include_media = False
         self.helper.layout = Layout(
             Fieldset(
                 'External Borrowing Request Form',
@@ -289,12 +290,33 @@ class ExternalBorrowingRequestForm(forms.Form):
                     <p>Make sure the contact information you enter is correct, as the Librarian will
                     contact you to discuss your request.</p>
                 """),
-                'applicant_name',
-                'applicant_org',
+                Div(
+                    Div(
+                        'applicant_name',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'applicant_org',
+                        css_class='col-md'
+                    ),
+                    css_class='form-row'
+                ),
                 'event_details',
-                'contact_phone',
-                'contact_email',
-                'requested_borrow_date',
+                Div(
+                    Div(
+                        'contact_phone',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'contact_email',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'requested_borrow_date',
+                        css_class='col-md',
+                    ),
+                    css_class='form-row'
+                ),
                 'requested_items',
                 Submit('submit', 'Submit', css_class='btn-primary'),
             ),

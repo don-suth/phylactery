@@ -17,5 +17,6 @@ urlpatterns = [
     path('search/', views.SearchView.as_view(), name='search'),
     path('overview/', views.overview_view, name='overview'),
     path('return/<int:pk>/', views.return_item_view, name='return-items'),
+    path('request/', views.external_borrow_request_view, name='external-request'),
     path('', views.AllItemsView.as_view(), name='library-home'),
 ]

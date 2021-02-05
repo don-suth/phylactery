@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingRecord
-from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm
+from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
+    ExternalBorrowingRequestForm
 from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -132,7 +133,7 @@ def item_list(request, page=1, qs=None):
 
 @gatekeeper_required
 def borrow_view(request):
-    form = ItemSelectForm
+    form = ItemSelectForm()
     return render(request, 'library/borrow_form.html', {'form': form})
 
 
@@ -341,3 +342,8 @@ def return_item_view(request, pk):
             return redirect('members:profile', pk=pk)
         else:
             return render(request, template_name='library/return_member_items.html', context=context)
+
+
+def external_borrow_request_view(request):
+    form = ExternalBorrowingRequestForm()
+    return render(request, 'library/external_borrow_form.html', {'form': form})
