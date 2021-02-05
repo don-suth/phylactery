@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.views.generic.base import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.i18n import JavaScriptCatalog
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='phylactery/home.html'), name='home'),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
     path('admin/', admin.site.urls),
+    path('jsi18n/', JavaScriptCatalog.as_view())
     ]
 
 if settings.DEBUG:
