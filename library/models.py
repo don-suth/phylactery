@@ -286,6 +286,7 @@ class ExternalBorrowingRecord(models.Model):
     event_details = models.TextField()
     contact_phone = models.CharField(max_length=20)
     contact_email = models.EmailField()
+    form_submitted_date = models.DateField(default=datetime.date.today)
     requested_borrow_date = models.DateField()
     requested_item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records')
 
