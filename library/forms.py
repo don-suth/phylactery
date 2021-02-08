@@ -1,6 +1,6 @@
 from django import forms
 from dal import autocomplete
-from .models import Item, ItemBaseTags, ItemComputedTags, BorrowRecord
+from .models import Item, ItemBaseTags, ItemComputedTags, BorrowRecord, ExternalBorrowingRecord
 from members.models import Member
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
@@ -274,6 +274,11 @@ class ExternalBorrowingRequestForm(forms.Form):
         widget=CrispyModelSelect2Multiple(url='library:item-autocomplete', attrs={'style': 'width: 100%;'})
     )
 
+    confirmed = forms.BooleanField(
+        required=True,
+        label='I agree to the above'
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -318,6 +323,31 @@ class ExternalBorrowingRequestForm(forms.Form):
                     css_class='form-row'
                 ),
                 'requested_items',
+                HTML('''
+                <p>By checking this box, you understand and agree to the following:
+                    <ul>
+                        <li>That a Unigames representative will contact you to discuss details about this 
+                            borrowing request with you.</li>
+                        <li>Unigames has the full right to approve or deny this request for any reason.</li>
+                        <li>It may not be possible to get you all the games that you request.</li>
+                        <li>You/Your organisation will be responsible for all costs in the event that the item is 
+                            damaged or not returned.</li>
+                    </ul>
+                </p>
+                '''),
+                'confirmed',
                 Submit('submit', 'Submit', css_class='btn-primary'),
             ),
         )
+
+    def submit(self):
+        for item in self.cleaned_data['requested_items']:
+            ExternalBorrowingRecord.objects.create(
+                applicant_name=self.cleaned_data['applicant_name'],
+                applicant_org=self.cleaned_data['applicant_org'],
+                event_details=self.cleaned_data['event_details'],
+                contact_phone=self.cleaned_data['contact_phone'],
+                contact_email=self.cleaned_data['contact_email'],
+                requested_borrow_date=self.cleaned_data['requested_borrow_date'],
+                requested_item=item
+            )

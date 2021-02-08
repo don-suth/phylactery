@@ -345,5 +345,14 @@ def return_item_view(request, pk):
 
 
 def external_borrow_request_view(request):
-    form = ExternalBorrowingRequestForm()
-    return render(request, 'library/external_borrow_form.html', {'form': form})
+    if request.method == 'GET':
+        form = ExternalBorrowingRequestForm()
+        return render(request, 'library/external_borrow_form.html', {'form': form})
+    elif request.method == 'POST':
+        form = ExternalBorrowingRequestForm(request.POST)
+        if form.is_valid():
+            form.submit()
+            messages.success(request, 'Your form was successfully submitted! We will get in touch soon.')
+            return redirect('library:library-home')
+        else:
+            return render(request, 'library/external_borrow_form.html', {'form': form})
