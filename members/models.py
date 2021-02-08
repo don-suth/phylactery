@@ -143,8 +143,8 @@ class Rank(models.Model):
 class RankAssignments(models.Model):
 	member = models.ForeignKey(Member, on_delete=models.CASCADE)
 	rank = models.ForeignKey(Rank, on_delete=models.CASCADE)
-	assignment_date = models.DateField(auto_now_add=True)
-	rank_expired = models.BooleanField(default=False)
+	assignment_date = models.DateField(default=datetime.date.today)
+	expired_date = models.DateField(blank=True, null=True)
 
 	def __str__(self):
 		return str(self.member) + ' (' + str(self.rank) + ')'
