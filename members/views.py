@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView
-from .forms import SignupForm, LoginForm, MembershipForm
+from .forms import SignupForm, LoginForm, NewMembershipForm, OldMembershipForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -141,7 +141,7 @@ class MemberListView(ListView):
 @gatekeeper_required
 def new_membership_view(request):
 	if request.method == 'POST':
-		form = MembershipForm(request.POST)
+		form = NewMembershipForm(request.POST)
 		if form.is_valid():
 			try:
 				authorising_gatekeeper = request.user.member
@@ -161,6 +161,10 @@ def new_membership_view(request):
 				email_address=form.cleaned_data['email'],
 				receive_emails=form.cleaned_data['receive_emails'],
 			)
+
+			if form.cleaned_data['is_fresher'] is True:
+				new_member.join_date = datetime.date.today()
+
 			new_membership = Membership(
 				member=new_member,
 				guild_member=form.cleaned_data['is_guild'],
@@ -181,7 +185,7 @@ def new_membership_view(request):
 			messages.success(request, "Successfully added "+str(new_member))
 			return redirect('members:signup-home')
 	else:
-		form = MembershipForm()
+		form = NewMembershipForm()
 	return render(request, 'members/new_membership_form.html', {'form': form})
 
 
@@ -212,7 +216,7 @@ def old_membership_view(request, pk=None):
 		if recent_membership:
 			data['is_guild'] = recent_membership.guild_member
 
-		form = MembershipForm(data)
+		form = OldMembershipForm(data)
 
 		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
 		form.add_error('is_guild', 'Please verify that this is still correct.')
@@ -240,7 +244,7 @@ def old_membership_view(request, pk=None):
 				'email': member.email_address,
 				'receive_emails': member.receive_emails
 			}
-			form = MembershipForm(request.POST, initial=init)
+			form = OldMembershipForm(request.POST, initial=init)
 
 			if form.is_valid():
 				if form.cleaned_data['email'] != member.email_address:

@@ -15,7 +15,7 @@ no_student_number = RegexValidator(
 )
 
 
-class MembershipForm(forms.Form):
+class OldMembershipForm(forms.Form):
     first_name = forms.CharField(
         required=True,
         max_length=200,
@@ -173,6 +173,19 @@ class MembershipForm(forms.Form):
         if is_guild is False and amount_paid != 7:
             self.add_error('is_guild', 'If you are a guild member, you should be paying $7')
             self.add_error('amount_paid', 'If you are a guild member, you should be paying $7')
+
+
+class NewMembershipForm(OldMembershipForm):
+    is_fresher = forms.BooleanField(
+        required=False,
+        initial=True,
+        label='Is this member a fresher?'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.layout[0][1][0][0][1].insert(3, 'is_fresher')
+
 
 
 class SignupForm(UserCreationForm):
