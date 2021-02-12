@@ -122,6 +122,14 @@ class Membership(models.Model):
 	def __str__(self):
 		return 'Membership for '+str(self.member)+' ('+str(self.date.__format__('%Y'))+')'
 
+	def save(self, *args, **kwargs):
+		if self.authorising_gatekeeper and not self.auth_gatekeeper_name:
+			self.auth_gatekeeper_name = str(self.authorising_gatekeeper)
+		elif not self.authorising_gatekeeper and not self.auth_gatekeeper_name:
+			# Must've been set by the admin account for some reason
+			self.auth_gatekeeper_name = 'Admin'
+		super(Membership, self).save(*args, **kwargs)
+
 
 class Rank(models.Model):
 	RANK_CHOICES = [
