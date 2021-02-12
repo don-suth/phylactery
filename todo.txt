@@ -41,8 +41,8 @@ Questions to ask (Library):
 
 Members:
     - DONE: (Members) Make the gatekeeper sign-up/login form work again
-    - TODO: (Members) Create membership items
-    - TODO: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
+    - DONE: (Members) Create membership items
+    - DONE: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
         - Two buttons - new or returning member?
             - For new, if it finds a partial match, confirm that it is a new member
             - Else create a new member + membership
@@ -51,9 +51,9 @@ Members:
         - Add inherent permissions to roles. eg. Library Powers to Committee.
 
 Library:
-    - TODO: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
+    - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
         - Make sure borrowable status is on item pages
-        - Add a reservation form for events and external clubs, items aren't borrowable if reserved.
+        - TODO: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
         - Add a "not-borrowable" flag
         - High-demand flag for borrowable items (sets the default due date)
     - TODO: (Library) Add player numbers to library items
@@ -68,7 +68,7 @@ Library:
         - Just a text box that you can put in a barcode (enables librarian quicksearch mode)
         - No need to generate barcodes.
         - Possible that two items could share a barcode, make sure to account for that.
-    - TODO: (Library) Make Tag non-mandatory
+    - DONE: (Library) Make Tag non-mandatory
 
 Content Management System:
     - TODO (CMS): Figure out how the hell to do this.
