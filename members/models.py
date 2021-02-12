@@ -119,7 +119,7 @@ class Membership(models.Model):
 	guild_member = models.BooleanField()
 	amount_paid = models.IntegerField()
 	expired = models.BooleanField(default=False)
-	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='authorised')
+	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='authorised', blank=True)
 	auth_gatekeeper_name = models.CharField(max_length=400, blank=True)
 
 	def __str__(self):
