@@ -108,6 +108,9 @@ class Member(models.Model):
 				return True
 		return False
 
+	class Meta:
+		ordering = ['first_name', 'last_name']
+
 
 class Membership(models.Model):
 	member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='memberships')
