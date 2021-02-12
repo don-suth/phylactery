@@ -117,6 +117,7 @@ class Membership(models.Model):
 	amount_paid = models.IntegerField()
 	expired = models.BooleanField(default=False)
 	authorising_gatekeeper = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='authorised')
+	auth_gatekeeper_name = models.CharField(max_length=400, blank=True)
 
 	def __str__(self):
 		return 'Membership for '+str(self.member)+' ('+str(self.date.__format__('%Y'))+')'
