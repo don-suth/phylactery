@@ -19,6 +19,7 @@ from django.views.generic.base import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.i18n import JavaScriptCatalog
+from .views import control_panel_view
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='phylactery/home.html'), name='home'),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('members/', include(('members.membership_urls', 'members'), namespace='members')),
     path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
+    path('control-panel/', control_panel_view, name='control-panel'),
     path('admin/', admin.site.urls),
     path('jsi18n/', JavaScriptCatalog.as_view())
     ]
