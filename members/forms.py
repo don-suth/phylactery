@@ -167,12 +167,12 @@ class OldMembershipForm(forms.Form):
         amount_paid = cleaned_data.get('amount_paid')
         if is_guild is True and not student_number:
             self.add_error('student_number', 'If you are a guild member, a student number is required.')
-        if is_guild is True and amount_paid != 5:
+        if is_guild is True and amount_paid is not None and amount_paid != 5:
             self.add_error('is_guild', 'If you are a guild member, you should be paying $5')
             self.add_error('amount_paid', 'If you are a guild member, you should be paying $5')
-        if is_guild is False and amount_paid != 7:
-            self.add_error('is_guild', 'If you are a guild member, you should be paying $7')
-            self.add_error('amount_paid', 'If you are a guild member, you should be paying $7')
+        if is_guild is False and amount_paid is not None and amount_paid != 7:
+            self.add_error('is_guild', "If you aren't a guild member, you should be paying $7")
+            self.add_error('amount_paid', "If you aren't a guild member, you should be paying $7")
 
 
 class NewMembershipForm(OldMembershipForm):
