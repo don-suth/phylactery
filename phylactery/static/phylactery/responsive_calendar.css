@@ -1,3 +1,7 @@
+.calendarbox {
+    z-index: 2000;
+}
+
 .calendar caption {
     caption-side: top;
 }
