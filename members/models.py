@@ -140,7 +140,15 @@ class Rank(models.Model):
 		('GATEKEEPER', 'Gatekeeper'),
 		('WEBKEEPER', 'Webkeeper'),
 		('COMMITTEE', 'Committee'),
-		('LIFEMEMBER', 'Life Member')
+		('LIFE-MEMBER', 'Life Member'),
+		('PRESIDENT', 'President'),
+		('VICE-PRESIDENT', 'Vice President'),
+		('SECRETARY', 'Secretary'),
+		('TREASURER', 'Treasurer'),
+		('LIBRARIAN', 'Librarian'),
+		('FRESHER-REP', 'Fresher Rep'),
+		('OCM', 'OCM'),
+		('IPP', 'IPP (Immediate Past President)')
 	]
 	rank_name = models.CharField(
 		max_length=20,
