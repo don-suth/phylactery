@@ -152,7 +152,8 @@ class Rank(models.Model):
 	]
 	rank_name = models.CharField(
 		max_length=20,
-		choices=RANK_CHOICES
+		choices=RANK_CHOICES,
+		unique=True
 	)
 	member = models.ManyToManyField(Member, related_name='ranks', through="RankAssignments")
 
