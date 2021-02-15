@@ -6,5 +6,6 @@ class MembersConfig(AppConfig):
     name = 'members'
 
     def ready(self):
-        from .signals import populate_ranks
+        from .signals import populate_ranks, populate_groups_and_permissions
         post_migrate.connect(populate_ranks, sender=self)
+        post_migrate.connect(populate_groups_and_permissions, sender=self)
