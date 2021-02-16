@@ -71,6 +71,7 @@ class Member(models.Model):
 	def __str__(self):
 		return str(self.preferred_name) + ' ' + str(self.last_name)
 
+	@property
 	def is_fresher(self):
 		return self.join_date.year == timezone.now().year
 
