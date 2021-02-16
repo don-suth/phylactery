@@ -47,8 +47,9 @@ Members:
             - For new, if it finds a partial match, confirm that it is a new member
             - Else create a new member + membership
         - For returning: use DAL to find member name, update details, and create membership
-    - TODO: (Members) Add expiry to roles like committee, and make those work
+    - DONE: (Members) Add expiry to roles like committee, and make those work
         - Add inherent permissions to roles. eg. Library Powers to Committee.
+    - TODO: Make a cronjob to check for expired permissions each day
 
 Library:
     - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
