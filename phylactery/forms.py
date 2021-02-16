@@ -6,6 +6,9 @@ from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
 from django.utils.text import slugify
 from django.contrib.admin import widgets
+from django.shortcuts import reverse
+from django.forms import ValidationError
+import datetime
 
 
 class ControlPanelForm(forms.Form):
@@ -14,33 +17,46 @@ class ControlPanelForm(forms.Form):
     # Provides a mandatory checkbox to confirm the action as well
     # Control panel forms should:
     # - have a name and description (will be rendered to the user)
+    # - have an optional long description that will show when the panel is opened
     # - have a submit function that does their thing
     # - define self.helper.form_action - the reversible url to submit the form to
     # - define self.helper.layout - the layout of the form inside the bootstrap modal
-
-    confirmation = forms.BooleanField(required=True, label='I confirm that I wish to perform this action.')
+    # - define form_permissions, a whitelist of Ranks that can operate this form
 
     form_name = ''
     form_description = ''
+    form_long_description = ''
+    form_permissions = []
     form_media = False
     form_tag = True
     form_method = 'post'
-    form_action = None
+    form_action = 'control-panel'
     layout = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.slug_name = slugify(self.form_name)
 
+        self.fields['form_slug_name'] = forms.CharField(widget=forms.HiddenInput(), initial=self.slug_name)
+        confirmation_name = self.slug_name+'_confirmation'
+        self.fields[confirmation_name] = forms.BooleanField(required=True, label='I confirm that I wish to perform this action.')
+
         self.helper = FormHelper()
         self.helper.include_media = self.form_media
         self.helper.form_tag = self.form_tag
         self.helper.form_method = self.form_method
         if self.form_action is not None:
-            self.helper.form_action = self.form_action
+            self.helper.form_action = reverse(self.form_action)
         else:
             raise ImproperlyConfigured('You must define a form action')
         if self.layout is not None:
+            self.is_valid()
+            if self.errors:
+                card_border = 'border-danger'
+                card_text = 'text-danger'
+            else:
+                card_border = ''
+                card_text = ''
             self.helper.layout = Layout(
                 Div(
                     Div(
@@ -53,9 +69,9 @@ class ControlPanelForm(forms.Form):
                             data_toggle='modal',
                             data_target='#{0}-modal'.format(self.slug_name)
                         ),
-                        css_class='card-body'
+                        css_class='card-body '+card_text
                     ),
-                    css_class='card text-center'
+                    css_class='card text-center '+card_border
                 ),
                 Div(
                     Div(
@@ -68,9 +84,13 @@ class ControlPanelForm(forms.Form):
                                 css_class="modal-header"
                             ),
                             Div(
-                                HTML('<p>{0}</p><hr>'.format(self.form_description)),
+                                HTML('<p>{0}</p><p>{1}</p><hr>'.format(
+                                    self.form_description,
+                                    self.form_long_description)
+                                ),
                                 self.layout,
-                                'confirmation',
+                                confirmation_name,
+                                'form_slug_name',
                                 css_class="modal-body"
                             ),
                             Div(
@@ -92,12 +112,16 @@ class ControlPanelForm(forms.Form):
         else:
             raise ImproperlyConfigured('You must define a form layout')
 
+    def submit(self, request):
+        pass
+
 
 class PurgeAllGatekeepers(ControlPanelForm):
     # When submitted, removes the gatekeeper rank from all non-committee members
-    form_action = 'phylactery:control-1'
-    form_name = 'Purge all Gatekeepers'
-    form_description = 'Remove the gatekeeper status of all non-committee gatekeepers.'
+    form_name = 'Purge all Gatekeepers / Webkeepers'
+    form_description = 'Remove the gatekeeper or webkeeper status of all non-committee members.'
+    form_long_description = ''
+    form_permissions = ['President', 'Vice-President', 'Secretary']
 
     layout = Layout()
 
@@ -109,20 +133,27 @@ class PurgeAllGatekeepers(ControlPanelForm):
 class ExpireMemberships(ControlPanelForm):
     # When submitted, expires any memberships of members before the given date.
     # Default is 1st Jan this year.
-    form_action = 'phylactery:control-2'
     form_name = "Invalidate Memberships"
     form_description = 'Marks any memberships gotten before the given date as expired. '\
                        'Defaults to 1st of January this year.'
     form_media = True
+    form_permissions = ['President', 'Vice-President', 'Secretary']
 
     cut_off_date = forms.DateField(
         label='Invalidate memberships purchased before:',
         widget=widgets.AdminDateWidget,
+        initial=datetime.date.today().replace(day=1, month=1)
     )
 
     layout = Layout(
         'cut_off_date'
     )
+
+    def clean_cut_off_date(self):
+        today = datetime.date.today()
+        date = self.cleaned_data['cut_off_date']
+        if date > today:
+            raise ValidationError('Date cannot be in the future.', code='future')
 
     def submit(self):
         # Do the thing!
@@ -133,3 +164,18 @@ class ExpireMemberships(ControlPanelForm):
             'all': ('admin/css/widgets.css', 'phylactery/responsive_calendar.css')
         }
         js = ('/jsi18n/', 'admin/js/core.js', 'admin/js/calendar.js', 'admin/js/admin/DateTimeShortcuts.js')
+
+
+class MakeGatekeepers(ControlPanelForm):
+    form_name = 'Promote Members to Gatekeepers'
+    form_description = 'Promotes the selected members to gatekeepers.'
+    layout = Layout()
+    form_permissions = ['President', 'Vice-President', 'Secretary']
+
+
+class TransferCommittee(ControlPanelForm):
+    form_name = 'Transfer Committee Roles'
+    form_description = 'Transfers any/all roles of committee to others'
+    layout = Layout()
+    form_permissions = ['President', 'Vice-President']
+
