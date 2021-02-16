@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.db.models import Q
 
 
 # Create your models here.
@@ -64,9 +65,21 @@ class Member(models.Model):
 			raise ValidationError({'email_address': 'One of email address and student number must be filled out.'})
 
 	def save(self, *args, **kwargs):
+		# If no preferred name provided, we just use their actual name
 		if not self.preferred_name:
 			self.preferred_name = self.first_name
+
+		# If the user object changes, we need to update the permissions
+		user_changed = False
+		if self.pk is not None:
+			orig = Member.objects.get(pk=self.pk)
+			if orig.user != self.user:
+				user_changed = True
+		# Save the object proper
 		super(Member, self).save(*args, **kwargs)
+
+		if user_changed:
+			self.sync_permissions()
 
 	def __str__(self):
 		return str(self.preferred_name) + ' ' + str(self.last_name)
@@ -76,10 +89,14 @@ class Member(models.Model):
 		return self.join_date.year == timezone.now().year
 
 	def has_rank(self, rank_name):
-		for rank in self.ranks.all():
-			if str(rank) == rank_name:
-				return True
-		return False
+		today = datetime.date.today()
+		if RankAssignments.objects \
+			.exclude(expired_date__lte=today) \
+			.filter(rank__rank_name__iexact=rank_name, member=self) \
+			.exists():
+			return True
+		else:
+			return False
 
 	@property
 	def is_gatekeeper(self):
@@ -108,6 +125,37 @@ class Member(models.Model):
 			if membership.date.year == timezone.now().year:
 				return True
 		return False
+
+	def get_active_ranks(self):
+		today = datetime.date.today()
+		ranks_qs = RankAssignments.objects \
+			.exclude(expired_date__lte=today) \
+			.filter(member=self) \
+			.values_list('rank__rank_name', flat=True)
+		return ranks_qs
+
+	def sync_permissions(self):
+		# Updates the groups of the associated user object depending on current ranks
+		if self.user is None:
+			# Can't do anything
+			return False
+		else:
+			from django.contrib.auth.models import Group
+			from .signals import GROUPS_TO_CREATE
+			current_ranks = list(self.get_active_ranks())
+			queries = Q()
+			for rank in current_ranks:
+				queries |= Q(name__iexact=rank)
+			groups_to_set = Group.objects.filter(queries)
+			self.user.groups.set(groups_to_set)
+			is_staff = False
+			for group in groups_to_set:
+				if GROUPS_TO_CREATE[group.name][0] is True:
+					is_staff = True
+			self.user.is_staff = is_staff
+			self.user.save()
+			return True
+
 
 	class Meta:
 		ordering = ['first_name', 'last_name']
@@ -170,6 +218,22 @@ class RankAssignments(models.Model):
 
 	def __str__(self):
 		return str(self.member) + ' (' + str(self.rank) + ')'
+
+	def save(self, *args, **kwargs):
+		super().save(*args, **kwargs)
+		self.member.sync_permissions()
+
+	def delete(self, *args, **kwargs):
+		super().delete(*args, **kwargs)
+		self.member.sync_permissions()
+
+
+	@property
+	def is_expired(self):
+		if datetime.date.today() >= self.expired_date:
+			return True
+		else:
+			return False
 
 
 class MemberFlag(models.Model):

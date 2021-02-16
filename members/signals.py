@@ -11,10 +11,10 @@ GROUPS_TO_CREATE = {
     'Secretary':        [ True, ['add', 'change', 'delete', 'view'], ['add', 'change', 'delete', 'view'] ],
     'Treasurer':        [ True, ['add', 'change', 'delete', 'view'], ['add', 'change', 'delete', 'view'] ],
     'Librarian':        [ True, ['add', 'change', 'delete', 'view'], ['add', 'change', 'delete', 'view'] ],
-    'Fresher Rep':      [ True, ['add', 'change', 'delete', 'view'], ['view'] ],
+    'Fresher-Rep':      [ True, ['add', 'change', 'delete', 'view'], ['view'] ],
     'OCM':              [ True, ['add', 'change', 'delete', 'view'], ['view'] ],
     'IPP':              [ True, ['add', 'change', 'delete', 'view'], ['view'] ],
-    'Committee':       [ False, ['none'], ['none'] ],
+    'Committee':        [ False, ['none'], ['none'] ],
     'Gatekeeper':       [ False, ['none'], ['none'] ],
     'Webkeeper':        [ True, ['add', 'change', 'delete', 'view'], ['add', 'change', 'delete', 'view'] ],
     'Admin':            [ True, ['add', 'change', 'delete', 'view'], ['add', 'change', 'delete', 'view'] ],
@@ -61,8 +61,3 @@ def populate_groups_and_permissions(sender, **kwargs):
         group.permissions.add(*permissions_to_add)
     for group in Group.objects.exclude(name__in=GROUPS_TO_CREATE):
         group.delete()
-
-
-def sync_permissions(sender, **kwargs):
-    # Whenever we change Rank, update Groups and Permissions of Member
-    pass
