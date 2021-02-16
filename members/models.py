@@ -204,15 +204,15 @@ class Rank(models.Model):
 		choices=RANK_CHOICES,
 		unique=True
 	)
-	member = models.ManyToManyField(Member, related_name='ranks', through="RankAssignments")
+	member = models.ManyToManyField(Member, through="RankAssignments")
 
 	def __str__(self):
 		return self.rank_name
 
 
 class RankAssignments(models.Model):
-	member = models.ForeignKey(Member, on_delete=models.CASCADE)
-	rank = models.ForeignKey(Rank, on_delete=models.CASCADE)
+	member = models.ForeignKey(Member, related_name='ranks', on_delete=models.CASCADE)
+	rank = models.ForeignKey(Rank, related_name='assignments', on_delete=models.CASCADE)
 	assignment_date = models.DateField(default=datetime.date.today)
 	expired_date = models.DateField(blank=True, null=True)
 
