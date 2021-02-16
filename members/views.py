@@ -32,8 +32,8 @@ def signup_view(request):
 				member = Member.objects.get(email_address=reg_email)
 			except Member.DoesNotExist:
 				member = None
-			if member is not None and member.has_rank("GATEKEEPER"):
-				# Member exists and they are a gatekeeper - sign them up!
+			if member is not None and (member.has_rank("GATEKEEPER") or member.has_rank("COMMITTEE")):
+				# Member exists and they are a gatekeeper/committee member - sign them up!
 				user = form.save(commit=False)
 				user.is_active = False
 				user.save()
