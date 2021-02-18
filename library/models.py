@@ -11,10 +11,20 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class TagParent(models.Model):
     child_tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name='parents')
-    parent_tag = models.ManyToManyField(Tag, related_name='children')
+    parent_tag = models.ManyToManyField(Tag, related_name='children', blank=True)
 
     def __str__(self):
         return 'Parents of '+str(self.child_tag)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # We find all items with the child_tag in their base or computed tags, and re_save them
+        for item in Item.objects.filter(
+            Q(base_tags__base_tags__name__in=[self.child_tag.name]) |
+            Q(computed_tags__computed_tags__name__in=[self.child_tag.name])) \
+            .distinct() \
+            .order_by('name'):
+            item.compute_tags()
 
 
 class Item(models.Model):

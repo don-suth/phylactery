@@ -35,7 +35,15 @@ class ItemAdmin(admin.ModelAdmin):
         ]
 
 
+class TagParentAdmin(admin.ModelAdmin):
+    filter_horizontal = ('parent_tag',)
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.save()
+
+
 admin.site.register(Item, ItemAdmin)
 admin.site.register(BorrowRecord)
 admin.site.register(ExternalBorrowingRecord)
-admin.site.register(TagParent)
+admin.site.register(TagParent, TagParentAdmin)
