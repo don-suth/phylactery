@@ -339,3 +339,48 @@ class TransferCommittee(ControlPanelForm):
             self.layout.append(slug_name)
         self.layout.append('include_ipp')
         super().__init__(skip_init=True)
+
+    def clean(self):
+        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #'+str(i+1) for i in range(self.NUMBER_OF_OCMS)]))
+        cleaned_new_committee_fields = {field_name: self.cleaned_data[field_name] for field_name in fields}
+
+        # Check if the new committee fields are unique to each other.
+        if len(cleaned_new_committee_fields.values()) != len(set(cleaned_new_committee_fields.values())):
+            raise ValidationError('A committee cannot be submitted with duplicate members.', code='duplicate')
+
+        # Check if all the new committee are actual members, and if the exec are guild members
+        for field_name in cleaned_new_committee_fields:
+            membership = cleaned_new_committee_fields[field_name].get_most_recent_membership()
+            if membership is not None:
+                if membership.expired is True:
+                    self.add_error(field_name, "This member doesn't have a valid membership.")
+                if field_name in cleaned_new_committee_fields[:5]:
+                    if membership.guild_member is False:
+                        self.add_error(field_name, 'This member needs to be a guild member.')
+            else:
+                self.add_error(field_name, "This member doesn't have a valid membership.")
+
+        # If IPP is ticked, so must the complete refresh
+        if self.cleaned_data['include_ipp'] is True and self.cleaned_data['full_committee_change'] is False:
+            self.add_error('include_ipp', "You can't include the IPP if it isn't a full committee changeover.")
+
+    def submit(self, request):
+        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #' + str(i + 1) for i in range(self.NUMBER_OF_OCMS)]))
+        cleaned_new_committee_fields = {field_name: self.cleaned_data[field_name] for field_name in fields}
+
+        include_ipp = self.cleaned_data['include_ipp']
+        full_committee_change = self.cleaned_data['full_committee_change']
+
+        if full_committee_change is True:
+            # Expire all old committee ranks (Committee + Position)
+            # Then add in the new ones
+            pass
+            messages.success(request, 'Did the thing')
+        else:
+            # Expire only the old ranks (Position only)
+            # Example, if the secretary quits, an OCM takes their place, and then a new OCM is elected
+            # Then we:
+            #   - expire the old secretary rank (Committee + Secretary)
+            #   - expire the OCM rank, keep the Committee rank, and add the Secretary rank
+            #   - add a new Committee and OCM rank to the incoming member.
+            pass
