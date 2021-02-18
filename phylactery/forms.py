@@ -1,4 +1,5 @@
 from members.models import Member, UnigamesUser, Rank, RankAssignments, MemberFlag
+from library.forms import CrispyModelSelect2, CrispyModelSelect2Multiple
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from crispy_forms.helper import FormHelper
@@ -11,6 +12,8 @@ from django.forms import ValidationError
 from django.contrib import messages
 from django.db.models import Q
 import datetime
+import warnings
+
 
 
 class ControlPanelForm(forms.Form):
@@ -36,7 +39,10 @@ class ControlPanelForm(forms.Form):
     layout = None
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        if kwargs.get('skip_init', None) is True:
+            pass
+        else:
+            super().__init__(*args, **kwargs)
         self.slug_name = slugify(self.form_name)
 
         self.fields['form_slug_name'] = forms.CharField(widget=forms.HiddenInput(), initial=self.slug_name)
@@ -226,13 +232,110 @@ class ExpireMemberships(ControlPanelForm):
 class MakeGatekeepers(ControlPanelForm):
     form_name = 'Promote Members to Gatekeepers'
     form_description = 'Promotes the selected members to gatekeepers.'
-    layout = Layout()
+    form_media = True
+
     form_permissions = ['President', 'Vice-President', 'Secretary']
+
+    members_to_add = forms.ModelMultipleChoiceField(
+        queryset=Member.objects.all(),
+        widget=CrispyModelSelect2Multiple(url='members:autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    layout = Layout(
+        'members_to_add'
+    )
 
 
 class TransferCommittee(ControlPanelForm):
     form_name = 'Transfer Committee Roles'
     form_description = 'Transfers any/all roles of committee to others'
-    layout = Layout()
     form_permissions = ['President', 'Vice-President']
 
+    full_committee_change = forms.BooleanField(
+        required=False,
+        label='Is this Committee change the result of a full committee re-election at an AGM?',
+        initial=True
+    )
+
+    include_ipp = forms.BooleanField(
+        required=False,
+        label='Add the immediate past president (IPP) to the new committee?'
+    )
+
+    layout = Layout(
+    )
+
+    NON_OCM_POSITIONS = [
+        'President',
+        'Vice-President',
+        'Treasurer',
+        'Secretary',
+        'Librarian',
+        'Fresher-Rep',
+    ]
+
+    NUMBER_OF_OCMS = 4
+
+    def get_current_committee(self):
+        # Find all current committee members
+        # Returns a dictionary, keyed with committee rank and a list of members with that rank.
+        # There should only be one committee member of each rank, plus some OCMs
+        committee = {}
+        today = datetime.date.today()
+        for position in self.NON_OCM_POSITIONS + ['OCM']:
+            # Find the member with the most recent non-expired rank
+            committee[position] = Member.objects.filter(
+                Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
+                ranks__rank__rank_name=position.upper()
+            )
+        for position in committee:
+            if position == 'OCM' and len(committee[position]) != self.NUMBER_OF_OCMS:
+                warnings.warn('Committee Error - Number of current OCMs ({0}) is not correct. (Should be {1}.)'
+                              .format(len(committee['OCM']), self.NUMBER_OF_OCMS))
+            elif len(committee[position]) != 1:
+                warnings.warn('Committee Error - Number of members with rank {0} ({1}) is not correct. (Should be 1.)'
+                              .format(position, len(committee[position])))
+        return committee
+
+    def __init__(self, *args, **kwargs):
+        forms.Form.__init__(self, *args, **kwargs)
+        # Add the fields, generate the layout
+        current_committee = self.get_current_committee()
+        self.layout.append(HTML('<p>Current Committee:</p><ul>'))
+        for position in self.NON_OCM_POSITIONS + ['OCM']:
+            self.layout.append(HTML('<li>'+position+':<ul>'))
+            if len(current_committee[position]) == 0:
+                self.layout.append(HTML('<li>None</li>'))
+            else:
+                for member in current_committee[position]:
+                    self.layout.append(HTML('<li>'+str(member)+'</li>'))
+            self.layout.append(HTML('</ul>'))
+        self.layout.append(HTML('</ul>'))
+        self.layout.append('full_committee_change')
+        for position in self.NON_OCM_POSITIONS:
+            slug_name = slugify(position)
+            self.fields[slug_name] = forms.ModelChoiceField(
+                queryset=Member.objects.all(),
+                widget=CrispyModelSelect2(
+                    url='members:autocomplete',
+                    attrs={'style': 'width: 100%'}
+                ),
+                label='New '+position,
+                required=True
+            )
+            self.layout.append(slug_name)
+        for i in range(self.NUMBER_OF_OCMS):
+            name = 'OCM #{0}'.format(i+1)
+            slug_name = slugify(name)
+            self.fields[slug_name] = forms.ModelChoiceField(
+                queryset=Member.objects.all(),
+                widget=CrispyModelSelect2(
+                    url='members:autocomplete',
+                    attrs={'style': 'width: 100%'}
+                ),
+                label='New ' + name,
+                required=True
+            )
+            self.layout.append(slug_name)
+        self.layout.append('include_ipp')
+        super().__init__(skip_init=True)
