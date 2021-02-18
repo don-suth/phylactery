@@ -8,6 +8,8 @@ from django.utils.text import slugify
 from django.contrib.admin import widgets
 from django.shortcuts import reverse
 from django.forms import ValidationError
+from django.contrib import messages
+from django.db.models import Q
 import datetime
 
 
@@ -123,11 +125,66 @@ class PurgeAllGatekeepers(ControlPanelForm):
     form_long_description = ''
     form_permissions = ['President', 'Vice-President', 'Secretary']
 
-    layout = Layout()
+    CHOICES = [
+        ('gatekeeper', 'Gatekeepers'),
+        ('webkeeper', 'Webkeepers'),
+        ('gatekeeper_webkeeper', 'Gatekeepers and Webkeepers')
+    ]
 
-    def submit(self):
-        # Do the thing!
-        pass
+    purge_choice = forms.ChoiceField(choices=CHOICES, label='Purge the status of:', widget=forms.RadioSelect())
+
+    layout = Layout(
+        'purge_choice'
+    )
+
+    def submit(self, request):
+        def expire_active_ranks(rank_name):
+            today = datetime.date.today()
+            committee = Member.objects.filter(
+                (Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None)), ranks__rank__rank_name='COMMITTEE'
+            )
+            active_ranks = RankAssignments.objects \
+                .exclude(expired_date__lte=today) \
+                .exclude(member__in=committee) \
+                .filter(rank__rank_name=rank_name)
+            for rank in active_ranks:
+                rank.expired_date = today
+                # We save individually rather than doing a mass update so that the Ranks save() method is called
+                rank.save()
+            return len(active_ranks)
+        if self.is_valid():
+            choice = self.cleaned_data['purge_choice']
+
+            if choice == 'gatekeeper':
+                # Kill all gatekeepers
+                num_removed = expire_active_ranks('GATEKEEPER')
+                if num_removed > 0:
+                    messages.success(request, 'Successfully removed gatekeeper status from {0} non-committee member{1}.'
+                                     .format(num_removed, 's' if num_removed != 1 else ''))
+                else:
+                    messages.warning(request, 'No non-committee gatekeepers to remove.')
+            elif choice == 'webkeeper':
+                # Kill all webkeepers
+                num_removed = expire_active_ranks('WEBKEEPER')
+                if num_removed > 0:
+                    messages.success(request, 'Successfully removed webkeeper status from {0} non-committee member{1}.'
+                                     .format(num_removed, 's' if num_removed != 1 else ''))
+                else:
+                    messages.warning(request, 'No non-committee webkeepers to remove.')
+            elif choice == 'gatekeeper_webkeeper':
+                # Kill both
+                num_gate_removed = expire_active_ranks('GATEKEEPER')
+                num_web_removed = expire_active_ranks('WEBKEEPER')
+                if num_gate_removed > 0:
+                    messages.success(request, 'Successfully removed gatekeeper status from {0} non-committee member{1}.'
+                                     .format(num_gate_removed, 's' if num_gate_removed != 1 else ''))
+                else:
+                    messages.warning(request, 'No non-committee gatekeepers to remove.')
+                if num_web_removed > 0:
+                    messages.success(request, 'Successfully removed webkeeper status from {0} non-committee member{1}.'
+                                     .format(num_web_removed, 's' if num_web_removed != 1 else ''))
+                else:
+                    messages.warning(request, 'No non-committee webkeepers to remove.')
 
 
 class ExpireMemberships(ControlPanelForm):
