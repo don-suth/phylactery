@@ -50,6 +50,7 @@ class OldMembershipForm(forms.Form):
     email = forms.EmailField(
         required=True,
         validators=[no_student_number],
+        label='Non-Student Email: '
     )
     phone_number = forms.CharField(
         required=True,
