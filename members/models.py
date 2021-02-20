@@ -143,6 +143,11 @@ class Member(models.Model):
 			from django.contrib.auth.models import Group
 			from .signals import GROUPS_TO_CREATE
 			current_ranks = list(self.get_active_ranks())
+			if len(current_ranks) == 0:
+				self.user.groups.clear()
+				self.user.is_staff = False
+				self.user.save()
+				return True
 			queries = Q()
 			for rank in current_ranks:
 				queries |= Q(name__iexact=rank)
