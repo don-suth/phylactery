@@ -24,8 +24,7 @@ class ControlPanelForm(forms.Form):
     # - have a name and description (will be rendered to the user)
     # - have an optional long description that will show when the panel is opened
     # - have a submit function that does their thing
-    # - define self.helper.form_action - the reversible url to submit the form to
-    # - define self.helper.layout - the layout of the form inside the bootstrap modal
+    # - define a get_layout function that returns the desired layout
     # - define form_permissions, a whitelist of Ranks that can operate this form
 
     form_name = ''
@@ -36,7 +35,9 @@ class ControlPanelForm(forms.Form):
     form_tag = True
     form_method = 'post'
     form_action = 'control-panel'
-    layout = None
+
+    def get_layout(self):
+        return Layout()
 
     def __init__(self, *args, **kwargs):
         if kwargs.get('skip_init', None) is True:
@@ -57,68 +58,65 @@ class ControlPanelForm(forms.Form):
             self.helper.form_action = reverse(self.form_action)
         else:
             raise ImproperlyConfigured('You must define a form action')
-        if self.layout is not None:
-            self.is_valid()
-            if self.errors:
-                card_border = 'border-danger'
-                card_text = 'text-danger'
-            else:
-                card_border = ''
-                card_text = ''
-            self.helper.layout = Layout(
+
+        if self.errors:
+            card_border = 'border-danger'
+            card_text = 'text-danger'
+        else:
+            card_border = ''
+            card_text = ''
+        self.helper.layout = Layout(
+            Div(
                 Div(
-                    Div(
-                        HTML('''<h5 class="card-title">{0}</h5>
-                        <p class="card-text">{1}</p>'''
-                             .format(self.form_name, self.form_description)),
-                        StrictButton(
-                            'Open Panel',
-                            css_class='btn btn-primary',
-                            data_toggle='modal',
-                            data_target='#{0}-modal'.format(self.slug_name)
-                        ),
-                        css_class='card-body '+card_text
+                    HTML('''<h5 class="card-title">{0}</h5>
+                    <p class="card-text">{1}</p>'''
+                         .format(self.form_name, self.form_description)),
+                    StrictButton(
+                        'Open Panel',
+                        css_class='btn btn-primary',
+                        data_toggle='modal',
+                        data_target='#{0}-modal'.format(self.slug_name)
                     ),
-                    css_class='card text-center '+card_border
+                    css_class='card-body '+card_text
                 ),
+                css_class='card text-center '+card_border
+            ),
+            Div(
                 Div(
                     Div(
                         Div(
-                            Div(
-                                HTML('''<h5 class="modal-title" id="{0}-modal-title">{1}</h5>'''
-                                     .format(self.slug_name, self.form_name)),
-                                StrictButton('&times;', css_class='btn-close', data_dismiss='modal',
-                                             aria_label='Close'),
-                                css_class="modal-header"
-                            ),
-                            Div(
-                                HTML('<p>{0}</p><p>{1}</p><hr>'.format(
-                                    self.form_description,
-                                    self.form_long_description)
-                                ),
-                                self.layout,
-                                confirmation_name,
-                                'form_slug_name',
-                                css_class="modal-body"
-                            ),
-                            Div(
-                                StrictButton('Close', css_class='btn-secondary', data_dismiss='modal'),
-                                Submit('submit', 'Submit and Perform action', css_class='btn-primary'),
-                                css_class="modal-footer"
-                            ),
-                            css_class="modal-content"
+                            HTML('''<h5 class="modal-title" id="{0}-modal-title">{1}</h5>'''
+                                 .format(self.slug_name, self.form_name)),
+                            StrictButton('&times;', css_class='btn-close', data_dismiss='modal',
+                                         aria_label='Close'),
+                            css_class="modal-header"
                         ),
-                        css_class="modal-dialog"
+                        Div(
+                            HTML('<p>{0}</p><p>{1}</p><hr>'.format(
+                                self.form_description,
+                                self.form_long_description)
+                            ),
+                            self.get_layout(),
+                            confirmation_name,
+                            'form_slug_name',
+                            css_class="modal-body"
+                        ),
+                        Div(
+                            StrictButton('Close', css_class='btn-secondary', data_dismiss='modal'),
+                            Submit('submit', 'Submit and Perform action', css_class='btn-primary'),
+                            css_class="modal-footer"
+                        ),
+                        css_class="modal-content"
                     ),
-                    css_class="modal fade",
-                    css_id="{0}-modal".format(self.slug_name),
-                    aria_labelledby="{0}-modal-title".format(self.slug_name),
-                    tabindex="-1",
-                    aria_hidden="true",
-                )
+                    css_class="modal-dialog"
+                ),
+                css_class="modal fade",
+                css_id="{0}-modal".format(self.slug_name),
+                aria_labelledby="{0}-modal-title".format(self.slug_name),
+                tabindex="-1",
+                aria_hidden="true",
             )
-        else:
-            raise ImproperlyConfigured('You must define a form layout')
+        )
 
     def submit(self, request):
         pass
@@ -139,9 +137,10 @@ class PurgeAllGatekeepers(ControlPanelForm):
 
     purge_choice = forms.ChoiceField(choices=CHOICES, label='Purge the status of:', widget=forms.RadioSelect())
 
-    layout = Layout(
-        'purge_choice'
-    )
+    def get_layout(self):
+        return Layout(
+            'purge_choice'
+        )
 
     def submit(self, request):
         def expire_active_ranks(rank_name):
@@ -208,9 +207,10 @@ class ExpireMemberships(ControlPanelForm):
         initial=datetime.date.today().replace(day=1, month=1)
     )
 
-    layout = Layout(
-        'cut_off_date'
-    )
+    def get_layout(self):
+        return Layout(
+            'cut_off_date'
+        )
 
     def clean_cut_off_date(self):
         today = datetime.date.today()
@@ -241,9 +241,10 @@ class MakeGatekeepers(ControlPanelForm):
         widget=CrispyModelSelect2Multiple(url='members:autocomplete', attrs={'style': 'width:100%'})
     )
 
-    layout = Layout(
-        'members_to_add'
-    )
+    def get_layout(self):
+        return Layout(
+            'members_to_add'
+        )
 
 
 class TransferCommittee(ControlPanelForm):
@@ -297,21 +298,34 @@ class TransferCommittee(ControlPanelForm):
                               .format(position, len(committee[position])))
         return committee
 
+    def get_layout(self):
+        layout = Layout()
+        current_committee = self.get_current_committee()
+        layout.append(HTML('<p>Current Committee:</p><ul>'))
+        for position in self.NON_OCM_POSITIONS + ['OCM']:
+            layout.append(HTML('<li>' + position + ':<ul>'))
+            if len(current_committee[position]) == 0:
+                layout.append(HTML('<li>None</li>'))
+            else:
+                for member in current_committee[position]:
+                    layout.append(HTML('<li>' + str(member) + '</li>'))
+            layout.append(HTML('</ul>'))
+        layout.append(HTML('</ul>'))
+        layout.append('full_committee_change')
+        for position in self.NON_OCM_POSITIONS:
+            slug_name = slugify(position)
+            layout.append(slug_name)
+        for i in range(self.NUMBER_OF_OCMS):
+            name = 'OCM #{0}'.format(i + 1)
+            slug_name = slugify(name)
+            layout.append(slug_name)
+        layout.append('include_ipp')
+
+        return layout
+
     def __init__(self, *args, **kwargs):
         forms.Form.__init__(self, *args, **kwargs)
         # Add the fields, generate the layout
-        current_committee = self.get_current_committee()
-        self.layout.append(HTML('<p>Current Committee:</p><ul>'))
-        for position in self.NON_OCM_POSITIONS + ['OCM']:
-            self.layout.append(HTML('<li>'+position+':<ul>'))
-            if len(current_committee[position]) == 0:
-                self.layout.append(HTML('<li>None</li>'))
-            else:
-                for member in current_committee[position]:
-                    self.layout.append(HTML('<li>'+str(member)+'</li>'))
-            self.layout.append(HTML('</ul>'))
-        self.layout.append(HTML('</ul>'))
-        self.layout.append('full_committee_change')
         for position in self.NON_OCM_POSITIONS:
             slug_name = slugify(position)
             self.fields[slug_name] = forms.ModelChoiceField(
@@ -320,12 +334,11 @@ class TransferCommittee(ControlPanelForm):
                     url='members:autocomplete',
                     attrs={'style': 'width: 100%'}
                 ),
-                label='New '+position,
+                label='New ' + position,
                 required=True
             )
-            self.layout.append(slug_name)
         for i in range(self.NUMBER_OF_OCMS):
-            name = 'OCM #{0}'.format(i+1)
+            name = 'OCM #{0}'.format(i + 1)
             slug_name = slugify(name)
             self.fields[slug_name] = forms.ModelChoiceField(
                 queryset=Member.objects.all(),
@@ -336,9 +349,8 @@ class TransferCommittee(ControlPanelForm):
                 label='New ' + name,
                 required=True
             )
-            self.layout.append(slug_name)
-        self.layout.append('include_ipp')
-        super().__init__(skip_init=True)
+
+        super().__init__(self, skip_init=True)
 
     def clean(self):
         fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #'+str(i+1) for i in range(self.NUMBER_OF_OCMS)]))
@@ -354,7 +366,7 @@ class TransferCommittee(ControlPanelForm):
             if membership is not None:
                 if membership.expired is True:
                     self.add_error(field_name, "This member doesn't have a valid membership.")
-                if field_name in cleaned_new_committee_fields[:5]:
+                if 'ocm' not in field_name:
                     if membership.guild_member is False:
                         self.add_error(field_name, 'This member needs to be a guild member.')
             else:

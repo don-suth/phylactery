@@ -6,22 +6,29 @@ from django.contrib import messages
 from django.utils.text import slugify
 from django.contrib.auth.models import Group
 
-
-# Permissions for forms.
-# Each 'tier' has all permissions from the tiers below it.
-# Example: The President could do something with permission 'SL', but the Treasurer could not.
-
-# Each form that we wish to load, plus the permissions of those who can use it
 CONTROL_PANEL_FORMS = [
-    PurgeAllGatekeepers,
-    ExpireMemberships,
-    MakeGatekeepers,
-    TransferCommittee
+    'PurgeAllGatekeepers',
+    'ExpireMemberships',
+    'MakeGatekeepers',
+    'TransferCommittee'
 ]
+
+
+def get_form_class(form_name):
+    return globals()[form_name]
+
+
+def form_factory(form_name, *args, **kwargs):
+    try:
+        form = globals()[form_name]
+        return form(*args, **kwargs)
+    except KeyError:
+        return None
+
 
 FORM_LOOKUP = {}
 for control_form in CONTROL_PANEL_FORMS:
-    FORM_LOOKUP[slugify(control_form.form_name)] = control_form
+    FORM_LOOKUP[slugify(get_form_class(control_form).form_name)] = control_form
 
 
 def check_permissions(request, valid_permissions):
@@ -42,7 +49,7 @@ def control_panel_view(request):
     if request.method == 'POST':
         # Check which form we should be executing
         form_name = request.POST.get('form_slug_name', None)
-        form = FORM_LOOKUP.get(form_name, None)
+        form = get_form_class(FORM_LOOKUP.get(form_name, None))
         if form is not None:
             if check_permissions(request, form.form_permissions):
                 # We have found a form that matches the name, and they have permissions to use it
@@ -57,8 +64,9 @@ def control_panel_view(request):
 
     for form_slug_name in FORM_LOOKUP:
         if (form_slug_name not in already_rendered) and \
-                (check_permissions(request, FORM_LOOKUP[form_slug_name].form_permissions)):
-            rendered_forms.append(FORM_LOOKUP[form_slug_name]())
+                (check_permissions(request, get_form_class(FORM_LOOKUP[form_slug_name]).form_permissions)):
+            new_form = form_factory(FORM_LOOKUP[form_slug_name])
+            rendered_forms.append(new_form)
     return render(
         request,
         'phylactery/control_panel.html',
