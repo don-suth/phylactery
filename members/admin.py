@@ -21,6 +21,22 @@ class MemberGatekeeperFilter(admin.SimpleListFilter):
             return queryset.exclude(rankassignments__rank__rank_name="GATEKEEPER")
 
 
+class MemberIsValidMemberFilter(admin.SimpleListFilter):
+    title = 'membership status:'
+    parameter_name = 'financial_member'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('financial', 'All Financial Members'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'financial':
+            return queryset.filter(
+                memberships__expired=False
+            )
+
+
 class MemberGatekeeperViewFilter(MemberGatekeeperFilter):
     # Exactly the same as the above but with a different template for outside of admin things.
     template = 'members/filter.html'
@@ -52,7 +68,7 @@ class MemberFlagsInline(admin.TabularInline):
 class MemberAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
     search_fields = ('first_name', 'last_name')
-    list_filter = (MemberGatekeeperFilter,)
+    list_filter = (MemberGatekeeperFilter,MemberIsValidMemberFilter)
     inlines = [MemberFlagsInline, MembershipInline, RanksInline]
 
 
