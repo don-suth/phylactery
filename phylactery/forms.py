@@ -253,20 +253,20 @@ class MakeGatekeepers(ControlPanelForm):
 
     form_permissions = ['President', 'Vice-President', 'Secretary']
 
-    members_to_add = forms.ModelMultipleChoiceField(
+    gatekeepers_to_add = forms.ModelMultipleChoiceField(
         queryset=Member.objects.all(),
         widget=CrispyModelSelect2Multiple(url='members:autocomplete', attrs={'style': 'width:100%'})
     )
 
     def get_layout(self):
         return Layout(
-            'members_to_add'
+            'gatekeepers_to_add'
         )
 
     def submit(self, request):
         already_gatekeeper = []
         success_gatekeeper = []
-        for member in self.cleaned_data['members_to_add']:
+        for member in self.cleaned_data['gatekeepers_to_add']:
             if member.has_rank('GATEKEEPER'):
                 already_gatekeeper.append(str(member))
                 continue
@@ -285,20 +285,20 @@ class MakeWebkeepers(ControlPanelForm):
 
     form_permissions = ['President', 'Vice-President', 'Secretary']
 
-    members_to_add = forms.ModelMultipleChoiceField(
+    webkeepers_to_add = forms.ModelMultipleChoiceField(
         queryset=Member.objects.all(),
         widget=CrispyModelSelect2Multiple(url='members:autocomplete', attrs={'style': 'width:100%'})
     )
 
     def get_layout(self):
         return Layout(
-            'members_to_add'
+            'webkeepers_to_add'
         )
 
     def submit(self, request):
         already_webkeeper = []
         success_webkeeper = []
-        for member in self.cleaned_data['members_to_add']:
+        for member in self.cleaned_data['webkeepers_to_add']:
             if member.has_rank('WEBKEEPER'):
                 already_webkeeper.append(str(member))
                 continue
