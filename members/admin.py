@@ -16,9 +16,9 @@ class MemberGatekeeperFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'gate':
-            return queryset.filter(rankassignments__rank__rank_name="GATEKEEPER")
+            return queryset.filter(ranks__rank__rank_name="GATEKEEPER")
         if self.value() == 'notgate':
-            return queryset.exclude(rankassignments__rank__rank_name="GATEKEEPER")
+            return queryset.exclude(ranks__rank__rank_name="GATEKEEPER")
 
 
 class MemberIsValidMemberFilter(admin.SimpleListFilter):
@@ -42,10 +42,14 @@ class MemberGatekeeperViewFilter(MemberGatekeeperFilter):
     template = 'members/filter.html'
 
 
+class MemberIsValidMemberViewFilter(MemberIsValidMemberFilter):
+    template = 'members/filter.html'
+
+
 class MemberListAdmin(admin.ModelAdmin):
     # This exists for the filter feature in members.views
     # While not used here, it is necessary.
-    list_filter = (MemberGatekeeperViewFilter,)
+    list_filter = (MemberGatekeeperViewFilter,MemberIsValidMemberViewFilter)
     search_fields = ('first_name', 'last_name')
 
 
