@@ -98,6 +98,22 @@ class Member(models.Model):
 		else:
 			return False
 
+	def get_recent_rank(self, rank_name):
+		today = datetime.date.today()
+		ranks = RankAssignments.objects \
+			.exclude(expired_date__lte=today) \
+			.filter(rank__rank_name__iexact=rank_name, member=self) \
+			.order_by('assignment_date')
+		if ranks.exists():
+			return ranks.first()
+		else:
+			return None
+
+	def add_rank(self, rank_name):
+		rank = Rank.objects.get(rank_name__iexact=rank_name)
+		return self.ranks.create(rank=rank)
+
+
 	@property
 	def is_gatekeeper(self):
 		return self.has_rank('GATEKEEPER')
@@ -231,6 +247,10 @@ class RankAssignments(models.Model):
 	def delete(self, *args, **kwargs):
 		super().delete(*args, **kwargs)
 		self.member.sync_permissions()
+
+	def expire(self):
+		self.expired_date = datetime.date.today()
+		self.save()
 
 
 	@property

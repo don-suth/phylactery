@@ -1,4 +1,4 @@
-from members.models import Member, UnigamesUser, Rank, RankAssignments, MemberFlag
+from members.models import Member, UnigamesUser, Rank, RankAssignments, MemberFlag, Membership
 from library.forms import CrispyModelSelect2, CrispyModelSelect2Multiple
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
@@ -14,6 +14,21 @@ from django.db.models import Q
 import datetime
 import warnings
 
+
+def expire_active_ranks(rank_name):
+    today = datetime.date.today()
+    committee = Member.objects.filter(
+        (Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None)), ranks__rank__rank_name='COMMITTEE'
+    )
+    active_ranks = RankAssignments.objects \
+        .exclude(expired_date__lte=today) \
+        .exclude(member__in=committee) \
+        .filter(rank__rank_name=rank_name)
+    for rank in active_ranks:
+        rank.expired_date = today
+        # We save individually rather than doing a mass update so that the Ranks save() method is called
+        rank.save()
+    return len(active_ranks)
 
 
 class ControlPanelForm(forms.Form):
@@ -143,20 +158,7 @@ class PurgeAllGatekeepers(ControlPanelForm):
         )
 
     def submit(self, request):
-        def expire_active_ranks(rank_name):
-            today = datetime.date.today()
-            committee = Member.objects.filter(
-                (Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None)), ranks__rank__rank_name='COMMITTEE'
-            )
-            active_ranks = RankAssignments.objects \
-                .exclude(expired_date__lte=today) \
-                .exclude(member__in=committee) \
-                .filter(rank__rank_name=rank_name)
-            for rank in active_ranks:
-                rank.expired_date = today
-                # We save individually rather than doing a mass update so that the Ranks save() method is called
-                rank.save()
-            return len(active_ranks)
+
         if self.is_valid():
             choice = self.cleaned_data['purge_choice']
 
@@ -217,10 +219,25 @@ class ExpireMemberships(ControlPanelForm):
         date = self.cleaned_data['cut_off_date']
         if date > today:
             raise ValidationError('Date cannot be in the future.', code='future')
+        return date
 
-    def submit(self):
-        # Do the thing!
-        pass
+    def submit(self, request):
+        memberships_to_expire = Membership.objects.filter(
+            date__lt=self.cleaned_data['cut_off_date'],
+            expired=False
+        )
+        expired_memberships = len(memberships_to_expire)
+        for membership in memberships_to_expire:
+            membership.expired = True
+            membership.save()
+        if expired_memberships:
+            messages.success(
+                request,
+                'Successfully invalidated {0} membership{1}'
+                    .format(expired_memberships, 's' if expired_memberships > 1 else '')
+            )
+        else:
+            messages.warning(request, 'No memberships to expire.')
 
     class Media:
         css = {
@@ -246,15 +263,63 @@ class MakeGatekeepers(ControlPanelForm):
             'members_to_add'
         )
 
+    def submit(self, request):
+        already_gatekeeper = []
+        success_gatekeeper = []
+        for member in self.cleaned_data['members_to_add']:
+            if member.has_rank('GATEKEEPER'):
+                already_gatekeeper.append(str(member))
+                continue
+            member.add_rank('GATEKEEPER')
+            success_gatekeeper.append(str(member))
+        if already_gatekeeper:
+            messages.warning(request, 'The following members were already gatekeepers: '+', '.join(already_gatekeeper))
+        if success_gatekeeper:
+            messages.success(request, 'The following members were successfully added as gatekeepers: '+', '.join(success_gatekeeper))
+
+
+class MakeWebkeepers(ControlPanelForm):
+    form_name = 'Promote Members to Webkeepers'
+    form_description = 'Promotes the selected members to webkeepers.'
+    form_media = True
+
+    form_permissions = ['President', 'Vice-President', 'Secretary']
+
+    members_to_add = forms.ModelMultipleChoiceField(
+        queryset=Member.objects.all(),
+        widget=CrispyModelSelect2Multiple(url='members:autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    def get_layout(self):
+        return Layout(
+            'members_to_add'
+        )
+
+    def submit(self, request):
+        already_webkeeper = []
+        success_webkeeper = []
+        for member in self.cleaned_data['members_to_add']:
+            if member.has_rank('WEBKEEPER'):
+                already_webkeeper.append(str(member))
+                continue
+            member.add_rank('WEBKEEPER')
+            success_webkeeper.append(str(member))
+        if already_webkeeper:
+            messages.warning(request, 'The following members were already webkeepers: '+', '.join(already_webkeeper))
+        if success_webkeeper:
+            messages.success(request, 'The following members were successfully added as webkeepers: '+', '.join(success_webkeeper))
+
+
 
 class TransferCommittee(ControlPanelForm):
     form_name = 'Transfer Committee Roles'
     form_description = 'Transfers any/all roles of committee to others'
+    form_long_description = 'NOTE: Partial committee changeover is not yet implemented.'
     form_permissions = ['President', 'Vice-President']
 
     full_committee_change = forms.BooleanField(
-        required=False,
-        label='Is this Committee change the result of a full committee re-election at an AGM?',
+        required=True,
+        label='Is this Committee change the result of a full committee re-election at an AGM? (currently required)',
         initial=True
     )
 
@@ -293,7 +358,7 @@ class TransferCommittee(ControlPanelForm):
             if position == 'OCM' and len(committee[position]) != self.NUMBER_OF_OCMS:
                 warnings.warn('Committee Error - Number of current OCMs ({0}) is not correct. (Should be {1}.)'
                               .format(len(committee['OCM']), self.NUMBER_OF_OCMS))
-            elif len(committee[position]) != 1:
+            elif position != 'OCM' and len(committee[position]) != 1:
                 warnings.warn('Committee Error - Number of members with rank {0} ({1}) is not correct. (Should be 1.)'
                               .format(position, len(committee[position])))
         return committee
@@ -379,15 +444,52 @@ class TransferCommittee(ControlPanelForm):
     def submit(self, request):
         fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #' + str(i + 1) for i in range(self.NUMBER_OF_OCMS)]))
         cleaned_new_committee_fields = {field_name: self.cleaned_data[field_name] for field_name in fields}
-
+        committee = self.get_current_committee()
         include_ipp = self.cleaned_data['include_ipp']
+        if include_ipp:
+            future_ipp = committee['President']
+        else:
+            future_ipp = Member.objects.none()
+
         full_committee_change = self.cleaned_data['full_committee_change']
+
+        today = datetime.date.today()
 
         if full_committee_change is True:
             # Expire all old committee ranks (Committee + Position)
-            # Then add in the new ones
-            pass
-            messages.success(request, 'Did the thing')
+            for position in committee:
+                if len(committee[position]) == 1:
+                    # Non-OCMs
+                    field_name = slugify(position)
+                    old_position_holder = committee[position].first()
+                    committee_rank = old_position_holder.get_recent_rank('COMMITTEE')
+                    if committee_rank:
+                        committee_rank.expire()
+                    position_rank = old_position_holder.get_recent_rank(position)
+                    if position_rank:
+                        position_rank.expire()
+
+                    new_position_holder = cleaned_new_committee_fields[field_name]
+                    new_position_holder.add_rank(position)
+                    new_position_holder.add_rank('COMMITTEE')
+                else:
+                    # This is the OCMs
+                    for i in range(self.NUMBER_OF_OCMS):
+                        field_name = slugify('OCM '+str(i+1))
+                        ocm = committee[position][i]
+                        committee_rank = ocm.get_recent_rank('COMMITTEE')
+                        if committee_rank:
+                            committee_rank.expire()
+                        position_rank = ocm.get_recent_rank('OCM')
+                        if position_rank:
+                            position_rank.expire()
+
+                        # Then add in the new ones
+                        new_position_holder = cleaned_new_committee_fields[field_name]
+                        new_position_holder.add_rank('OCM')
+                        new_position_holder.add_rank('COMMITTEE')
+
+            messages.success(request, 'Successfully changed committee.')
         else:
             # Expire only the old ranks (Position only)
             # Example, if the secretary quits, an OCM takes their place, and then a new OCM is elected

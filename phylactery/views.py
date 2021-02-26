@@ -10,7 +10,8 @@ CONTROL_PANEL_FORMS = [
     'PurgeAllGatekeepers',
     'ExpireMemberships',
     'MakeGatekeepers',
-    'TransferCommittee'
+    'MakeWebkeepers',
+    'TransferCommittee',
 ]
 
 
