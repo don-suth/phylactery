@@ -2,6 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Member, Membership, Rank, MemberFlag
+import datetime
+from django.db.models import Q
 
 
 class MemberGatekeeperFilter(admin.SimpleListFilter):
@@ -15,10 +17,17 @@ class MemberGatekeeperFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
+        today = datetime.date.today()
         if self.value() == 'gate':
-            return queryset.filter(ranks__rank__rank_name="GATEKEEPER")
+            return queryset.filter(
+                Q(ranks__expired_date__lte=today) | Q(ranks__expired_date=None),
+                ranks__rank__rank_name="GATEKEEPER",
+            )
         if self.value() == 'notgate':
-            return queryset.exclude(ranks__rank__rank_name="GATEKEEPER")
+            return queryset.exclude(
+                Q(ranks__expired_date__lte=today) | Q(ranks__expired_date=None),
+                ranks__rank__rank_name="GATEKEEPER",
+            )
 
 
 class MemberIsValidMemberFilter(admin.SimpleListFilter):
@@ -49,7 +58,7 @@ class MemberIsValidMemberViewFilter(MemberIsValidMemberFilter):
 class MemberListAdmin(admin.ModelAdmin):
     # This exists for the filter feature in members.views
     # While not used here, it is necessary.
-    list_filter = (MemberGatekeeperViewFilter,MemberIsValidMemberViewFilter)
+    list_filter = (MemberGatekeeperViewFilter, MemberIsValidMemberViewFilter)
     search_fields = ('first_name', 'last_name')
 
 
