@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
+from django.core.paginator import Paginator
 from .models import Member, Membership, MemberFlag, switch_to_proxy
 from .decorators import gatekeeper_required
 from django.views.generic import ListView
@@ -97,7 +98,6 @@ class MemberListView(ListView):
 	Templates of the filter are customised in admin.py
 	"""
 	model = Member
-	paginate_by = 100
 	adm_model = MemberListAdmin(Member, AdminSite())
 	changelist = None
 	template_name = "members/member_list.html"
@@ -105,9 +105,27 @@ class MemberListView(ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		self.changelist = self.adm_model.get_changelist_instance(self.request)
 
+		self.changelist = self.adm_model.get_changelist_instance(self.request)
 		context['cl'] = self.changelist
+
+		paginator = Paginator(self.object_list, 100)  # Show 100 members per page.
+
+		# The shenanigans involving +1s and -1s is to avoid a conflict with the admin changelist
+		# Essentially, the url page number is 0-indexed, while paginator is 1-indexed
+		page_number = int(self.request.GET.get('p', '0')) + 1
+		page_obj = paginator.get_page(page_number)
+		context['page_obj'] = page_obj
+
+		first_page, last_page = paginator.page_range
+		prev_page = page_number - 2
+		next_page = page_number
+
+		context['first_page_q'] = self.changelist.get_query_string(new_params={'p': first_page})
+		context['prev_page_q'] = self.changelist.get_query_string(new_params={'p': prev_page})
+		context['next_page_q'] = self.changelist.get_query_string(new_params={'p': next_page})
+		context['last_page_q'] = self.changelist.get_query_string(new_params={'p': last_page})
+
 		return context
 
 	def get_queryset(self):
@@ -124,10 +142,7 @@ class MemberListView(ListView):
 			new_qs = filter_spec.queryset(self.request, qs)
 			if new_qs is not None:
 				qs = new_qs
-		try:
-			qs = qs.filter(**remaining_lookup_params)
-		except:
-			pass
+
 
 		# Set ordering.
 		ordering = self.changelist.get_ordering(self.request, qs)
@@ -135,6 +150,7 @@ class MemberListView(ListView):
 
 		# Apply search results
 		qs, search_use_distinct = self.changelist.model_admin.get_search_results(self.request, qs, self.changelist.query)
+
 		return qs
 
 
