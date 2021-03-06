@@ -117,7 +117,7 @@ class MemberListView(ListView):
 		page_obj = paginator.get_page(page_number)
 		context['page_obj'] = page_obj
 
-		first_page, last_page = paginator.page_range
+		first_page, last_page = 1, paginator.page_range[-1]
 		prev_page = page_number - 2
 		next_page = page_number
 
