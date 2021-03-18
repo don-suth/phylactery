@@ -1,6 +1,7 @@
 from django import forms
 from dal import autocomplete
-from .models import Item, ItemBaseTags, ItemComputedTags, BorrowRecord, ExternalBorrowingRecord
+from .models import Item, ItemBaseTags, ItemComputedTags, \
+    BorrowRecord, ExternalBorrowingForm
 from members.models import Member
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
@@ -341,13 +342,16 @@ class ExternalBorrowingRequestForm(forms.Form):
         )
 
     def submit(self):
+        new_form = ExternalBorrowingForm.objects.create(
+            applicant_name=self.cleaned_data['applicant_name'],
+            applicant_org=self.cleaned_data['applicant_org'],
+            event_details=self.cleaned_data['event_details'],
+            contact_phone=self.cleaned_data['contact_phone'],
+            contact_email=self.cleaned_data['contact_email'],
+            requested_borrow_date=self.cleaned_data['requested_borrow_date'],
+            form_status=ExternalBorrowingForm.UNAPPROVED,
+        )
         for item in self.cleaned_data['requested_items']:
-            ExternalBorrowingRecord.objects.create(
-                applicant_name=self.cleaned_data['applicant_name'],
-                applicant_org=self.cleaned_data['applicant_org'],
-                event_details=self.cleaned_data['event_details'],
-                contact_phone=self.cleaned_data['contact_phone'],
-                contact_email=self.cleaned_data['contact_email'],
-                requested_borrow_date=self.cleaned_data['requested_borrow_date'],
-                requested_item=item
+            new_form.requested_items.create(
+                item=item
             )

@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Item, BorrowRecord, ExternalBorrowingRecord, ItemBaseTags, ItemComputedTags, TagParent
+from .models import Item, BorrowRecord, ExternalBorrowingForm, ExternalBorrowingItemRecord, \
+    ItemBaseTags, ItemComputedTags, TagParent
 from .forms import ItemTaggitForm, BaseTagForm, ComputedTagForm
 
 
@@ -43,7 +44,18 @@ class TagParentAdmin(admin.ModelAdmin):
         form.instance.save()
 
 
+class ExternalBorrowingItemRecordAdmin(admin.TabularInline):
+    model = ExternalBorrowingItemRecord
+    extra = 1
+
+
+class ExternalBorrowingFormAdmin(admin.ModelAdmin):
+    model = ExternalBorrowingForm
+    inlines = [ExternalBorrowingItemRecordAdmin]
+
+
+
 admin.site.register(Item, ItemAdmin)
 admin.site.register(BorrowRecord)
-admin.site.register(ExternalBorrowingRecord)
+admin.site.register(ExternalBorrowingForm, ExternalBorrowingFormAdmin)
 admin.site.register(TagParent, TagParentAdmin)

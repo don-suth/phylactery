@@ -121,25 +121,29 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Borrower Name</th>
-                        <th>Borrower Org.</th>
+                        <th>Applicant Name</th>
+                        <th>Applicant Org.</th>
                         <th>Form Submitted</th>
                         <th>Req. Borrow Date</th>
                         <th>Link</th>
                     </tr>
                 </thead>
-                {% for details, item_list in unapproved_borrow_requests.items %}
+                {% for form in unapproved_borrow_requests %}
                 <tbody style="border-top: 3px solid black">
                         <tr>
-                            <td>{{ details.0 }}</td>
-                            <td>{{ details.1 }}</td>
-                            <td>{{ details.2 }}</td>
-                            <td>{{ details.3 }}</td>
+                            <td>{{ form.applicant_name }}</td>
+                            <td>{{ form.applicant_org }}</td>
+                            <td>{{ form.form_submitted_date }}</td>
+                            <td>{{ form.requested_borrow_date }}</td>
                             <td>Link to form</td>
                         </tr>
                         <tr>
                             <th>Items:</th>
-                            <td colspan="4">{% for item in item_list %}{{ item.1 }}, {% endfor %}</td>
+                            <td colspan="4">
+                                {% for item_record in form.requested_items.all %}
+                                    {{ item_record.item }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
                         </tr>
                 </tbody>
                 {% endfor %}
@@ -167,6 +171,24 @@
                 <tbody>
                     <tr>
                         <td colspan="4">No approved borrow requests</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
+            <h4>Completed borrow requests</h4>
+            {% if completed_borrow_requests|length > 0 %}
+            <table class="table table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="4">There are completed borrow requests, but this feature isn't implemented yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% else %}
+            <table class="table table-striped table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="4">No completed borrow requests</td>
                     </tr>
                 </tbody>
             </table>

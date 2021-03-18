@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from .models import Item, BorrowRecord, ExternalBorrowingRecord
+from .models import Item, BorrowRecord, ExternalBorrowingForm
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
     ExternalBorrowingRequestForm
@@ -244,8 +244,15 @@ def overview_view(request):
         'today': today,
         'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
         'needing_return': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
-        'unapproved_borrow_requests': ExternalBorrowingRecord.objects.none(),
-        'approved_borrow_requests': ExternalBorrowingRecord.objects.none(),
+        'unapproved_borrow_requests': ExternalBorrowingForm.objects.filter(
+            form_status=ExternalBorrowingForm.UNAPPROVED
+        ),
+        'approved_borrow_requests': ExternalBorrowingForm.objects.filter(
+            form_status=ExternalBorrowingForm.APPROVED
+        ),
+        'completed_borrow_requests': ExternalBorrowingForm.objects.filter(
+            Q(form_status=ExternalBorrowingForm.DENIED)|Q(form_status=ExternalBorrowingForm.COMPLETED)
+        ),
         'members_borrowing': Member.objects.annotate(
             num_borrowed=Count('borrowed', filter=Q(borrowed__date_returned=None))
             ).filter(
@@ -255,43 +262,6 @@ def overview_view(request):
         'recent_records': BorrowRecord.objects.filter(date_borrowed__gte=three_weeks_ago).order_by('date_borrowed')
     }
     u = switch_to_proxy(request.user)
-    if u.is_committee:
-        unapproved_borrow_request_values = ExternalBorrowingRecord.objects \
-            .filter(due_date=None) \
-            .values_list(
-                'pk',
-                'requested_item__name',
-                'applicant_name',
-                'applicant_org',
-                'form_submitted_date',
-                'requested_borrow_date',
-            )
-        unapproved_borrow_requests = {}
-        for request_form in unapproved_borrow_request_values:
-            if request_form[2:] in unapproved_borrow_requests:
-                unapproved_borrow_requests[request_form[2:]].append((request_form[0], request_form[1]))
-            else:
-                unapproved_borrow_requests[request_form[2:]] = [(request_form[0], request_form[1])]
-        approved_borrow_request_values = ExternalBorrowingRecord.objects \
-            .exclude(due_date=None) \
-            .filter(date_returned=None) \
-            .values_list(
-                'pk',
-                'requested_item__name',
-                'applicant_name',
-                'applicant_org',
-                'form_submitted_date',
-                'requested_borrow_date',
-                'due_date',
-            )
-        approved_borrow_requests = {}
-        for request_form in approved_borrow_request_values:
-            if request_form[2:] in approved_borrow_requests:
-                approved_borrow_requests[request_form[2:]].append((request_form[0], request_form[1]))
-            else:
-                approved_borrow_requests[request_form[2:]] = [(request_form[0], request_form[1])]
-        context['approved_borrow_requests'] = approved_borrow_requests
-        context['unapproved_borrow_requests'] = unapproved_borrow_requests
     errors = False
     if request.method == 'POST' and u.is_committee:
         form_type = request.POST.get('form_type', None)

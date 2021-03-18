@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Item, BorrowRecord, ExternalBorrowingRecord
+from .models import Item, BorrowRecord, ExternalBorrowingForm
 from members.models import Member
 from django.utils import timezone
 import datetime
@@ -63,11 +63,11 @@ def create_borrow_record(
 
 
 def create_ext_borrow_record(
-        requested_item, applicant_name='Smonald Dunderland', applicant_org='Punygames',
+        requested_items, form=None, applicant_name='Smonald Dunderland', applicant_org='Punygames',
         event_details='Totally not going to damage the books', contact_phone='0123456789',
         contact_email='fake@email.com.au', requested_borrow_date=1, due_date=2, date_borrowed=1,
         date_returned=2, auth_gatekeeper_borrow=None, borrower_name='Smonald Dunderland',
-        auth_gatekeeper_return=None, verified_returned=False):
+        auth_gatekeeper_return=None, verified_returned=False, form_status='U'):
 
     today = timezone.now()
     if type(requested_borrow_date) is int:
@@ -86,22 +86,29 @@ def create_ext_borrow_record(
     elif auth_gatekeeper_return is None:
         auth_gatekeeper_return = create_member()
 
-    return ExternalBorrowingRecord.objects.create(
-        requested_item=requested_item,
-        applicant_name=applicant_name,
-        applicant_org=applicant_org,
-        event_details=event_details,
-        contact_phone=contact_phone,
-        contact_email=contact_email,
-        auth_gatekeeper_return=auth_gatekeeper_return,
-        auth_gatekeeper_borrow=auth_gatekeeper_borrow,
-        requested_borrow_date=requested_borrow_date,
-        date_borrowed=date_borrowed,
-        date_returned=date_returned,
-        due_date=due_date,
-        borrower_name=borrower_name,
-        verified_returned=verified_returned
-    )
+    if form is None:
+        form = ExternalBorrowingForm.objects.create(
+            applicant_name=applicant_name,
+            applicant_org=applicant_org,
+            event_details=event_details,
+            contact_phone=contact_phone,
+            contact_email=contact_email,
+            due_date=due_date,
+            form_status=form_status,
+
+        )
+    for item in requested_items:
+        form.requested_items.create(
+            item=item,
+            auth_gatekeeper_return=auth_gatekeeper_return,
+            auth_gatekeeper_borrow=auth_gatekeeper_borrow,
+            requested_borrow_date=requested_borrow_date,
+            date_borrowed=date_borrowed,
+            date_returned=date_returned,
+            borrower_name=borrower_name,
+        )
+    return form
+
 
 
 class LibraryModelTests(TestCase):
@@ -134,7 +141,7 @@ class LibraryModelTests(TestCase):
             self.assertEqual(info['expected_availability_date'], None)
 
             ext_borrow_record = create_ext_borrow_record(
-                dnd, auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
+                [dnd], auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
                 requested_borrow_date=datetime.date(2020, 10, 4), due_date=datetime.date(2020, 10, 5)
             )
 
@@ -144,7 +151,7 @@ class LibraryModelTests(TestCase):
             self.assertEqual(info['expected_availability_date'], datetime.date(2020, 10, 5))
 
             ext_borrow_record_2 = create_ext_borrow_record(
-                dnd, auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
+                [dnd], auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
                 requested_borrow_date=datetime.date(2020, 10, 6), due_date=datetime.date(2020, 10, 8)
             )
 

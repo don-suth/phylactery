@@ -289,8 +289,19 @@ class BorrowRecord(models.Model):
             return str(self.borrowing_member)+' - '+str(self.item)+' (Due '+self.due_date.strftime('%a %b %d')+')'
 
 
-class ExternalBorrowingRecord(models.Model):
-    # All are required due to the initial form
+class ExternalBorrowingForm(models.Model):
+    UNAPPROVED = 'U'
+    DENIED = 'D'
+    APPROVED = 'A'
+    COMPLETED = 'C'  # For forms that were approved and have been fully completely
+
+    STATUS_CHOICES = [
+        (UNAPPROVED, 'Unapproved'),
+        (DENIED, 'Denied'),
+        (APPROVED, 'Approved'),
+        (COMPLETED, 'Completed'),
+    ]
+
     applicant_name = models.CharField(max_length=200)
     applicant_org = models.CharField(max_length=200, blank=True)
     event_details = models.TextField()
@@ -298,10 +309,14 @@ class ExternalBorrowingRecord(models.Model):
     contact_email = models.EmailField()
     form_submitted_date = models.DateField(default=datetime.date.today)
     requested_borrow_date = models.DateField()
-    requested_item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records')
 
-    # The librarian approves this by setting the due date
+    form_status = models.CharField(max_length=1, choices=STATUS_CHOICES)
     due_date = models.DateField(blank=True, null=True, default=None)
+
+
+class ExternalBorrowingItemRecord(models.Model):
+    form = models.ForeignKey(ExternalBorrowingForm, on_delete=models.CASCADE, related_name='requested_items')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     # These fields are set when the borrower collects the item
     borrower_name = models.CharField(max_length=200, blank=True)
@@ -322,6 +337,45 @@ class ExternalBorrowingRecord(models.Model):
         blank=True,
         null=True,
         related_name='authorised_returning_ext',
+        on_delete=models.SET_NULL,
+        default=None,
+    )
+    date_returned = models.DateField(blank=True, null=True, default=None)
+
+
+class ExternalBorrowingRecord(models.Model):
+    # All are required due to the initial form
+    applicant_name = models.CharField(max_length=200)
+    applicant_org = models.CharField(max_length=200, blank=True)
+    event_details = models.TextField()
+    contact_phone = models.CharField(max_length=20)
+    contact_email = models.EmailField()
+    form_submitted_date = models.DateField(default=datetime.date.today)
+    requested_borrow_date = models.DateField()
+    requested_item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records')
+
+    # The librarian approves this by setting the due date
+    due_date = models.DateField(blank=True, null=True, default=None)
+
+    # These fields are set when the borrower collects the item
+    borrower_name = models.CharField(max_length=200, blank=True)
+    auth_gatekeeper_borrow = models.ForeignKey(
+        Member,
+        blank=True,
+        null=True,
+        related_name='authorised_borrowing_ext_old',
+        on_delete=models.SET_NULL,
+        default=None,
+    )
+    date_borrowed = models.DateField(blank=True, null=True, default=None)
+
+    # These fields are set when the borrower returns the item
+    returner_name = models.CharField(max_length=200, blank=True)
+    auth_gatekeeper_return = models.ForeignKey(
+        Member,
+        blank=True,
+        null=True,
+        related_name='authorised_returning_ext_old',
         on_delete=models.SET_NULL,
         default=None,
     )
