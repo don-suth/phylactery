@@ -312,6 +312,7 @@ class ExternalBorrowingForm(models.Model):
 
     form_status = models.CharField(max_length=1, choices=STATUS_CHOICES)
     due_date = models.DateField(blank=True, null=True, default=None)
+    librarian_comments = models.TextField(blank=True)
 
 
 class ExternalBorrowingItemRecord(models.Model):
