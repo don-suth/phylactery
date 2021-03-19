@@ -1,80 +1,58 @@
 Tests:
     - TODO: Write tests
 
-- Things be removed after two years or upon request
-- Phone + Email on membership forms, address + phone on borrowing form
-- Old borrowing records deleted after a year
-- Names + borrowing data only for gatekeepers
-
-Admin > Committee > Gatekeeper > everything else
-
 Control Panel:
-    - Expire all financial memberships from before [date] (default=1/1/[this year]). (President, VP, Secretary)
-    - Gatekeeper Purge (President, VP)
-    - Webkeeper Purge (President, VP)
-    - Library Overview (OCM+)
-    - Replace Committee Member(s) (President, VP)
-    - Change website theme (President, VP)
-
-Questions to ask (Membership):
-    - What information do you want to store in the Member DB?
-    - What information do you want to store on borrowing records?
-    - When do you want what information to be deleted?
-    - Who do you want to be able to see what information? (For example, should gatekeepers see names of members? Should they see email addresses?)
-        - Coming off of that, do you want a way for people to see information that's they shouldn't need to, provided that it's logged?
-            (Example: A gatekeeper can get a members phone number to contact them about lost property, but that action will be put in the log)
-    -  I aim to have the majority of this finished by O-Day, would you folks be willing to make this the first digital O-Day for the club?
-
-Questions to ask (Library):
-    - Barcode field in library data?
-    - Current plan for library borrowing is:
-        - A Gatekeeper can log in, add items to their 'cart', and then 'checkout'.
-        - They'll put in the details of whoever is borrowing them.
-        - Items will be borrowed individually, in case someone wants/needs to return an item early.
-        - Due dates will be automatically set, keeping in mind any reservation forms in place, high-demand items, and the default time of two-weeks.
-        - When a person wants to return items, gatekeeper will log on, check a "library overview page",
-            find the member that wants to return things, and tick boxes to say they've returned them.
-        - Website will show an items borrowable status, if it is available or not.
-        - If not available, it will say the date that you can expect to be returned by, keeping in mind any reservation forms.
-    - Would the club consider getting a tablet for library purpose?
-
+    - TODO: Change website theme (President, VP)
 
 Members:
-    - DONE: (Members) Make the gatekeeper sign-up/login form work again
-    - DONE: (Members) Create membership items
-    - DONE: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
-        - Two buttons - new or returning member?
-            - For new, if it finds a partial match, confirm that it is a new member
-            - Else create a new member + membership
-        - For returning: use DAL to find member name, update details, and create membership
-    - DONE: (Members) Add expiry to roles like committee, and make those work
-        - Add inherent permissions to roles. eg. Library Powers to Committee.
     - TODO: Make a cronjob to check for expired permissions each day
 
 Library:
-    - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
-        - Make sure borrowable status is on item pages
-        - TODO: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
-        - Add a "not-borrowable" flag
-        - High-demand flag for borrowable items (sets the default due date)
+    - TODO: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
+        - Make sure gatekeepers can authorising the borrowing/returning
+        - Make sure email is sent to borrower when form approved
+        - Make form approving only for Librarian/Pres/VP
     - TODO: (Library) Add player numbers to library items
         - Allow null values.
         - If both null, display nothing.
         - If max is null and min is X, display "X+ players".
         - If min is null and max is X, display "1 - X players."
         - If min is X and max is Y, display "X - Y players"
-    - TODO: (Library) Add a item create/edit form outside of the admin interface
-        - Make sure to check for proper permissions.
-    - TODO: (Library) Maybe barcode field?
-        - Just a text box that you can put in a barcode (enables librarian quicksearch mode)
-        - No need to generate barcodes.
-        - Possible that two items could share a barcode, make sure to account for that.
-    - DONE: (Library) Make Tag non-mandatory
+    - TODO (Library) Email relevant people when:
+        - item is borrowed
+        - form is approved/denied
 
-Content Management System:
-    - TODO (CMS): Figure out how the hell to do this.
+Cron-Jobs:
+    - TODO: Check for expired membership permissions each day
+    - TODO: Delete old borrowing records after one year.
+    - TODO: Delete membership records upon two years of inactivity
+
+---
 
 Future future ideas:
     - Calender + events system?
     - Blog?
     - Discord integration
+
+---
+
+Completed tasks:
+
+    Control Panel:
+        - DONE: Expire all financial memberships from before [date] (default=1/1/[this year]). (President, VP, Secretary)
+        - DONE: Gatekeeper Purge (President, VP)
+        - DONE: Webkeeper Purge (President, VP)
+        - DONE: Library Overview (Gatekeeper+) (moved away from the control panel)
+        - DONE: Replace Committee Member(s) (President, VP)
+
+    Membership:
+        - DONE: (Members) Make the gatekeeper sign-up/login form work again
+        - DONE: (Members) Create membership items
+        - DONE: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
+        - DONE: (Members) Add expiry to roles like committee, and make those work
+
+    Library:
+        - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
+        - DONE: (Library) Make Tag non-mandatory
+
+
