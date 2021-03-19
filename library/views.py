@@ -3,7 +3,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingForm
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
-    ExternalBorrowingRequestForm
+    ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm
 from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -365,3 +365,13 @@ def external_borrow_request_view(request):
             return redirect('library:library-home')
         else:
             return render(request, 'library/external_borrow_form.html', {'form': form})
+
+
+@gatekeeper_required
+def external_borrow_form_view(request, pk):
+    if request.method == 'POST':
+        # Do nothing just yet
+        pass
+    external_borrow_form = get_object_or_404(ExternalBorrowingForm, pk=pk)
+    crispy_form = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
+    return render(request, 'library/external_form_view.html', {'form_data': external_borrow_form, 'form': crispy_form})

@@ -89,3 +89,14 @@
 .stat-card {
     height: 127.6px;
 }
+
+.right-label {
+    text-align: right;
+}
+
+@media (max-width: 576px) {
+    .right-label {
+        text-align: left;
+    }
+}
+

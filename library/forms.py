@@ -7,7 +7,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
 from django.conf import settings
 from django.contrib.admin import widgets
-from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.core.exceptions import ValidationError, ImproperlyConfigured, ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from django.utils import timezone
 import datetime
@@ -355,3 +355,66 @@ class ExternalBorrowingRequestForm(forms.Form):
             new_form.requested_items.create(
                 item=item
             )
+
+
+class ExternalBorrowingLibrarianForm(forms.Form):
+    librarian_comments = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': '3'}),
+        label=''
+    )
+    form_status = forms.ChoiceField(
+        widget=forms.Select(),
+        choices=ExternalBorrowingForm.STATUS_CHOICES,
+        initial=ExternalBorrowingForm.UNAPPROVED,
+        label='',
+    )
+    due_date = forms.DateField(
+        required=True,
+        widget=widgets.AdminDateWidget,
+        label='',
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.display_form = kwargs.pop('display_form', None)
+        if self.display_form is None:
+            raise ImproperlyConfigured('Invalid object passed to form')
+        super().__init__(*args, **kwargs)
+        self.initial['librarian_comments'] = self.display_form.librarian_comments
+        self.initial['form_status'] = self.display_form.form_status
+        self.initial['due_date'] = self.display_form.due_date
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                HTML(
+                    '''<label class="col-sm-3 col-form-label font-weight-bold right-label">Form Status</label>'''
+                ),
+                Div(
+                    'form_status',
+                    css_class="col-sm-9"
+                ),
+                css_class="form-group row"
+            ),
+            Div(
+                HTML(
+                    '''<label class="col-sm-3 col-form-label font-weight-bold right-label">Librarian Comments</label>'''
+                ),
+                Div(
+                    'librarian_comments',
+                    css_class="col-sm-9"
+                ),
+                css_class="form-group row"
+            ),
+            Div(
+                HTML(
+                    '''<label class="col-sm-3 col-form-label font-weight-bold right-label">Due Date</label>'''
+                ),
+                Div(
+                    'due_date',
+                    css_class="col-sm-9"
+                ),
+                css_class="form-group row"
+            ),
+        )
+
