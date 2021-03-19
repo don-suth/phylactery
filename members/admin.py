@@ -59,7 +59,7 @@ class MemberListAdmin(admin.ModelAdmin):
     # This exists for the filter feature in members.views
     # While not used here, it is necessary.
     list_filter = (MemberGatekeeperViewFilter, MemberIsValidMemberViewFilter)
-    search_fields = ('first_name', 'last_name')
+    search_fields = ('first_name', 'last_name', 'preferred_name')
 
 
 class RanksInline(admin.TabularInline):
@@ -80,7 +80,7 @@ class MemberFlagsInline(admin.TabularInline):
 
 class MemberAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'pronouns', 'email_address', 'student_number', 'join_date', 'is_fresher', 'notes')
-    search_fields = ('first_name', 'last_name')
+    search_fields = ('first_name', 'last_name', 'preferred_name')
     list_filter = (MemberGatekeeperFilter,MemberIsValidMemberFilter)
     inlines = [MemberFlagsInline, MembershipInline, RanksInline]
 

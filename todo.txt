@@ -12,6 +12,10 @@ Library:
         - Make sure gatekeepers can authorising the borrowing/returning
         - Make sure email is sent to borrower when form approved
         - Make form approving only for Librarian/Pres/VP
+    - TODO: (Library) Add playtime to library items
+        - Allow null values
+        - Uses the minutes units - convert to hours if above 59 minutes.
+        - Eg. 40 -> "40 mins", 80 -> "1 hour 20 mins"
     - TODO: (Library) Add player numbers to library items
         - Allow null values.
         - If both null, display nothing.
@@ -50,6 +54,8 @@ Completed tasks:
         - DONE: (Members) Create membership items
         - DONE: (Members) Make a easy to use member add form, that doesn't touch the admin interface.
         - DONE: (Members) Add expiry to roles like committee, and make those work
+        - DONE: (Members) Allow searching by preferred name
+
 
     Library:
         - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
