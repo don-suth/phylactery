@@ -416,5 +416,6 @@ class ExternalBorrowingLibrarianForm(forms.Form):
                 ),
                 css_class="form-group row"
             ),
+            Submit('submit', 'Submit', css_class='btn-primary')
         )
 

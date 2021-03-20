@@ -373,5 +373,56 @@ def external_borrow_form_view(request, pk):
         # Do nothing just yet
         pass
     external_borrow_form = get_object_or_404(ExternalBorrowingForm, pk=pk)
+    today = datetime.date.today()
+    # Item data contains tuples in the form:
+    # (ItemRecord, borrowing status, available actions ('b', 'r', or ''))
+    item_data = []
+    for item_record in external_borrow_form.requested_items.all():
+        status = 'Not Borrowable'
+        actions = ''
+        details = ''
+        if external_borrow_form.form_status in (ExternalBorrowingForm.UNAPPROVED, ExternalBorrowingForm.DENIED):
+            item_data.append((item_record, status, actions, details))
+            continue
+        if item_record.date_borrowed is None:
+            # Item is not borrowed yet
+            if today == external_borrow_form.requested_borrow_date:
+                # Item is borrowable
+                status = 'Awaiting Pickup'
+                actions = 'b'
+        elif item_record.date_returned is None:
+            # Item has been borrowed and not returned
+            actions = 'r'
+            details = 'Borrowed by {0} on {1}. Authorised by {2}.'.format(
+                item_record.borrower_name,
+                str(item_record.date_borrowed),
+                str(item_record.auth_gatekeeper_borrow)
+            )
+            if today > external_borrow_form.due_date:
+                # The item is overdue
+                status = 'Borrowed & Awaiting Return (Overdue)'
+            else:
+                status = 'Borrowed & Awaiting Return'
+        else:
+            # Item has been borrowed and returned.
+            details = \
+                'Borrowed by {0} on {1}. Authorised by {2}.\n' \
+                'Returned by {3} on {4}. Authorised by {5}' \
+                .format(
+                    item_record.borrower_name,
+                    str(item_record.date_borrowed),
+                    str(item_record.auth_gatekeeper_borrow),
+                    item_record.returner_name,
+                    str(item_record.date_returned),
+                    str(item_record.auth_gatekeeper_return)
+                )
+            status = 'Returned'
+        item_data.append((item_record, status, actions, details))
+
     crispy_form = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
-    return render(request, 'library/external_form_view.html', {'form_data': external_borrow_form, 'form': crispy_form})
+    context = {
+        'form_data': external_borrow_form,
+        'item_data': item_data,
+        'form': crispy_form
+    }
+    return render(request, 'library/external_form_view.html', context)

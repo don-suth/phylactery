@@ -135,7 +135,7 @@
                             <td>{{ form.applicant_org }}</td>
                             <td>{{ form.form_submitted_date }}</td>
                             <td>{{ form.requested_borrow_date }}</td>
-                            <td>Link to form</td>
+                            <td><a href="{% url 'library:form-view' pk=form.pk %}">Link to form</a></td>
                         </tr>
                         <tr>
                             <th>Items:</th>
