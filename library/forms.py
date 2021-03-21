@@ -4,7 +4,7 @@ from .models import Item, ItemBaseTags, ItemComputedTags, \
     BorrowRecord, ExternalBorrowingForm
 from members.models import Member
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit
+from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit, Hidden
 from django.conf import settings
 from django.contrib.admin import widgets
 from django.core.exceptions import ValidationError, ImproperlyConfigured, ObjectDoesNotExist
@@ -370,7 +370,7 @@ class ExternalBorrowingLibrarianForm(forms.Form):
         label='',
     )
     due_date = forms.DateField(
-        required=True,
+        required=False,
         widget=widgets.AdminDateWidget,
         label='',
     )
@@ -385,6 +385,7 @@ class ExternalBorrowingLibrarianForm(forms.Form):
         self.initial['due_date'] = self.display_form.due_date
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.include_media = False
         self.helper.layout = Layout(
             Div(
                 HTML(
@@ -394,7 +395,7 @@ class ExternalBorrowingLibrarianForm(forms.Form):
                     'form_status',
                     css_class="col-sm-9"
                 ),
-                css_class="form-group row"
+                css_class="form-group form-group-sm row"
             ),
             Div(
                 HTML(
@@ -404,7 +405,7 @@ class ExternalBorrowingLibrarianForm(forms.Form):
                     'librarian_comments',
                     css_class="col-sm-9"
                 ),
-                css_class="form-group row"
+                css_class="form-group form-group-sm row"
             ),
             Div(
                 HTML(
@@ -414,8 +415,69 @@ class ExternalBorrowingLibrarianForm(forms.Form):
                     'due_date',
                     css_class="col-sm-9"
                 ),
-                css_class="form-group row"
+                css_class="form-group form-group-sm row"
             ),
+            Hidden('form-name', 'librarian-control'),
             Submit('submit', 'Submit', css_class='btn-primary')
         )
 
+    def clean(self):
+        if self.cleaned_data['form_status'] in [ExternalBorrowingForm.APPROVED, ExternalBorrowingForm.COMPLETED]:
+            if self.cleaned_data['due_date'] is None:
+                self.add_error('due_date', "If form is approved, you must set a due date.")
+
+
+
+class ExternalBorrowingReturningForm(forms.Form):
+    borrower_returner_name = forms.CharField(
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.submitted_form = kwargs.pop('submitted_form', None)
+        self.auth_gatekeeper = kwargs.pop('auth_gatekeeper', None)
+        self.added_fields = []
+        today = datetime.date.today()
+        if self.submitted_form is None or self.auth_gatekeeper is None:
+            raise ImproperlyConfigured('Invalid/missing object passed to form')
+        super().__init__(*args, **kwargs)
+        if self.submitted_form.form_status == ExternalBorrowingForm.APPROVED:
+            for item_record in self.submitted_form.requested_items.all():
+                if item_record.date_borrowed is None:
+                    # Item is not borrowed yet
+                    if today == self.submitted_form.requested_borrow_date:
+                        # Item is borrowable
+                        field_name = str(item_record.pk)+'_borrow'
+                        self.fields[field_name] = forms.BooleanField(
+                            required=False,
+                            initial=False,
+                        )
+                        self.added_fields.append((field_name, item_record))
+                elif item_record.date_returned is None:
+                    # Item has been borrowed but not returned
+                    field_name = str(item_record.pk)+'_return'
+                    self.fields[field_name] = forms.BooleanField(
+                        required=False,
+                        initial=False,
+                    )
+                    self.added_fields.append((field_name, item_record))
+
+    def submit(self):
+        today = datetime.date.today()
+        success_borrow = 0
+        success_return = 0
+        for field, item_record in self.added_fields:
+            pk, action = field.split('_')
+            if (action == 'borrow') and (self.cleaned_data[field] is True):
+                item_record.borrower_name = self.cleaned_data['borrower_returner_name']
+                item_record.date_borrowed = today
+                item_record.auth_gatekeeper_borrow = self.auth_gatekeeper
+                item_record.save()
+                success_borrow += 1
+            if (action == 'return') and (self.cleaned_data[field] is True):
+                item_record.returner_name = self.cleaned_data['borrower_returner_name']
+                item_record.date_returned = today
+                item_record.auth_gatekeeper_return = self.auth_gatekeeper
+                item_record.save()
+                success_return += 1
+        return success_borrow, success_return

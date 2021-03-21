@@ -17,6 +17,7 @@ def unigames_user_processor(request):
     if request.user.is_authenticated:
         new_user = switch_to_proxy(request.user)
         return {
-            'user': new_user
+            'user': new_user,
+            'user_is_admin': new_user.groups.filter(name='Admin').exists()
         }
     return {}

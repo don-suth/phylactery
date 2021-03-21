@@ -3,7 +3,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from .models import Item, BorrowRecord, ExternalBorrowingForm
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
-    ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm
+    ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm, ExternalBorrowingReturningForm
 from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.forms import formset_factory
@@ -369,14 +369,16 @@ def external_borrow_request_view(request):
 
 @gatekeeper_required
 def external_borrow_form_view(request, pk):
-    if request.method == 'POST':
-        # Do nothing just yet
-        pass
+    VALID_GROUPS = ['Librarian', 'Vice-President', 'President', 'Admin']
+    user_has_permissions = request.user.groups.filter(name__in=VALID_GROUPS).exists()
     external_borrow_form = get_object_or_404(ExternalBorrowingForm, pk=pk)
     today = datetime.date.today()
-    # Item data contains tuples in the form:
-    # (ItemRecord, borrowing status, available actions ('b', 'r', or ''))
     item_data = []
+    control_form = None
+    all_borrow = True
+    all_return = True
+    any_borrow = False
+    any_return = False
     for item_record in external_borrow_form.requested_items.all():
         status = 'Not Borrowable'
         actions = ''
@@ -390,9 +392,13 @@ def external_borrow_form_view(request, pk):
                 # Item is borrowable
                 status = 'Awaiting Pickup'
                 actions = 'b'
+                all_return = False
+                any_borrow = True
         elif item_record.date_returned is None:
             # Item has been borrowed and not returned
             actions = 'r'
+            all_borrow = False
+            any_return = True
             details = 'Borrowed by {0} on {1}. Authorised by {2}.'.format(
                 item_record.borrower_name,
                 str(item_record.date_borrowed),
@@ -408,7 +414,7 @@ def external_borrow_form_view(request, pk):
             details = \
                 'Borrowed by {0} on {1}. Authorised by {2}.\n' \
                 'Returned by {3} on {4}. Authorised by {5}' \
-                .format(
+                    .format(
                     item_record.borrower_name,
                     str(item_record.date_borrowed),
                     str(item_record.auth_gatekeeper_borrow),
@@ -419,10 +425,47 @@ def external_borrow_form_view(request, pk):
             status = 'Returned'
         item_data.append((item_record, status, actions, details))
 
-    crispy_form = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
     context = {
         'form_data': external_borrow_form,
         'item_data': item_data,
-        'form': crispy_form
+        'form': control_form,
+        'show_control': user_has_permissions,
+        'all_borrow': all_borrow and any_borrow,
+        'all_return': all_return and any_return,
+        'any_actions': any_borrow or any_return
     }
+
+    if request.method == 'POST':
+        form_name = request.POST.get('form-name', None)
+        print(form_name)
+        if request.POST.get('form-name', None) == 'librarian-control':
+            if user_has_permissions:
+                control_form = ExternalBorrowingLibrarianForm(request.POST, display_form=external_borrow_form)
+                if control_form.is_valid():
+                    # Form is valid, user has correct permissions
+                    external_borrow_form.librarian_comments = control_form.cleaned_data['librarian_comments']
+                    external_borrow_form.form_status = control_form.cleaned_data['form_status']
+                    external_borrow_form.due_date = control_form.cleaned_data['due_date']
+                    external_borrow_form.save()
+                else:
+                    context['form'] = control_form
+                    return render(request, 'library/external_form_view.html', context)
+            else:
+                messages.error(request, "You don't have permission to do that.")
+        if request.POST.get('form-name', None) == 'borrow-return':
+            submitted_form = ExternalBorrowingReturningForm(
+                request.POST, submitted_form=external_borrow_form, auth_gatekeeper=request.user.member)
+            if submitted_form.is_valid():
+                borrowed, returned = submitted_form.submit()
+                if borrowed:
+                    messages.success(request, 'Successfully borrowed {0} items.'.format(str(borrowed)))
+                if returned:
+                    messages.success(request, 'Successfully returned {0} items.'.format(str(returned)))
+            else:
+                messages.error(request, 'There was an error submitted the form. Please check the fields and try again.')
+        return redirect('library:form-view', pk=pk)
+
+    if context['form'] is None:
+        context['form'] = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
+
     return render(request, 'library/external_form_view.html', context)
