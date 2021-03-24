@@ -16,8 +16,12 @@ def navbar_colour_settings(request):
 def unigames_user_processor(request):
     if request.user.is_authenticated:
         new_user = switch_to_proxy(request.user)
-        return {
+        context = {
             'user': new_user,
-            'user_is_admin': new_user.groups.filter(name='Admin').exists()
+            'user_groups': list(new_user.groups.values_list('name', flat=True))
         }
+        context['librarian_permissions'] = any(
+            x in ['Librarian', 'President', 'Vice-President'] for x in context['user_groups']
+        )
+        return context
     return {}

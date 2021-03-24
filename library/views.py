@@ -10,7 +10,7 @@ from django.forms import formset_factory
 from django.views import generic
 from dal import autocomplete
 from taggit.models import Tag
-from django.db.models import Q, Count
+from django.db.models import F, Q, Count
 from django.contrib import messages
 from members.decorators import gatekeeper_required
 import datetime
@@ -240,18 +240,44 @@ def borrow_view_3(request):
 def overview_view(request):
     today = datetime.date.today()
     three_weeks_ago = today - datetime.timedelta(weeks=3)
+    external_forms = ExternalBorrowingForm.objects\
+        .annotate(
+            total_items=Count(
+                'requested_items',
+                distinct=True,
+            ),
+            borrowed_items=Count(
+                'requested_items',
+                filter=Q(
+                    requested_items__date_borrowed__isnull=False,
+                ),
+                distinct=True,
+            ),
+            returned_items=Count(
+                'requested_items',
+                filter=Q(
+                    requested_items__date_borrowed__isnull=False,
+                    requested_items__date_returned__isnull=False,
+                ),
+                distinct=True,
+            ),
+        )
     context = {
         'today': today,
         'currently_borrowed': BorrowRecord.objects.filter(date_returned=None).order_by('due_date'),
         'needing_return': BorrowRecord.objects.exclude(date_returned=None).exclude(verified_returned=True),
-        'unapproved_borrow_requests': ExternalBorrowingForm.objects.filter(
+        'unapproved_borrow_requests': external_forms.filter(
             form_status=ExternalBorrowingForm.UNAPPROVED
         ),
-        'approved_borrow_requests': ExternalBorrowingForm.objects.filter(
-            form_status=ExternalBorrowingForm.APPROVED
+        'approved_borrow_requests': external_forms.filter(
+            form_status=ExternalBorrowingForm.APPROVED,
+        ).exclude(
+            total_items=F('returned_items')
         ),
-        'completed_borrow_requests': ExternalBorrowingForm.objects.filter(
-            Q(form_status=ExternalBorrowingForm.DENIED)|Q(form_status=ExternalBorrowingForm.COMPLETED)
+        'completed_borrow_requests': external_forms.filter(
+            Q(form_status=ExternalBorrowingForm.DENIED)
+            | Q(form_status=ExternalBorrowingForm.COMPLETED)
+            | Q(form_status=ExternalBorrowingForm.APPROVED, total_items=F('returned_items'))
         ),
         'members_borrowing': Member.objects.annotate(
             num_borrowed=Count('borrowed', filter=Q(borrowed__date_returned=None))
@@ -455,7 +481,7 @@ def external_borrow_form_view(request, pk):
         if request.POST.get('form-name', None) == 'borrow-return':
             submitted_form = ExternalBorrowingReturningForm(
                 request.POST, submitted_form=external_borrow_form, auth_gatekeeper=request.user.member)
-            if submitted_form.is_valid():
+            if submitted_form.is_valid() and external_borrow_form.due_date is not None:
                 borrowed, returned = submitted_form.submit()
                 if borrowed:
                     messages.success(request, 'Successfully borrowed {0} items.'.format(str(borrowed)))
