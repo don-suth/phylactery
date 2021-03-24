@@ -1,6 +1,11 @@
 Tests:
     - TODO: Write tests
 
+Static Pages:
+    - TODO: Redo the static pages
+    - TODO: Add easy to find link for external borrowing requests
+    - TODO: Add automatic committee viewing
+
 Control Panel:
     - TODO: Change website theme (President, VP)
 
@@ -8,10 +13,6 @@ Members:
     - TODO: Make a cronjob to check for expired permissions each day
 
 Library:
-    - TODO: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
-        - Make sure gatekeepers can authorising the borrowing/returning
-        - Make sure email is sent to borrower when form approved
-        - Make form approving only for Librarian/Pres/VP
     - TODO: (Library) Add playtime to library items
         - Allow null values
         - Uses the minutes units - convert to hours if above 59 minutes.
@@ -60,5 +61,8 @@ Completed tasks:
     Library:
         - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
         - DONE: (Library) Make Tag non-mandatory
+        - DONE: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
+        - Make sure gatekeepers can authorising the borrowing/returning
+        - Make form approving only for Librarian/Pres/VP
 
 
