@@ -48,6 +48,10 @@ class Item(models.Model):
     is_borrowable = models.BooleanField(default=True)
     high_demand = models.BooleanField(default=False)
 
+    min_players = models.IntegerField(blank=True, null=True)
+    max_players = models.IntegerField(blank=True, null=True)
+    play_time = models.IntegerField(blank=True, null=True)
+
     def image_file_name(self, filename):
         filename, dot, extension = filename.rpartition('.')
         return "library/item_images/{0}.{1}".format(self.slug, extension)

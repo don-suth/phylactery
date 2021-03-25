@@ -124,7 +124,9 @@ class ItemTaggitForm(autocomplete.FutureModelForm):
         fields = (
             'name', 'slug', 'description',
             'condition', 'type', 'image',
-            'is_borrowable', 'high_demand', 'notes'
+            'is_borrowable', 'high_demand',
+            'min_players', 'max_players',
+            'play_time', 'notes'
         )
 
 
