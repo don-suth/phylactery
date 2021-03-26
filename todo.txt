@@ -11,6 +11,7 @@ Control Panel:
 
 Members:
     - TODO: Make a cronjob to check for expired permissions each day
+    - TODO (Accounts): Add a password reset/change feature to accounts
 
 Library:
     - TODO: (Library) Add playtime to library items
