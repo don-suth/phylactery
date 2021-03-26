@@ -95,14 +95,13 @@ def create_ext_borrow_record(
             contact_email=contact_email,
             due_date=due_date,
             form_status=form_status,
-
+            requested_borrow_date=requested_borrow_date,
         )
     for item in requested_items:
         form.requested_items.create(
             item=item,
             auth_gatekeeper_return=auth_gatekeeper_return,
             auth_gatekeeper_borrow=auth_gatekeeper_borrow,
-            requested_borrow_date=requested_borrow_date,
             date_borrowed=date_borrowed,
             date_returned=date_returned,
             borrower_name=borrower_name,
@@ -142,7 +141,8 @@ class LibraryModelTests(TestCase):
 
             ext_borrow_record = create_ext_borrow_record(
                 [dnd], auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
-                requested_borrow_date=datetime.date(2020, 10, 4), due_date=datetime.date(2020, 10, 5)
+                requested_borrow_date=datetime.date(2020, 10, 4), due_date=datetime.date(2020, 10, 5),
+                form_status='A'
             )
 
             info = dnd.get_availability_info()
@@ -152,7 +152,8 @@ class LibraryModelTests(TestCase):
 
             ext_borrow_record_2 = create_ext_borrow_record(
                 [dnd], auth_gatekeeper_borrow=member1, auth_gatekeeper_return=member1,
-                requested_borrow_date=datetime.date(2020, 10, 6), due_date=datetime.date(2020, 10, 8)
+                requested_borrow_date=datetime.date(2020, 10, 6), due_date=datetime.date(2020, 10, 8),
+                form_status='A'
             )
 
             info = dnd.get_availability_info()

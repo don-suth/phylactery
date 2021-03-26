@@ -8,6 +8,18 @@ import datetime
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
+# External Borrowing Form Statuses
+UNAPPROVED = 'U'
+DENIED = 'D'
+APPROVED = 'A'
+COMPLETED = 'C'
+
+# Item Types
+BOOK = 'BK'
+BOARD_GAME = 'BG'
+CARD_GAME = 'CG'
+OTHER = '??'
+
 
 class TagParent(models.Model):
     child_tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name='parents')
@@ -28,10 +40,10 @@ class TagParent(models.Model):
 
 
 class Item(models.Model):
-    BOOK = 'BK'
-    BOARD_GAME = 'BG'
-    CARD_GAME = 'CG'
-    OTHER = '??'
+    BOOK = BOOK
+    BOARD_GAME = BOARD_GAME
+    CARD_GAME = CARD_GAME
+    OTHER = OTHER
     ITEM_TYPE_CHOICES = [
         (BOOK, 'Book'),
         (BOARD_GAME, 'Board Game'),
@@ -148,34 +160,34 @@ class Item(models.Model):
                 info['expected_availability_date'] = records.first().due_date
         if info['is_available'] is True:
             ext_records = self.ext_borrow_records \
-                .exclude(due_date=None) \
+                .exclude(form__form_status__in=[UNAPPROVED, DENIED, COMPLETED]) \
                 .filter(date_borrowed__lte=today, date_returned=None) \
-                .order_by('-due_date')
+                .order_by('-form__due_date')
             if ext_records.exists():
                 info['in_clubroom'] = False
                 info['is_available'] = False
-                info['expected_availability_date'] = ext_records.first().due_date
+                info['expected_availability_date'] = ext_records.first().form.due_date
         if info['is_available'] is True:
             # We also check if an external form is lodged for tomorrow
             tomorrow_ext_records = self.ext_borrow_records \
-                .exclude(due_date=None) \
-                .filter(requested_borrow_date=today+next_day) \
-                .order_by('-due_date')
+                .exclude(form__form_status__in=[UNAPPROVED, DENIED, COMPLETED]) \
+                .filter(form__requested_borrow_date=today+next_day) \
+                .order_by('-form__due_date')
             if tomorrow_ext_records.exists():
                 info['is_available'] = False
-                info['expected_availability_date'] = tomorrow_ext_records.first().due_date
+                info['expected_availability_date'] = tomorrow_ext_records.first().form.due_date
 
         if info['is_available'] is False:
             # We check here to see how the chain of external borrowing forms could affect the availability date
             while True:
                 qs = self.ext_borrow_records \
-                    .exclude(due_date=None) \
-                    .filter(Q(requested_borrow_date=info['expected_availability_date'] + next_day)
-                            | Q(requested_borrow_date=info['expected_availability_date'])) \
-                    .order_by('-due_date')
+                    .exclude(form__form_status__in=[UNAPPROVED, DENIED, COMPLETED]) \
+                    .filter(Q(form__requested_borrow_date=info['expected_availability_date'] + next_day)
+                            | Q(form__requested_borrow_date=info['expected_availability_date'])) \
+                    .order_by('-form__due_date')
                 if qs.exists() is False:
                     break
-                info['expected_availability_date'] = qs.first().due_date
+                info['expected_availability_date'] = qs.first().form.due_date
 
         if info['is_available'] is True:
             # The item is confirmed available, so calculate the maximum due date for it.
@@ -193,12 +205,12 @@ class Item(models.Model):
             # Finally, if there's a pending external borrowing form,
             # make sure to have the item returned before then
             qs = self.ext_borrow_records \
-                .exclude(due_date=None) \
-                .filter(date_returned=None) \
-                .order_by('-due_date')
+                .exclude(form__form_status__in=[UNAPPROVED, DENIED, COMPLETED]) \
+                .filter(form__requested_borrow_date__gte=today) \
+                .order_by('-form__due_date')
 
             if qs.exists():
-                due_dates.append(qs.first().requested_borrow_date+datetime.timedelta(days=-1))
+                due_dates.append(qs.first().form.requested_borrow_date+datetime.timedelta(days=-1))
 
             info['max_due_date'] = min(due_dates)
 
@@ -294,10 +306,10 @@ class BorrowRecord(models.Model):
 
 
 class ExternalBorrowingForm(models.Model):
-    UNAPPROVED = 'U'
-    DENIED = 'D'
-    APPROVED = 'A'
-    COMPLETED = 'C'  # For forms that were approved and have been fully completely
+    UNAPPROVED = UNAPPROVED
+    DENIED = DENIED
+    APPROVED = APPROVED
+    COMPLETED = COMPLETED  # For forms that were approved and have been fully completely
 
     STATUS_CHOICES = [
         (UNAPPROVED, 'Unapproved'),
@@ -321,7 +333,7 @@ class ExternalBorrowingForm(models.Model):
 
 class ExternalBorrowingItemRecord(models.Model):
     form = models.ForeignKey(ExternalBorrowingForm, on_delete=models.CASCADE, related_name='requested_items')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records')
 
     # These fields are set when the borrower collects the item
     borrower_name = models.CharField(max_length=200, blank=True)
