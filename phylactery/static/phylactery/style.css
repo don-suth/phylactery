@@ -9,7 +9,7 @@
 }
 
 .item-detail-card {
-    max-width: 288px;
+    min-width: 288px;
     float: right;
     margin-left: 10px;
     margin-bottom: 10px;
@@ -21,7 +21,7 @@
 
 @media (max-width: 576px) {
     .item-detail-card {
-        width: 100%;
+        width: 288px;
         float: none;
         margin-left: auto;
         margin-right: auto;
@@ -29,6 +29,11 @@
     .item-card-img {
         max-width: 288px;
     }
+}
+
+.item-detail-img {
+    max-height: 400px;
+    object-fit: contain;
 }
 
 .list-card-image {
