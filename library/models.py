@@ -241,6 +241,41 @@ class Item(models.Model):
     def all_tags(self):
         return self.get_base_tags.all().union(self.get_computed_tags.all())
 
+    @property
+    def players_display(self):
+        # Returns a string rep of the player count
+        if not (self.min_players or self.max_players):
+            # No players specified
+            return ""
+        if self.min_players == self.max_players:
+            if self.max_players == 1:
+                return "1 player"
+            else:
+                return "{0} players".format(self.max_players)
+        if not self.max_players:
+            # There's a min but no max
+            return "{0}+ players".format(self.min_players)
+        if not self.min_players:
+            # There's a max but no min
+            return "1 - {0} players".format(self.max_players)
+        return "{0} - {1} players".format(self.min_players, self.max_players)
+
+    @property
+    def play_time_display(self):
+        # Returns a string rep of the play time
+        if not self.play_time:
+            return ""
+        hours = self.play_time // 60
+        plural_hours = 's' if hours != 1 else ''
+        minutes = self.play_time % 60
+        plural_minutes = 's' if minutes != 1 else ''
+        if hours == 0:
+            return "~{0} min{1}".format(minutes, plural_minutes)
+        if minutes == 0:
+            return "~{0} hour{1}".format(hours, plural_hours)
+        return "~{0} hour{1} {2} min{3}".format(hours, plural_hours, minutes, plural_minutes)
+
+
 
 class ItemBaseTags(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='base_tags')

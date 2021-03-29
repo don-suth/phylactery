@@ -8,28 +8,59 @@
 <h2 class="">{{ item.name }}</h2>
 <div class="card item-detail-card">
     <img src="{{ item.image.url }}" class="card-img-top item-detail-img" alt="Image for {{ item.name }}">
-    <table class="table table-sm mb-0">
+    <table class="table table-sm mb-0 text-center">
         <tbody>
             <tr class="">
-                <td class="pl-2"><b>Borrowing status:</b></td>
+                <td class="pl-2" colspan="{{ colspan }}"><b>Type:</b> {{ item.get_type_display }}</td>
+            </tr>
+            {% if item.players_display and item.play_time_display %}
+                <tr class="">
+                    <td class="half-cell">
+                        <i class="bi-people-fill" role="img" aria-label="Players"></i><br />
+                        {{ item.players_display }}
+                    </td>
+                    <td>
+                        <i class="bi-clock" role="img" aria-label="Play Time"></i><br />
+                        {{ item.play_time_display }}
+                    </td>
+                </tr>
+            {% elif item.players_display %}
+                <tr class="">
+                    <td colspan="{{ colspan }}">
+                        <i class="bi-people-fill"role="img" aria-label="Players"></i><br />
+                        {{ item.players_display }}
+                    </td>
+                </tr>
+            {% elif item.play_time_display %}
+                <tr class="">
+                    <td colspan="{{ colspan }}">
+                        <i class="bi-clock"role="img" aria-label="Play Time"></i><br />
+                        {{ item.play_time_display }}
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tbody>
+            <tr class="">
+                <td class="pl-2" colspan="{{ colspan }}"><b>Borrowing status:</b></td>
             </tr>
             <tr class="">
                 {% if item_info.is_available is True and item.high_demand is True %}
-                    <td class="pl-2 table-warning">Available to borrow!<br />(High Demand Item)</td>
+                    <td class="pl-2 table-warning" colspan="{{ colspan }}">Available to borrow!<br />(High Demand Item)</td>
                 {% elif item_info.is_available is True %}
-                    <td class="pl2 table-success">Available to borrow!</td>
+                    <td class="pl2 table-success" colspan="{{ colspan }}">Available to borrow!</td>
                 {% else %}
-                    <td class="pl-2 table-danger">Unavailable to borrow</td>
+                    <td class="pl-2 table-danger" colspan="{{ colspan }}">Unavailable to borrow</td>
                 {% endif %}
             </tr>
             <tr class="">
-                <td class="pl-2"><b>Clubroom status:</b></td>
+                <td class="pl-2" colspan="{{ colspan }}"><b>Clubroom status:</b></td>
             </tr>
             <tr class="">
                 {% if item_info.in_clubroom is True %}
-                    <td class="pl-2 table-success">Available in the clubroom!</td>
+                    <td class="pl-2 table-success" colspan="{{ colspan }}">Available in the clubroom!</td>
                 {% else %}
-                    <td class="pl-2 table-danger">Due back
+                    <td class="pl-2 table-danger" colspan="{{ colspan }}">Due back
                         {% if today %}
                             today
                         {% elif tomorrow %}
@@ -39,20 +70,33 @@
                         {% endif %}</td>
                 {% endif %}
             </tr>
+            <tr class="">
+                <td class="" colspan="{{ colspan }}"><a href="{% url 'library:detail-id' item.pk %}">Permalink</a></td>
+            </tr>
         </tbody>
     </table>
 </div>
-<p>
-    {{ item.description|markdownify }}
-</p>
 
-<p>Condition: {{ item.condition }}</p>
-<p>Notes: {{ item.notes }}</p>
-<p>Type: {{ item.get_type_display }}</p>
-<p>Tags:
-{% for tag in item.all_tags %}
-<a href="{% url 'library:tag-list' tag.pk %}" role="button" class="btn btn-outline-dark">{{ tag }}</a>
-{% endfor %}
-</p>
-<p>Here is the slug url for this item: <a href="{% url 'library:detail-id' item.pk %}">Link</a> </p>
+<div class="card">
+    <h5 class="card-header">Description</h5>
+    <div class="card-body">
+        <p class="card-text">{{ item.description|markdownify }}</p>
+    </div>
+    {% if item.notes %}
+    <h5 class="card-header card-mid-header">Notes</h5>
+    <div class="card-body">
+        <p class="card-text">{{ item.notes }}</p>
+    </div>
+    {% endif %}
+    <h5 class="card-header card-mid-header">Tags</h5>
+    <div class="card-body">
+        <p class="card-text tag-group">
+            {% for tag in item.all_tags %}
+                <a href="{% url 'library:tag-list' tag.pk %}" role="button" class="btn btn-outline-dark">{{ tag }}</a>
+            {% endfor %}
+        </p>
+    </div>
+
+</div>
+
 {% endblock %}

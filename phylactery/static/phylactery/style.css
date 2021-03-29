@@ -21,7 +21,7 @@
 
 @media (max-width: 576px) {
     .item-detail-card {
-        width: 288px;
+        width: 100%;
         float: none;
         margin-left: auto;
         margin-right: auto;
@@ -128,4 +128,17 @@ body {
 
 .form-group-sm {
     margin-bottom: 0px;
+}
+
+.card-mid-header {
+    border-top: 1px solid rgba(0,0,0,.125)
+}
+
+.tag-group {
+    line-height: 2.8;
+}
+
+.half-cell {
+    width: 50%;
+    border-right: 1px solid #dee2e6;
 }
