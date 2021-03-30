@@ -344,6 +344,16 @@ class MemberAutocomplete(autocomplete.Select2QuerySetView):
 			qs = Member.objects.all()
 		else:
 			qs = Member.objects.none()
+			return qs
 		if self.q:
-			qs = qs.filter(Q(first_name__icontains=self.q) | Q(last_name__icontains=self.q))
+			terms = self.q.split()
+			q_objects = []
+
+			for search_term in terms:
+				q_objects.append(
+					Q(first_name__icontains=search_term)
+					| Q(last_name__icontains=search_term)
+					| Q(preferred_name__icontains=search_term)
+				)
+			qs = qs.filter(*q_objects)
 		return qs
