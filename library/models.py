@@ -70,6 +70,9 @@ class Item(models.Model):
 
     image = models.ImageField(upload_to=image_file_name, null=True)
 
+    class Meta:
+        ordering = ['name']
+
     @property
     def get_base_tags(self):
         # Returns the base tag TaggableManager, or creates it if it doesn't exist
