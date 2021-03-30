@@ -14,16 +14,7 @@ Members:
     - TODO (Accounts): Add a password reset/change feature to accounts
 
 Library:
-    - TODO: (Library) Add playtime to library items
-        - Allow null values
-        - Uses the minutes units - convert to hours if above 59 minutes.
-        - Eg. 40 -> "40 mins", 80 -> "1 hour 20 mins"
-    - TODO: (Library) Add player numbers to library items
-        - Allow null values.
-        - If both null, display nothing.
-        - If max is null and min is X, display "X+ players".
-        - If min is null and max is X, display "1 - X players."
-        - If min is X and max is Y, display "X - Y players"
+    - TODO (Library) Add Library Strikes
     - TODO (Library) Email relevant people when:
         - item is borrowed
         - form is approved/denied
@@ -63,7 +54,16 @@ Completed tasks:
         - DONE: (Library) Add borrowing records, and a checkout system for logged in gatekeepers, tie in with memberDB
         - DONE: (Library) Make Tag non-mandatory
         - DONE: Add a reservation form for events and external clubs, items aren't borrowable if reserved.
-        - Make sure gatekeepers can authorising the borrowing/returning
-        - Make form approving only for Librarian/Pres/VP
-
+        - DONE: Make sure gatekeepers can authorising the borrowing/returning
+        - DONE: Make form approving only for Librarian/Pres/VP
+        - DONE: (Library) Add playtime to library items
+            - Allow null values
+            - Uses the minutes units - convert to hours if above 59 minutes.
+            - Eg. 40 -> "40 mins", 80 -> "1 hour 20 mins"
+        - DONE: (Library) Add player numbers to library items
+            - Allow null values.
+            - If both null, display nothing.
+            - If max is null and min is X, display "X+ players".
+            - If min is null and max is X, display "1 - X players."
+            - If min is X and max is Y, display "X - Y players"
 
