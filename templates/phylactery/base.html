@@ -65,6 +65,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarAccountDropdown">
                             {% if user.is_authenticated %}
                                 <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Logged in as {{ user.username }}!</span>
+                                <a class="dropdown-item" href="{% url 'account:password_change' %}">Change your Password</a>
                                 <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
                             {% else %}
                                 <span class="dropdown-item disabled" style="font-weight:bold; color:black;">You are not currently signed in.</span>

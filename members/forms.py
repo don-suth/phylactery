@@ -1,5 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField
+from django.contrib.auth.forms import (
+    UserCreationForm, AuthenticationForm, UsernameField,
+    PasswordChangeForm, PasswordResetForm,
+)
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from crispy_forms.helper import FormHelper
@@ -260,5 +263,27 @@ class LoginForm(AuthenticationForm):
                     Submit('submit', 'Submit', css_class='btn-primary'),
                 ),
                 style="max-width: 576px", css_class="container"
+            )
+        )
+
+
+class MyPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Change Password',
+                    HTML("""
+                        <p>To change your password, enter your old password, 
+                        and your new password twice to confirm.</p>
+                    """),
+                    'old_password',
+                    'new_password1',
+                    'new_password2',
+                    Submit('submit', 'Submit', css_class='btn-primary'),
+                )
             )
         )

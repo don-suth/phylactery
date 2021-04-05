@@ -1,7 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.views import LoginView
-from .forms import SignupForm, LoginForm, NewMembershipForm, OldMembershipForm
+from django.urls import reverse_lazy
+from django.contrib.auth.views import (
+	LoginView, PasswordChangeView, PasswordChangeDoneView, PasswordResetView,
+	PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView,
+)
+from .forms import SignupForm, LoginForm, NewMembershipForm, OldMembershipForm, MyPasswordChangeForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -86,6 +90,34 @@ def activate_view(request, uidb64, token):
 class MyLoginView(LoginView):
 	template_name = 'account/login.html'
 	authentication_form = LoginForm
+
+
+class MyPasswordChangeView(PasswordChangeView):
+	form_class = MyPasswordChangeForm
+	success_url = reverse_lazy('account:password_change_done')
+	template_name = 'account/password_change.html'
+
+
+@gatekeeper_required
+def my_password_change_done_view(request):
+	messages.success(request, 'Your password was changed successfully.')
+	return redirect('home')
+
+
+class MyPasswordResetView(PasswordResetView):
+	pass
+
+
+class MyPasswordResetDoneView(PasswordResetDoneView):
+	pass
+
+
+class MyPasswordResetConfirmView(PasswordResetConfirmView):
+	pass
+
+
+class MyPasswordResetCompleteView(PasswordResetCompleteView):
+	pass
 
 
 @method_decorator(gatekeeper_required, name='dispatch')
