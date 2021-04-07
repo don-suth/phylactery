@@ -1,14 +1,15 @@
 from django import forms
 from django.contrib.auth.forms import (
     UserCreationForm, AuthenticationForm, UsernameField,
-    PasswordChangeForm, PasswordResetForm,
+    PasswordChangeForm, PasswordResetForm, _unicode_ci_compare
 )
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
-from .models import MemberFlag
+from .models import MemberFlag, UnigamesUser
 
 number_validator = RegexValidator(regex=r"^[0-9]+$")
 no_student_number = RegexValidator(
@@ -287,3 +288,84 @@ class MyPasswordChangeForm(PasswordChangeForm):
                 )
             )
         )
+
+
+class MyPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(
+        label='Email',
+        max_length=254,
+        widget=forms.EmailInput(attrs={'autocomplete': 'email'}),
+        required=False
+    )
+    username = forms.CharField(
+        label='Username',
+        max_length=254,
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Reset Password',
+                    HTML("""
+                        <p>To reset your password, 
+                        enter your email address or your username below.</p>
+                    """),
+                    'email',
+                    'username',
+                    Submit('submit', 'Submit', css_class='btn-primary'),
+                )
+            )
+        )
+
+    def clean(self):
+        if not (self.cleaned_data['username'] or self.cleaned_data['email']):
+            raise ValidationError('Exactly one of the username or email fields must be submitted.')
+        if self.cleaned_data['username'] and self.cleaned_data['email']:
+            raise ValidationError('Only one of the email or username fields should be filled out.')
+
+    @staticmethod
+    def get_user_by_username(username):
+        active_users = UnigamesUser.objects.filter(
+            username__iexact=username,
+            member__isnull=False,
+            is_active=True
+        )
+        valid_users = [
+            u for u in active_users
+            if u.has_usable_password() and
+            _unicode_ci_compare(u.username, username)
+        ]
+        if len(valid_users) == 1:
+            return valid_users
+        return []
+
+    @staticmethod
+    def get_user_by_email(email):
+        active_users = UnigamesUser.objects.filter(
+            is_active=True,
+            member__isnull=False,
+            email__iexact=email
+        )
+        valid_users = [
+            u for u in active_users
+            if u.has_usable_password() and
+            _unicode_ci_compare(u.email, email)
+        ]
+        if len(valid_users) == 1:
+            return valid_users
+        return []
+
+    def get_users(self, *args):
+        # Overrides the default method to use our method.
+        # We don't care about the *args, we just use the cleaned data
+        users = []
+        if self.cleaned_data['email']:
+            users = self.get_user_by_email(self.cleaned_data['email'])
+        elif self.cleaned_data['username']:
+            users = self.get_user_by_username(self.cleaned_data['username'])
+        return users

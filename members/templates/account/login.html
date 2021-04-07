@@ -18,4 +18,5 @@
 {% csrf_token %}
 {% crispy form %}
 </form>
+<p><a href="{% url 'account:password_reset' %}">Forgotten your password?</a></p>
 {% endblock %}

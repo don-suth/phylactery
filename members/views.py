@@ -5,7 +5,10 @@ from django.contrib.auth.views import (
 	LoginView, PasswordChangeView, PasswordChangeDoneView, PasswordResetView,
 	PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView,
 )
-from .forms import SignupForm, LoginForm, NewMembershipForm, OldMembershipForm, MyPasswordChangeForm
+from .forms import (
+	SignupForm, LoginForm, NewMembershipForm,
+	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm
+)
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -105,7 +108,11 @@ def my_password_change_done_view(request):
 
 
 class MyPasswordResetView(PasswordResetView):
-	pass
+	email_template_name = 'account/password_reset_email.html'
+	form_class = MyPasswordResetForm
+	subject_template_name = 'account/password_reset_subject.html'
+	template_name = 'account/password_reset_form.html'
+	success_url = reverse_lazy('account:password_reset_done')
 
 
 class MyPasswordResetDoneView(PasswordResetDoneView):
