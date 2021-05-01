@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import (
     UserCreationForm, AuthenticationForm, UsernameField,
-    PasswordChangeForm, PasswordResetForm, _unicode_ci_compare
+    PasswordChangeForm, PasswordResetForm, _unicode_ci_compare,
+    SetPasswordForm
 )
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -369,3 +370,23 @@ class MyPasswordResetForm(PasswordResetForm):
         elif self.cleaned_data['username']:
             users = self.get_user_by_username(self.cleaned_data['username'])
         return users
+
+
+class MySetPasswordForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Set your new password',
+                    HTML("""
+                            <p>Please enter your new password twice so we can verify you typed it in correctly.</p>    
+                        """),
+                    'new_password1',
+                    'new_password2',
+                    Submit('submit', 'Submit', css_class='btn-primary'),
+                )
+            )
+        )

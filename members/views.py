@@ -7,7 +7,7 @@ from django.contrib.auth.views import (
 )
 from .forms import (
 	SignupForm, LoginForm, NewMembershipForm,
-	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm
+	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm
 )
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_text
@@ -116,15 +116,17 @@ class MyPasswordResetView(PasswordResetView):
 
 
 class MyPasswordResetDoneView(PasswordResetDoneView):
-	pass
+	template_name = 'account/password_reset_done.html'
 
 
 class MyPasswordResetConfirmView(PasswordResetConfirmView):
-	pass
+	success_url = reverse_lazy('account:password_reset_complete')
+	template_name = 'account/password_reset_confirm.html'
+	form_class = MySetPasswordForm
 
 
 class MyPasswordResetCompleteView(PasswordResetCompleteView):
-	pass
+	template_name = 'account/password_reset_complete.html'
 
 
 @method_decorator(gatekeeper_required, name='dispatch')
