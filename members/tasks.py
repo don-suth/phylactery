@@ -3,7 +3,6 @@ from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 
-#
 
 @shared_task(name="send_activation_email_task")
 def send_activation_email_task(email, message):
