@@ -2,3 +2,4 @@
 /venv/
 /media/
 local_settings.py
+dump.rdb
