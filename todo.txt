@@ -25,6 +25,7 @@ Cron-Jobs:
     - TODO: Check for expired membership permissions each day
     - TODO: Delete old borrowing records after one year.
     - TODO: Delete membership records upon two years of inactivity
+    - TODO: Send emails about borrowed items the day before/the day that they are due.
 
 ---
 
