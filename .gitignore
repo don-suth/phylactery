@@ -3,3 +3,4 @@
 /media/
 /local_settings.py
 /dump.rdb
+/celerybeat-schedule
