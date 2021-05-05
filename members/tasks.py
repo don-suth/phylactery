@@ -4,6 +4,26 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 
+@shared_task(name="send_single_email_task")
+def send_single_email_task(email_address, message):
+    """
+        Sends an email to a single email address asynchronously.
+    """
+    logger.info("Sent activation email")
+    return
+
+
+@shared_task(name="send_mass_email_task")
+def send_mass_email_task(email_addresses, message):
+    """
+        Sends the same email en masse to a list of emails.
+        Intended for mailing list purposes.
+    """
+
+    logger.info('Emails not sent.')
+    return
+
+
 @shared_task(name="cleanup_permissions_task")
 def cleanup_permissions_task():
     """
@@ -24,44 +44,4 @@ def send_due_date_reminder_task():
     """
 
     logger.info('Reminders would be sent here.')
-    return
-
-
-@shared_task(name="send_activation_email_task")
-def send_activation_email_task(email, message):
-    """
-        Sends an email when someone wants to activate their account.
-    """
-    logger.info("Sent activation email")
-    return
-
-
-@shared_task(name="send_reset_email_task")
-def send_reset_email_task(email, message):
-    """
-        Sends an email when someone wants to reset their password.
-    """
-
-    logger.info("Sent password reset email")
-    return
-
-
-@shared_task(name="send_borrow_receipt_task")
-def send_borrow_receipt_task():
-    """
-        Sends a receipt to the borrower when items are borrowed.
-    """
-
-    logger.info('Receipt would be sent here.')
-    return
-
-
-@shared_task(name="send_mass_email_task")
-def send_mass_email_task():
-    """
-        Sends the same email en masse to a list of emails.
-        Intended for mailing list purposes.
-    """
-
-    logger.info('Emails not sent.')
     return
