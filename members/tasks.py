@@ -1,27 +1,44 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
+from django.core.mail import EmailMessage, get_connection
+
 logger = get_task_logger(__name__)
 
 
 @shared_task(name="send_single_email_task")
-def send_single_email_task(email_address, message):
+def send_single_email_task(email_address, subject, message):
     """
         Sends an email to a single email address asynchronously.
     """
-    logger.info("Sent activation email")
-    return
+    email = EmailMessage(
+        subject=subject,
+        body=message,
+        to=[email_address]
+    )
+
+    email.send()
+    logger.info("Sent email to "+email_address)
 
 
 @shared_task(name="send_mass_email_task")
-def send_mass_email_task(email_addresses, message):
+def send_mass_email_task(email_addresses, subject, message, unsubscribe_footer=True):
     """
         Sends the same email en masse to a list of emails.
         Intended for mailing list purposes.
     """
+    connection = get_connection()
+    connection.open()
+    for email_address in email_addresses:
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            to=[email_address]
+        )
+        email.send()
+    connection.close()
 
-    logger.info('Emails not sent.')
-    return
+    logger.info('Sent emails to {0} recipients.'.format(len(email_addresses)))
 
 
 @shared_task(name="cleanup_permissions_task")
