@@ -7,14 +7,15 @@ logger = get_task_logger(__name__)
 
 
 @shared_task(name="send_single_email_task")
-def send_single_email_task(email_address, subject, message):
+def send_single_email_task(email_address, subject, message, unsubscribe_footer=False, connection=None):
     """
         Sends an email to a single email address asynchronously.
     """
     email = EmailMessage(
         subject=subject,
         body=message,
-        to=[email_address]
+        to=[email_address],
+        connection=connection,
     )
 
     email.send()
@@ -48,17 +49,9 @@ def cleanup_permissions_task():
         Cleans up permissions based on expired ranks.
         Intended to be run every day.
     """
-    logger.info("No permissions to clean up.")
-    return
-
-
-@shared_task(name="send_due_date_reminder_task")
-def send_due_date_reminder_task():
-    """
-        Scheduled task.
-        Sends a reminder to all borrowers of items due the next day.
-        Intended to be run every day.
-    """
-
-    logger.info('Reminders would be sent here.')
-    return
+    from .models import Member
+    successful = 0
+    for member in Member.objects.all():
+        if member.sync_permissions():
+            successful += 1
+    logger.info('Verified the permissions of {0} users.'.format(successful))
