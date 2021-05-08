@@ -46,7 +46,7 @@ def send_due_date_tomorrow_reminder_task():
                 'first_name': member.first_name,
                 'today_or_tomorrow': 'tomorrow',
                 'due_date': tomorrow,
-                'item_list': members_with_items[member]
+                'record_list': members_with_items[member]
             }
         )
         email_address = member.email_address
