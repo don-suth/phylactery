@@ -42,7 +42,7 @@ def send_due_date_tomorrow_reminder_task():
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Tomorrow'
         email_body = loader.render_to_string(
-            'library/email_reminder.html', {
+            'library/email_reminder_tomorrow.html', {
                 'first_name': member.first_name,
                 'today_or_tomorrow': 'tomorrow',
                 'due_date': tomorrow,
