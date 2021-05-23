@@ -1,11 +1,29 @@
-{% autoescape off %}
-Hi there {{ user.username }},
+{% extends 'phylactery/email_base.html' %}
 
-You are receiving this email because you attempted to sign-up for an account on the Unigames website.
-Please click on this link to confirm your registration.
+{% block title %}Account Activation{% endblock %}
+{% block email_title %}Account Activation{% endblock %}
 
-http://{{ domain }}{% url 'account:activate' uidb64=uid token=token %}
+{% block preheader %}Hi there {{ user.username }}, please activate your Unigames account.{% endblock %}
 
-Regards,
-Unigames
-{% endautoescape %}
+{% block content %}
+<p>Hi there {{ user.username }}</p>
+<p>You are receiving this email because you attempted to sign-up for an account on the Unigames website.</p>
+<p>Please click on the button below to complete your registration.</p>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+    <tbody>
+    <tr>
+        <td align="left">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr>
+                    <td> <a href="http://{{ domain }}{% url 'account:activate' uidb64=uid token=token %}" target="_blank">Activate Account</a> </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p>Regards,</p>
+<p>Unigames</p>
+{% endblock %}
