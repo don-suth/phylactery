@@ -16,7 +16,6 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from phylactery.tasks import send_single_email_task
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from .models import Member, Membership, MemberFlag, switch_to_proxy
 from .decorators import gatekeeper_required
@@ -30,6 +29,33 @@ from dal import autocomplete
 from django.db.models import Q
 from library.models import BorrowRecord
 import datetime
+from django.utils.html import strip_tags
+from premailer import transform
+
+
+def send_activation_email(email_address, user, uid, token, domain):
+	subject = 'Activate your Unigames account'
+	plaintext_message = render_to_string('account/acc_active_email.html', {
+		'user': user,
+		'domain': domain,
+		'uid': uid,
+		'token': token,
+		'override_base': 'phylactery/email_base.txt'
+	})
+	plaintext_message = strip_tags(plaintext_message)
+	html_message = render_to_string('account/acc_active_email.html', {
+		'user': user,
+		'domain': domain,
+		'uid': uid,
+		'token': token,
+	})
+	html_message = transform(html_message)
+	send_single_email_task.delay(
+		email_address,
+		subject,
+		message=plaintext_message,
+		html_message=html_message,
+	)
 
 
 def signup_view(request):
@@ -48,16 +74,12 @@ def signup_view(request):
 				user.save()
 				member.user = user
 				member.save()
-				current_site = get_current_site(request)
-				mail_subject = 'Activate your Unigames account.'
-				message = render_to_string('account/acc_active_email.html', {
-					'user': user,
-					'domain': current_site.domain,
-					'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-					'token': account_activation_token.make_token(user),
-				})
+				domain = get_current_site(request).domain
 				to_email = form.cleaned_data.get('email')
-				send_single_email_task.delay(to_email, mail_subject, message)
+				uid = urlsafe_base64_encode(force_bytes(user.pk))
+				token = account_activation_token.make_token(user)
+
+				send_activation_email(to_email, user, uid, token, domain)
 			else:
 				# The form is valid, but the member either doesn't exist or is not a gatekeeper.
 				# We give them the same response, but don't do anything with the data to prevent leaking.
