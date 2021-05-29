@@ -2,7 +2,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.template import loader
 from django.core.mail import get_connection
-from members.tasks import send_single_email_task
+from phylactery.tasks import send_single_email_task
 import datetime
 
 from .models import BorrowRecord
