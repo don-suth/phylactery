@@ -12,7 +12,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
 from .models import MemberFlag, UnigamesUser
-from .tasks import send_single_email_task
+from phylactery.tasks import send_single_email_task
 
 number_validator = RegexValidator(regex=r"^[0-9]+$")
 no_student_number = RegexValidator(
