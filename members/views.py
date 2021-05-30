@@ -14,7 +14,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.template.loader import render_to_string
 from .tokens import account_activation_token
-from phylactery.tasks import send_single_email_task
+from phylactery.tasks import send_single_email_task, compose_html_email
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from .models import Member, Membership, MemberFlag, switch_to_proxy
@@ -35,21 +35,13 @@ from premailer import transform
 
 def send_activation_email(email_address, user, uid, token, domain):
 	subject = 'Activate your Unigames account'
-	plaintext_message = render_to_string('account/acc_active_email.html', {
+	context = {
 		'user': user,
 		'domain': domain,
 		'uid': uid,
 		'token': token,
-		'override_base': 'phylactery/email_base.txt'
-	})
-	plaintext_message = strip_tags(plaintext_message)
-	html_message = render_to_string('account/acc_active_email.html', {
-		'user': user,
-		'domain': domain,
-		'uid': uid,
-		'token': token,
-	})
-	html_message = transform(html_message)
+	}
+	plaintext_message, html_message = compose_html_email('account/acc_active_email.html', context)
 	send_single_email_task.delay(
 		email_address,
 		subject,
