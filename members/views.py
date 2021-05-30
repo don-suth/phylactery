@@ -418,3 +418,7 @@ class MemberAutocomplete(autocomplete.Select2QuerySetView):
 				)
 			qs = qs.filter(*q_objects)
 		return qs
+
+
+def unsubscribe_view(*args, **kwargs):
+	return HttpResponse("Under construction")
