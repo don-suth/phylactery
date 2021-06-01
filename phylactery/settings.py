@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'phylactery.context_processors.navbar_colour_settings',
                 'phylactery.context_processors.unigames_user_processor',
+                'phylactery.context_processors.domain_processor'
             ],
         },
     },
