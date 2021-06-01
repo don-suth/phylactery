@@ -9,7 +9,7 @@ from .forms import (
 	SignupForm, LoginForm, NewMembershipForm,
 	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm
 )
-from django.contrib.sites.shortcuts import get_current_site
+
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.template.loader import render_to_string
@@ -33,15 +33,14 @@ from django.utils.html import strip_tags
 from premailer import transform
 
 
-def send_activation_email(email_address, user, uid, token, domain):
+def send_activation_email(email_address, user, uid, token, request):
 	subject = 'Activate your Unigames account'
 	context = {
 		'user': user,
-		'domain': domain,
 		'uid': uid,
 		'token': token,
 	}
-	plaintext_message, html_message = compose_html_email('account/acc_active_email.html', context)
+	plaintext_message, html_message = compose_html_email('account/acc_active_email.html', context, request=request)
 	send_single_email_task.delay(
 		email_address,
 		subject,
@@ -66,12 +65,11 @@ def signup_view(request):
 				user.save()
 				member.user = user
 				member.save()
-				domain = get_current_site(request).domain
 				to_email = form.cleaned_data.get('email')
 				uid = urlsafe_base64_encode(force_bytes(user.pk))
 				token = account_activation_token.make_token(user)
 
-				send_activation_email(to_email, user, uid, token, domain)
+				send_activation_email(to_email, user, uid, token, request)
 			else:
 				# The form is valid, but the member either doesn't exist or is not a gatekeeper.
 				# We give them the same response, but don't do anything with the data to prevent leaking.

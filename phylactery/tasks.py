@@ -13,14 +13,14 @@ from premailer import transform
 logger = get_task_logger(__name__)
 
 
-def compose_html_email(template_name, context):
+def compose_html_email(template_name, context, request=None):
     """
         Returns an email template, ready-to-email, in both plaintext and html form.
     """
-    html_message = render_to_string(template_name, context)
+    html_message = render_to_string(template_name, context, request=request)
     html_message = transform(html_message)
     context['override_base'] = 'phylactery/email_base.txt'
-    plaintext_message = render_to_string(template_name, context)
+    plaintext_message = render_to_string(template_name, context, request=request)
     plaintext_message = strip_tags(plaintext_message)
     return plaintext_message, html_message
 
