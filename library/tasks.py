@@ -2,7 +2,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.template import loader
 from django.core.mail import get_connection
-from phylactery.tasks import send_single_email_task
+from phylactery.tasks import send_single_email_task, compose_html_email
 import datetime
 
 from .models import BorrowRecord
@@ -38,19 +38,22 @@ def send_due_date_tomorrow_reminder_task():
 
     connection = get_connection()
     connection.open()
+
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Tomorrow'
-        email_body = loader.render_to_string(
-            'library/email_reminder_tomorrow.html', {
-                'first_name': member.first_name,
-                'due_date': tomorrow,
-                'record_list': members_with_items[member]
-            }
-        )
+        context = {
+            'first_name': member.first_name,
+            'due_date': tomorrow,
+            'record_list': members_with_items[member]
+        }
+        body, html_body = compose_html_email('library/email_reminder_tomorrow.html', context)
         email_address = member.email_address
-        send_single_email_task(email_address, email_subject, email_body, connection=connection)
+        send_single_email_task(email_address, email_subject, body, html_message=html_body, connection=connection)
     connection.close()
-    logger.info('Reminders would be sent here.')
+    number_of_emails = len(members_with_items)
+    logger.info(
+        'Sent "due-tomorrow" reminders to {0} member{1}.'.format(number_of_emails, "" if number_of_emails == 1 else "s")
+    )
     return
 
 
@@ -84,15 +87,17 @@ def send_due_date_today_reminder_task():
     connection.open()
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Today'
-        email_body = loader.render_to_string(
-            'library/email_reminder_tomorrow.html', {
-                'first_name': member.first_name,
-                'due_date': today,
-                'record_list': members_with_items[member]
-            }
-        )
+        context = {
+            'first_name': member.first_name,
+            'due_date': today,
+            'record_list': members_with_items[member]
+        }
+        body, html_body = compose_html_email('library/email_reminder_today.html', context)
         email_address = member.email_address
-        send_single_email_task(email_address, email_subject, email_body, connection=connection)
+        send_single_email_task(email_address, email_subject, body, html_message=html_body, connection=connection)
     connection.close()
-    logger.info('Reminders would be sent here.')
+    number_of_emails = len(members_with_items)
+    logger.info(
+        'Sent "due-today" reminders to {0} member{1}.'.format(number_of_emails, "" if number_of_emails == 1 else "s")
+    )
     return
