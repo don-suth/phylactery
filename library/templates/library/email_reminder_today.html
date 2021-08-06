@@ -1,17 +1,24 @@
-{% autoescape off %}
-Hi there {{ first_name }},
+{% extends override_base|default:'phylactery/email_base.html' %}
 
-This is an automated email to remind you that the following items that
-you have borrowed are due back today, {{ due_date|date:"l jS F" }}:
-{% for record in record_list %}
-- {{ record.item.name }}
-{% endfor %}
-Please note, failure to return these items today may result in
-library strikes being added to your account.
 
-If circumstances mean you are unable to return some or all of
-these items on time, please contact the Librarian as soon as possible.
+{% block title %}Reminder - Library Items Due Today{% endblock %}
+{% block email_title %}Reminder - Library Items Due Today{% endblock %}
 
-Kind regards,
-Unigames
-{% endautoescape %}
+{% block preheader %}Hi there {{ first_name }}, you have library items due today.{% endblock %}
+
+{% block content %}
+<p>Hi there {{ first_name }}</p>
+<p>This is an automated email to remind you that the following items that
+you have borrowed are due back today, {{ due_date|date:"l jS F" }}:</p>
+<ul>
+    {% for record in record_list %}
+        <li>{{ record.item.name }}</li>
+    {% endfor %}
+</ul>
+<p>Please note, failure to return these items today may result in
+library strikes being added to your account.</p>
+<p>If circumstances mean you are unable to return some or all of
+these items on time, please contact the Librarian as soon as possible.</p>
+<p>Regards, <br />
+Unigames</p>
+{% endblock %}
