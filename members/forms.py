@@ -334,7 +334,7 @@ class MyPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
 
-        message, html_message = compose_html_email('account/password_reset_email.html', context)
+        message, html_message = compose_html_email(email_template_name, context)
 
         subject = loader.render_to_string(subject_template_name, context)
         # Email subject *must not* contain newlines
