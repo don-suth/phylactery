@@ -74,11 +74,12 @@ def signup_view(request):
 				# The form is valid, but the member either doesn't exist or is not a gatekeeper.
 				# We give them the same response, but don't do anything with the data to prevent leaking.
 				pass
-			return HttpResponse("""
-			Form submission complete.
-			If you are a gatekeeper, an email to confirm your registration will sent to the specified email address.
-			If you didn't receive an email, try checking your spam box. If you suspect an error has been made,
-			contact an admin.""")
+			messages.success(
+				request,
+				"""Form submission complete. 
+				If your details were valid, an email will be sent to you with further instructions."""
+			)
+			return redirect("home")
 		else:
 			return render(request, 'account/signup.html', {'form': form})
 	else:
@@ -95,10 +96,11 @@ def activate_view(request, uidb64, token):
 	if user is not None and account_activation_token.check_token(user, token):
 		user.is_active = True
 		user.save()
-		return HttpResponse('Thank you for your email confirmation. Now you can log in to your account.')
+		messages.success(request, "Your account has now been activated. Feel free to log in!")
+		return redirect("home")
 	else:
-		return HttpResponse('Activation link is invalid!')
-
+		messages.error(request, "Your activation link was invalid. If you think this is a problem, please contact a webkeeper.")
+		return redirect("home")
 
 class MyLoginView(LoginView):
 	template_name = 'account/login.html'
