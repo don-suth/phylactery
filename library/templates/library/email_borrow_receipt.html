@@ -1,0 +1,23 @@
+{% extends override_base|default:'phylactery/email_base.html' %}
+
+
+{% block title %}Unigames Library Borrowing Receipt{% endblock %}
+{% block email_title %}Unigames Library Borrowing Receipt{% endblock %}
+
+{% block preheader %}Hi there {{ first_name }}, here's your receipt for the items you borrowed today.{% endblock %}
+
+{% block content %}
+<p>Hi there {{ first_name }}</p>
+<p>Here's your receipt for the items you borrowed at Unigames today!</p>
+<p>You borrowed the following items:</p>
+<ul>
+    {% for item_record in items %}
+        <li>{{ item_record.0 }} (due back {{ item_record.1|date:"l jS F" }})</li>
+    {% endfor %}
+</ul>
+<p>Please take note of the due date of each of these items, and remember to return them on or before the due date.</p>
+<p>If circumstances mean you are unable to return some or all of
+these items on time, please contact the Librarian as soon as possible.</p>
+<p>Regards, <br />
+Unigames</p>
+{% endblock %}
