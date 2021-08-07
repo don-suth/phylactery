@@ -15,6 +15,7 @@
         <li>{{ item_record.0 }} (due back {{ item_record.1|date:"l jS F Y" }})</li>
     {% endfor %}
 </ul>
+<p>This borrowing was authorised by {{ gatekeeper }} on {{ today|date:"jS F Y" }}.</p>
 <p>Please take note of the due date of each of these items, as they may be different,
     and remember to return them on or before the due date.</p>
 <p>If circumstances mean you are unable to return some or all of
