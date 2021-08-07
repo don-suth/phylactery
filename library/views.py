@@ -15,6 +15,7 @@ from django.contrib import messages
 from members.decorators import gatekeeper_required
 import datetime
 from django.core.exceptions import ObjectDoesNotExist
+from phylactery.tasks import compose_html_email, send_single_email_task
 # Create your views here.
 
 
@@ -229,6 +230,15 @@ def borrow_view_3(request):
             context['address'] = str(member_address)
             context['phone_number'] = str(member_phone_number)
             context['gatekeeper'] = str(auth_gatekeeper_borrow)
+            context['today'] = datetime.date.today()
+            subject = "Unigames Borrow Receipt"
+            message, html_message = compose_html_email('library/email_borrow_receipt.html', context)
+            send_single_email_task.delay(
+                borrowing_member.email_address,
+                subject,
+                message,
+                html_message=html_message
+            )
             return render(request, 'library/borrow_form_success.html', context)
         else:
             return render(request, 'library/borrow_form_2.html', {'formset': formset, 'borrow_form': borrow_form})
