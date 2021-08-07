@@ -12,7 +12,7 @@
 <p>You borrowed the following items:</p>
 <ul>
     {% for item_record in items %}
-        <li>{{ item_record.0 }} (due back {{ item_record.1|date:"l jS F" }})</li>
+        <li>{{ item_record.0 }} (due back {{ item_record.1|date:"l jS F Y" }})</li>
     {% endfor %}
 </ul>
 <p>Please take note of the due date of each of these items, and remember to return them on or before the due date.</p>
