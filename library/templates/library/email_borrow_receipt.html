@@ -7,12 +7,12 @@
 {% block preheader %}Hi there {{ member.first_name }}, here's your receipt for the items you borrowed today.{% endblock %}
 
 {% block content %}
-<p>Hi there {{ member.first_name }}</p>
-<p>Here's your receipt for the items you borrowed at Unigames today</p>
+<p>Hi there {{ member.first_name }},</p>
+<p>Here's your receipt for the items you borrowed at Unigames today.</p>
 <p>You borrowed the following items:</p>
 <ul>
-    {% for item_record in items %}
-        <li>{{ item_record.0 }} (due back {{ item_record.1|date:"l jS F Y" }})</li>
+    {% for item, due_date in items %}
+        <li>{{ item }} (due back {{ due_date|date:"l jS F Y" }})</li>
     {% endfor %}
 </ul>
 <p>This borrowing was authorised by {{ gatekeeper }} on {{ today|date:"jS F Y" }}.</p>

@@ -225,7 +225,7 @@ def borrow_view_3(request):
                     item=item,
                     due_date=due_date,
                 )
-                context['items'].append([str(item), str(due_date)])
+                context['items'].append([str(item), due_date])
             context['member'] = borrowing_member
             context['address'] = str(member_address)
             context['phone_number'] = str(member_phone_number)
