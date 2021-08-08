@@ -87,9 +87,11 @@
                             {% endif %}
                             {% if user.is_gatekeeper %}
                                 {% if user.is_staff %}<div class="dropdown-divider"></div>{% endif %}
-                                <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Gatekeeper actions:</span>
+                                <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Membership:</span>
                                 <a class="dropdown-item" href="{% url 'members:signup-home' %}">New Membership</a>
                                 <a class="dropdown-item" href="{% url 'members:member-list' %}">Member List</a>
+                                <span class="dropdown-item disabled" style="font-weight:bold; color:black;">Library:</span>
+                                <a class="dropdown-item" href="{% url 'library:borrow' %}">Borrow Items</a>
                                 <a class="dropdown-item" href="{% url 'library:overview' %}">Library Dashboard</a>
                             {% endif %}
                         </div>
