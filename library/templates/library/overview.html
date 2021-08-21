@@ -6,43 +6,43 @@
 
 <nav>
     <div class="nav nav-tabs nav-justified" id="nav-tab" role="tablist">
-        <a class="nav-link active" id="nav-currently-borrowed-tab" data-toggle="tab" href="#nav-currently-borrowed" role="tab" aria-controls="nav-currently-borrowed" aria-selected="true">
+        <a class="nav-link active" id="currently-borrowed" data-toggle="tab" href="#nav-currently-borrowed" role="tab" aria-controls="nav-currently-borrowed" aria-selected="true">
             Currently Borrowed
             {% if currently_borrowed.exists %}
                 <span class="badge badge-secondary">{{ currently_borrowed.count }}</span>
             {% endif %}
         </a>
         {% if librarian_permissions %}
-        <a class="nav-link" id="nav-needing-return-tab" data-toggle="tab" href="#nav-needing-return" role="tab" aria-controls="nav-needing-return" aria-selected="false">
+        <a class="nav-link" id="needing-return" data-toggle="tab" href="#nav-needing-return" role="tab" aria-controls="nav-needing-return" aria-selected="false">
             Verify Returns
             {% if needing_return.exists %}
                 <span class="badge badge-secondary">{{ needing_return.count }}</span>
             {% endif %}
         </a>
         {% endif %}
-        <a class="nav-link" id="nav-borrow-requests-tab" data-toggle="tab" href="#nav-borrow-requests" role="tab" aria-controls="nav-borrow-requests" aria-selected="false">
+        <a class="nav-link" id="borrow-requests" data-toggle="tab" href="#nav-borrow-requests" role="tab" aria-controls="nav-borrow-requests" aria-selected="false">
             Borrow Requests
             <span class="badge badge-secondary">None!</span>
         </a>
-        <a class="nav-link" id="nav-members-borrowing-tab" data-toggle="tab" href="#nav-members-borrowing" role="tab" aria-controls="nav-members-borrowing" aria-selected="false">
+        <a class="nav-link" id="members-borrowing" data-toggle="tab" href="#nav-members-borrowing" role="tab" aria-controls="nav-members-borrowing" aria-selected="false">
             Members Borrowing
             {% if members_borrowing.exists %}
                 <span class="badge badge-secondary">{{ members_borrowing.count }}</span>
             {% endif %}
         </a>
-        <a class="nav-link" id="nav-overdue-tab" data-toggle="tab" href="#nav-overdue" role="tab" aria-controls="nav-overdue" aria-selected="false">
+        <a class="nav-link" id="overdue" data-toggle="tab" href="#nav-overdue" role="tab" aria-controls="nav-overdue" aria-selected="false">
             Overdue Items
             {% if overdue.exists %}
                 <span class="badge badge-secondary">{{ overdue.count }}</span>
             {% endif %}
         </a>
-        <a class="nav-link" id="nav-past-entries-tab" data-toggle="tab" href="#nav-past-entries" role="tab" aria-controls="nav-past-entries" aria-selected="false">
+        <a class="nav-link" id="past-entries" data-toggle="tab" href="#nav-past-entries" role="tab" aria-controls="nav-past-entries" aria-selected="false">
             Past Entries
         </a>
     </div>
 </nav>
 <div class="tab-content" id="nav-tabContent">
-    <div class="tab-pane show active" id="nav-currently-borrowed" role="tabpanel" aria-labelledby="nav-currently-borrowed-tab">
+    <div class="tab-pane show active" id="nav-currently-borrowed" role="tabpanel" aria-labelledby="currently-borrowed">
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -71,7 +71,7 @@
         </div>
     </div>
     {% if user.is_committee %}
-    <div class="tab-pane" id="nav-needing-return" role="tabpanel" aria-labelledby="nav-needing-return-tab">
+    <div class="tab-pane" id="nav-needing-return" role="tabpanel" aria-labelledby="needing-return">
         <div class="table-responsive">
             <form method="post" action="{% url 'library:overview' %}" name="return-items">
                 {% csrf_token %}
@@ -115,7 +115,7 @@
         </div>
     </div>
     {% endif %}
-    <div class="tab-pane" id="nav-borrow-requests" role="tabpanel" aria-labelledby="nav-borrow-requests-tab">
+    <div class="tab-pane" id="nav-borrow-requests" role="tabpanel" aria-labelledby="borrow-requests">
         <div class="table-responsive pt-3">
             {% if librarian_permissions %}
                 <h4>Unapproved borrow requests</h4>
@@ -250,7 +250,7 @@
             {% endif %}
         </div>
     </div>
-    <div class="tab-pane" id="nav-members-borrowing" role="tabpanel" aria-labelledby="nav-members-borrowing-tab">
+    <div class="tab-pane" id="nav-members-borrowing" role="tabpanel" aria-labelledby="members-borrowing">
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -276,7 +276,7 @@
             </table>
         </div>
     </div>
-    <div class="tab-pane" id="nav-overdue" role="tabpanel" aria-labelledby="nav-overdue-tab">
+    <div class="tab-pane" id="nav-overdue" role="tabpanel" aria-labelledby="overdue">
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -304,7 +304,7 @@
             </table>
         </div>
     </div>
-    <div class="tab-pane" id="nav-past-entries" role="tabpanel" aria-labelledby="nav-past-entries-tab">
+    <div class="tab-pane" id="nav-past-entries" role="tabpanel" aria-labelledby="past-entries">
                 <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -345,4 +345,18 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+var hash = location.hash.replace(/^#/, '');  // ^ means starting, meaning only match the first hash
+if (hash) {
+    $('.nav-tabs a[href="#' + hash + '"]').tab('show');
+}
+
+// Change hash for page-reload
+$('.nav-tabs a').on('shown.bs.tab', function (e) {
+    window.location.hash = e.target.hash;
+})
+</script>
 {% endblock %}
