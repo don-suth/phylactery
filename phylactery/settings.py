@@ -28,6 +28,7 @@ SECRET_KEY = get_random_secret_key()
 DEBUG = True
 
 ALLOWED_HOSTS = []
+SITE_ID = 1
 
 # Application definition
 
@@ -43,9 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'crispy_forms',
     'django.contrib.postgres',
     'markdownify',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +76,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'phylactery.context_processors.navbar_colour_settings',
                 'phylactery.context_processors.unigames_user_processor',
+                'phylactery.context_processors.domain_processor'
             ],
         },
     },
@@ -182,6 +186,14 @@ MARKDOWNIFY_WHITELIST_TAGS = [
  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
  'ul', 'li', 'span',
 ]
+
+# Celery Stuff
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Australia/Perth'
 
 
 try:

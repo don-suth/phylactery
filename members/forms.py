@@ -7,10 +7,12 @@ from django.contrib.auth.forms import (
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.template import loader
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
 from .models import MemberFlag, UnigamesUser
+from phylactery.tasks import send_single_email_task, compose_html_email
 
 number_validator = RegexValidator(regex=r"^[0-9]+$")
 no_student_number = RegexValidator(
@@ -328,6 +330,18 @@ class MyPasswordResetForm(PasswordResetForm):
             raise ValidationError('Exactly one of the username or email fields must be submitted.')
         if self.cleaned_data['username'] and self.cleaned_data['email']:
             raise ValidationError('Only one of the email or username fields should be filled out.')
+
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+
+        message, html_message = compose_html_email(email_template_name, context)
+
+        subject = loader.render_to_string(subject_template_name, context)
+        # Email subject *must not* contain newlines
+        subject = ''.join(subject.splitlines())
+
+        send_single_email_task.delay(to_email, subject, message, html_message=html_message)
+
 
     @staticmethod
     def get_user_by_username(username):

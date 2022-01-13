@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from members.models import switch_to_proxy
+from django.contrib.sites.shortcuts import get_current_site
 
 
 def navbar_colour_settings(request):
@@ -25,3 +26,9 @@ def unigames_user_processor(request):
         )
         return context
     return {}
+
+
+def domain_processor(request):
+    return {
+        'domain': get_current_site(request).domain
+    }

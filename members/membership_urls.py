@@ -10,5 +10,7 @@ urlpatterns = [
 	path('signup/existing_member/', views.old_membership_view, name='signup-old'),
 	path('signup/new_member/', views.new_membership_view, name='signup-new'),
 	path('profile/<int:pk>/', views.MemberProfileView.as_view(), name='profile'),
+	path('unsubscribe/', views.unsubscribe_view, name='unsubscribe'),
+	path('unsubscribe/<int:pk>/', views.unsubscribe_view, name='unsubscribe'),
 	path('auto/', views.MemberAutocomplete.as_view(), name='autocomplete')
 ]

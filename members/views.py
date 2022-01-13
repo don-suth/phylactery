@@ -9,13 +9,13 @@ from .forms import (
 	SignupForm, LoginForm, NewMembershipForm,
 	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm
 )
-from django.contrib.sites.shortcuts import get_current_site
+
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.template.loader import render_to_string
 from .tokens import account_activation_token
+from phylactery.tasks import send_single_email_task, compose_html_email
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from .models import Member, Membership, MemberFlag, switch_to_proxy
 from .decorators import gatekeeper_required
@@ -29,6 +29,24 @@ from dal import autocomplete
 from django.db.models import Q
 from library.models import BorrowRecord
 import datetime
+from django.utils.html import strip_tags
+from premailer import transform
+
+
+def send_activation_email(email_address, user, uid, token, request):
+	subject = 'Activate your Unigames account'
+	context = {
+		'user': user,
+		'uid': uid,
+		'token': token,
+	}
+	plaintext_message, html_message = compose_html_email('account/acc_active_email.html', context, request=request)
+	send_single_email_task.delay(
+		email_address,
+		subject,
+		message=plaintext_message,
+		html_message=html_message,
+	)
 
 
 def signup_view(request):
@@ -47,28 +65,21 @@ def signup_view(request):
 				user.save()
 				member.user = user
 				member.save()
-				current_site = get_current_site(request)
-				mail_subject = 'Activate your Unigames account.'
-				message = render_to_string('account/acc_active_email.html', {
-					'user': user,
-					'domain': current_site.domain,
-					'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-					'token': account_activation_token.make_token(user),
-				})
 				to_email = form.cleaned_data.get('email')
-				email = EmailMessage(
-					mail_subject, message, to=[to_email]
-				)
-				email.send()
+				uid = urlsafe_base64_encode(force_bytes(user.pk))
+				token = account_activation_token.make_token(user)
+
+				send_activation_email(to_email, user, uid, token, request)
 			else:
 				# The form is valid, but the member either doesn't exist or is not a gatekeeper.
 				# We give them the same response, but don't do anything with the data to prevent leaking.
 				pass
-			return HttpResponse("""
-			Form submission complete.
-			If you are a gatekeeper, an email to confirm your registration will sent to the specified email address.
-			If you didn't receive an email, try checking your spam box. If you suspect an error has been made,
-			contact an admin.""")
+			messages.success(
+				request,
+				"""Form submission complete. 
+				If your details were valid, an email will be sent to you with further instructions."""
+			)
+			return redirect("home")
 		else:
 			return render(request, 'account/signup.html', {'form': form})
 	else:
@@ -85,10 +96,11 @@ def activate_view(request, uidb64, token):
 	if user is not None and account_activation_token.check_token(user, token):
 		user.is_active = True
 		user.save()
-		return HttpResponse('Thank you for your email confirmation. Now you can log in to your account.')
+		messages.success(request, "Your account has now been activated. Feel free to log in!")
+		return redirect("home")
 	else:
-		return HttpResponse('Activation link is invalid!')
-
+		messages.error(request, "Your activation link was invalid. If you think this is a problem, please contact a webkeeper.")
+		return redirect("home")
 
 class MyLoginView(LoginView):
 	template_name = 'account/login.html'
@@ -398,3 +410,7 @@ class MemberAutocomplete(autocomplete.Select2QuerySetView):
 				)
 			qs = qs.filter(*q_objects)
 		return qs
+
+
+def unsubscribe_view(*args, **kwargs):
+	return HttpResponse("Under construction")
