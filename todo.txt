@@ -11,6 +11,7 @@ Static Pages:
 
 Control Panel:
     - TODO: Change website theme (President, VP)
+    - TODO: Export list of emails for mailing list (President, VP, Secretary)
 
 Members:
     - TODO: Make a cronjob to check for expired permissions each day
