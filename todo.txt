@@ -1,9 +1,6 @@
 Tests:
     - TODO: Write tests
 
-Emails:
-    - TODO: Have an email queue/use threads for emailing so page load times don't leak information
-
 Static Pages:
     - TODO: Redo the static pages
     - TODO: Add easy to find link for external borrowing requests
@@ -14,7 +11,7 @@ Control Panel:
     - TODO: Export list of emails for mailing list (President, VP, Secretary)
 
 Members:
-    - TODO: Make a cronjob to check for expired permissions each day
+
 
 Library:
     - TODO (Library) Add Library Strikes
@@ -53,6 +50,7 @@ Completed tasks:
         - DONE: (Members) Add expiry to roles like committee, and make those work
         - DONE: (Members) Allow searching by preferred name
         - DONE (Accounts): Add a password reset/change feature to accounts
+        - DONE: Make a cronjob to check for expired permissions each day
 
 
     Library:
@@ -72,3 +70,5 @@ Completed tasks:
             - If min is null and max is X, display "1 - X players."
             - If min is X and max is Y, display "X - Y players"
 
+    Emails:
+        - DONE: Have an email queue/use threads for emailing so page load times don't leak information
