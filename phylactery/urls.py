@@ -29,6 +29,7 @@ urlpatterns = [
     path('members/', include(('members.membership_urls', 'members'), namespace='members')),
     path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
+    path('blog/', include('blog.urls')),
     path('control-panel/', control_panel_view, name='control-panel'),
     path('admin/', admin.site.urls),
     path('jsi18n/', JavaScriptCatalog.as_view())

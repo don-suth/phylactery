@@ -1,0 +1,44 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}{{ page_title|default:"Blog Posts" }} - {% endblock %}
+
+{% block content %}
+<h2 class="mt-3">{{ page_title|default:"Blog Posts:" }}</h2>
+<div class="list-group">
+    {% for post in blog_post_list %}
+    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ post.title }}</h5>
+          <small>3 days ago</small>
+        </div>
+        <p class="mb-1">{{ post.short_description }}</p>
+        <small>by {{ post.author }}</small>
+    </a>
+    {% endfor %}
+</div>
+  <div class="mx-auto" style="width: 280px;">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&larr;</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&larr;</span></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span></li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&rarr;</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&rarr;</span></li>
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}{{ blogpost.title }} - {% endblock %}
+
+{% load markdownify %}
+
+{% block content %}
+<div class="card">
+    <h1 class="card-header">{{ blogpost.title }}</h1>
+
+    <h6 class="card-header">by {{ blogpost.author }}</h6>
+    <div class="card-body">
+        <p class="card-text">{{ blogpost.body|markdownify }}</p>
+    </div>
+    {% comment %}
+    <h5 class="card-header card-mid-header">Tags</h5>
+    <div class="card-body">
+        <p class="card-text tag-group">
+            {% for tag in item.all_tags %}
+                <a href="{% url 'library:tag-list' tag.pk %}" role="button" class="btn btn-outline-dark">{{ tag }}</a>
+            {% endfor %}
+        </p>
+    </div>
+    {% endcomment %}
+
+</div>
+
+{% endblock %}
