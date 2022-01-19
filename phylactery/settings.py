@@ -198,7 +198,53 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Australia/Perth'
 
 JAZZMIN_SETTINGS = {
-    'show_ui_builder': False
+    'show_ui_builder': True,
+    'custom_css': 'jazzmin/css/additional.css',
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "library.Item": "fas fa-book",
+        "library.BorrowRecord": 'fas fa-receipt',
+        "library.ExternalBorrowingForm": 'fab fa-wpforms',
+        "library.TagParent": 'fas fa-tags',
+        'members.Member': 'fas fa-user',
+        'members.Membership': 'fas fa-user-check',
+        'members.Rank': 'fas fa-graduation-cap',
+        'members.Memberflag': 'fas fa-user-tag',
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": True,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "lumen",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary text-dark",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
 }
 
 try:
