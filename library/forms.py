@@ -14,63 +14,65 @@ import datetime
 
 
 class CrispyModelSelect2(autocomplete.ModelSelect2):
-    @property
-    def media(self):
-        """Return JS/CSS resources for the widget."""
-        extra = '' if settings.DEBUG else '.min'
-        i18n_name = self._get_language_code()
-        i18n_file = (
-            'vendor/select2/dist/js/i18n/%s.js' % i18n_name,
-        ) if i18n_name else ()
-
-        return forms.Media(
-            js=(
-                   'autocomplete_light/jquery.init.js',
-                   'phylactery/select2.full%s.js' % extra,
-               ) + i18n_file + (
-                   'autocomplete_light/autocomplete.init.js',
-                   'autocomplete_light/forward.js',
-                   'autocomplete_light/select2.js',
-                   'autocomplete_light/jquery.post-setup.js',
-               ),
-            css={
-                'screen': (
-                    'phylactery/select2%s.css' % extra,
-                    'admin/css/autocomplete.css',
-                    'autocomplete_light/select2.css',
-                ),
-            },
-        )
+    pass
+    # @property
+    # def media(self):
+    #     """Return JS/CSS resources for the widget."""
+    #     extra = '' if settings.DEBUG else '.min'
+    #     i18n_name = self._get_language_code()
+    #     i18n_file = (
+    #         'vendor/select2/dist/js/i18n/%s.js' % i18n_name,
+    #     ) if i18n_name else ()
+    #
+    #     return forms.Media(
+    #         js=(
+    #                'autocomplete_light/jquery.init.js',
+    #                'phylactery/select2.full%s.js' % extra,
+    #            ) + i18n_file + (
+    #                'autocomplete_light/autocomplete.init.js',
+    #                'autocomplete_light/forward.js',
+    #                'autocomplete_light/select2.js',
+    #                'autocomplete_light/jquery.post-setup.js',
+    #            ),
+    #         css={
+    #             'screen': (
+    #                 'phylactery/select2%s.css' % extra,
+    #                 'admin/css/autocomplete.css',
+    #                 'autocomplete_light/select2.css',
+    #             ),
+    #         },
+    #     )
 
 
 class CrispyModelSelect2Multiple(autocomplete.ModelSelect2Multiple):
-    @property
-    def media(self):
-        """Return JS/CSS resources for the widget."""
-        extra = '' if settings.DEBUG else '.min'
-        i18n_name = self._get_language_code()
-        i18n_file = (
-            'vendor/select2/dist/js/i18n/%s.js' % i18n_name,
-        ) if i18n_name else ()
-
-        return forms.Media(
-            js=(
-                   'autocomplete_light/jquery.init.js',
-                   'phylactery/select2.full%s.js' % extra,
-               ) + i18n_file + (
-                   'autocomplete_light/autocomplete.init.js',
-                   'autocomplete_light/forward.js',
-                   'autocomplete_light/select2.js',
-                   'autocomplete_light/jquery.post-setup.js',
-               ),
-            css={
-                'screen': (
-                    'phylactery/select2%s.css' % extra,
-                    'admin/css/autocomplete.css',
-                    'autocomplete_light/select2.css',
-                ),
-            },
-        )
+    pass
+    # @property
+    # def media(self):
+    #     """Return JS/CSS resources for the widget."""
+    #     extra = '' if settings.DEBUG else '.min'
+    #     i18n_name = self._get_language_code()
+    #     i18n_file = (
+    #         'vendor/select2/dist/js/i18n/%s.js' % i18n_name,
+    #     ) if i18n_name else ()
+    #
+    #     return forms.Media(
+    #         js=(
+    #                'autocomplete_light/jquery.init.js',
+    #                'phylactery/select2.full%s.js' % extra,
+    #            ) + i18n_file + (
+    #                'autocomplete_light/autocomplete.init.js',
+    #                'autocomplete_light/forward.js',
+    #                'autocomplete_light/select2.js',
+    #                'autocomplete_light/jquery.post-setup.js',
+    #            ),
+    #         css={
+    #             'screen': (
+    #                 'phylactery/select2%s.css' % extra,
+    #                 'admin/css/autocomplete.css',
+    #                 'autocomplete_light/select2.css',
+    #             ),
+    #         },
+    #     )
 
 
 class ItemDueDateForm(forms.Form):
@@ -135,7 +137,13 @@ class BaseTagForm(autocomplete.FutureModelForm):
         model = ItemBaseTags
         fields = ('base_tags',)
         widgets = {
-            'base_tags': autocomplete.TaggitSelect2('library:select2_taggit', attrs={'style': 'width: 100%;'})
+            'base_tags': autocomplete.TaggitSelect2(
+                'library:select2_taggit',
+                attrs={
+                    'style': 'width: 50%;',
+                    'class': 'jazzy-ignore'
+                }
+            )
         }
 
 

@@ -33,6 +33,7 @@ SITE_ID = 1
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'taggit',
     'dal',
     'dal_select2',
@@ -195,6 +196,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Australia/Perth'
 
+JAZZMIN_SETTINGS = {
+    'show_ui_builder': False
+}
 
 try:
     with open(os.path.join(os.path.dirname(__file__), 'local_settings.py')) as f:
