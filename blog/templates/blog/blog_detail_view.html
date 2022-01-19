@@ -5,10 +5,9 @@
 {% load markdownify %}
 
 {% block content %}
-<div class="card">
-    <h1 class="card-header">{{ blogpost.title }}</h1>
-
-    <h6 class="card-header">by {{ blogpost.author }}</h6>
+<div class="card{% if not blogpost.is_published %} border-danger{% endif %}">
+    <h1 class="card-header{% if not blogpost.is_published %} border-danger{% endif %}">{{ blogpost.title }}{% if user.is_staff %}<a class="btn btn-outline-secondary float-right btn-lg" href="{% url 'admin:blog_blogpost_change' blogpost.id %}"><i class="bi-pencil-square"></i> Edit this post</a>{% endif %}</h1>
+    <h6 class="card-header{% if not blogpost.is_published %} border-danger{% endif %}">by {{ blogpost.author }} <span class="float-right{% if not blogpost.is_published %} text-danger{% endif %}">{{ blogpost.get_pretty_timestamp }}</span></h6>
     <div class="card-body">
         <p class="card-text">{{ blogpost.body|markdownify }}</p>
     </div>
