@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.urls import reverse
-
+from members.models import Member, MemberFlag
 
 class BlogPost(models.Model):
     # Blog Post Title + Slug
@@ -62,3 +62,33 @@ class BlogPost(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:detail-slug', args=[self.slug_title])
+
+
+class EmailOrder(models.Model):
+    # A model that tracks an 'order' for an email to be submitted.
+    # A celery task will check these every so often, and send any pending email requests.
+    # For an email to be sent, the publish date of the blog post has to be in the past.
+
+    # Track whether we've sent an email or not.
+    email_sent = models.BooleanField(default=False)
+
+    # The post for which the order is for
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='emailorders')
+
+    # Which membership flags (if any) to send the emails to. If none, it sends to all members by default.
+    # Note: Members will not be sent emails unless they have the "receive emails" flag set to True on their account.
+    flags = models.ManyToManyField(MemberFlag, related_name='emailorders')
+
+    @property
+    def is_ready(self):
+        # Returns true if the post is published and the emails have not been sent.
+        return self.email_sent is False and self.post.is_published is True
+
+    def get_members_to_send_to(self):
+        qs = Member.objects.none()
+        if self.flags.count() == 0:
+            # All members that have the receive_email setting set to true.
+            qs = Member.objects.filter(receive_emails=True)
+        else:
+            qs = Member.objects.filter(flags__emailorders=self, receive_emails=True)
+        return qs

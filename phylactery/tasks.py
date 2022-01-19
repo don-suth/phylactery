@@ -13,6 +13,8 @@ from premailer import transform
 from logging import CRITICAL as CRITICAL_LOG
 from cssutils import log as css_log
 
+from django.contrib.sites.models import Site
+
 logger = get_task_logger(__name__)
 
 
@@ -21,6 +23,8 @@ def compose_html_email(template_name, context, request=None):
         Returns an email template, ready-to-email, in both plaintext and html form.
     """
     css_log.setLevel(CRITICAL_LOG)
+    context['protocol'] = 'https://'
+    context['domain'] = Site.objects.get_current().domain
     html_message = render_to_string(template_name, context, request=request)
     html_message = transform(html_message)
     context['override_base'] = 'phylactery/email_base.txt'

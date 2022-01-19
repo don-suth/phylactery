@@ -1,0 +1,16 @@
+{% extends override_base|default:'phylactery/email_base.html' %}
+
+{% load markdownify %}
+
+{% block title %}{{ blogpost.title }}{% endblock %}
+{% block email_title %}{{ blogpost.title }}{% endblock %}
+
+{% block preheader %}Unigames News - {{ blogpost.title }}{% endblock %}
+
+{% block content %}
+{{ blogpost.body|markdownify }}
+<hr>
+<a href="{{ protocol }}{{ domain }}{{ blogpost.get_absolute_url }}">View this email in your browser</a>
+<p>Regards, <br />
+Unigames</p>
+{% endblock %}
