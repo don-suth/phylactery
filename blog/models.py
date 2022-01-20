@@ -63,6 +63,11 @@ class BlogPost(models.Model):
     def get_absolute_url(self):
         return reverse('blog:detail-slug', args=[self.slug_title])
 
+    @property
+    def get_number_of_emailorders(self):
+        # Returns the number of EmailOrders associated with this post.
+        return self.emailorders.count()
+
 
 class EmailOrder(models.Model):
     # A model that tracks an 'order' for an email to be submitted.
