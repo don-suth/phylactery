@@ -198,7 +198,13 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Australia/Perth'
 
 JAZZMIN_SETTINGS = {
-    'show_ui_builder': True,
+    'show_ui_builder': False,
+    'site_title': 'Unigames Admin',
+    'site_header': 'Unigames Admin',
+    'site_brand': 'Unigames Admin',
+    'welcome_sign': 'Welcome to the Unigames Admin Panel. Please Log In.',
+    'copyright': 'Unigames',
+    'site_logo': 'phylactery/images/unigames_admin_logo.png',
     'custom_css': 'jazzmin/css/additional.css',
     "icons": {
         "auth": "fas fa-users-cog",
@@ -212,7 +218,21 @@ JAZZMIN_SETTINGS = {
         'members.Membership': 'fas fa-user-check',
         'members.Rank': 'fas fa-graduation-cap',
         'members.Memberflag': 'fas fa-user-tag',
+        'django_celery_beat.PeriodicTask': 'fas fa-calendar-check',
+        'django_celery_beat.ClockedSchedule': 'fas fa-clock',
+        'django_celery_beat.CrontabSchedule': 'fas fa-calendar-alt',
+        'django_celery_beat.IntervalSchedule': 'fas fa-hourglass-half',
+        'django_celery_beat.SolarSchedule': 'fas fa-sun',
+        'taggit.Tag': 'fas fa-tag',
+        'sites.Site': 'fas fa-globe'
     },
+    'order_with_respect_to': [
+        'members', 'members.Member', 'members.Membership', 'members.MemberFlag', 'members.Rank',
+        'auth', 'auth.User', 'auth.Group',
+        'library', 'library.Item', 'library.BorrowRecord', 'library.ExternalBorrowingForm', 'library.TagParents',
+        'taggit',
+        'django_celery_beat', 'django_celery_beat.PeriodicTask',
+    ],
 }
 
 JAZZMIN_UI_TWEAKS = {
