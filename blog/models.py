@@ -92,3 +92,6 @@ class EmailOrder(models.Model):
         else:
             qs = Member.objects.filter(flags__emailorders=self, receive_emails=True)
         return qs
+
+    def __str__(self):
+        return 'Email Order for: {0}'.format(self.post.title)

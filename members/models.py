@@ -269,4 +269,7 @@ class MemberFlag(models.Model):
 	member = models.ManyToManyField(Member, related_name='flags')
 
 	def __str__(self):
-		return self.name
+		if self.active:
+			return self.name
+		else:
+			return '{0} (not active)'.format(self.name)
