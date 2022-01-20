@@ -62,7 +62,10 @@ class Item(models.Model):
 
     min_players = models.IntegerField(blank=True, null=True)
     max_players = models.IntegerField(blank=True, null=True)
-    play_time = models.IntegerField(blank=True, null=True)
+
+    min_play_time = models.IntegerField(blank=True, null=True, help_text='in minutes')
+    max_play_time = models.IntegerField(blank=True, null=True, help_text='in minutes')
+    average_play_time = models.IntegerField(blank=True, null=True, help_text='in minutes')
 
     def image_file_name(self, filename):
         filename, dot, extension = filename.rpartition('.')
@@ -120,8 +123,15 @@ class Item(models.Model):
 
         tag_parents.parent_tag.set(list(base_tags.all())+list(already_searched))
 
+    def compute_playtime(self):
+        # On item save, calculate playtime.
+        if self.average_play_time is None and (self.min_play_time is not None and self.max_play_time is not None):
+            # Set average to be equal to average of min and max.
+            self.average_play_time = (self.min_play_time + self.max_play_time) // 2
+
     def save(self, *args, **kwargs):
         # On item save, compute the tags as well
+        self.compute_playtime()
         super(Item, self).save(*args, **kwargs)
         self.compute_tags()
 
@@ -265,19 +275,32 @@ class Item(models.Model):
 
     @property
     def play_time_display(self):
+        def convert_minutes_to_hours(mins):
+            hours = mins // 60
+            plural_hours = 's' if hours != 1 else ''
+            minutes = mins % 60
+            plural_minutes = 's' if minutes != 1 else ''
+            if hours == 0:
+                return "{0} min{1}".format(minutes, plural_minutes)
+            elif minutes == 0:
+                return "{0} hour{1}".format(hours, plural_hours)
+            else:
+                return "{0} hour{1} {2} min{3}".format(hours, plural_hours, minutes, plural_minutes)
         # Returns a string rep of the play time
-        if not self.play_time:
+        # If there's no average, then return nothing.
+        if not self.average_play_time:
             return ""
-        hours = self.play_time // 60
-        plural_hours = 's' if hours != 1 else ''
-        minutes = self.play_time % 60
-        plural_minutes = 's' if minutes != 1 else ''
-        if hours == 0:
-            return "~{0} min{1}".format(minutes, plural_minutes)
-        if minutes == 0:
-            return "~{0} hour{1}".format(hours, plural_hours)
-        return "~{0} hour{1} {2} min{3}".format(hours, plural_hours, minutes, plural_minutes)
-
+        else:
+            if self.min_play_time is not None and self.max_play_time is not None:
+                # All three are set, display all three.
+                return "{0} to {1}<br />Avg: ~{2}".format(
+                    convert_minutes_to_hours(self.min_play_time),
+                    convert_minutes_to_hours(self.max_play_time),
+                    convert_minutes_to_hours(self.average_play_time)
+                )
+            else:
+                # Simply display the average:
+                return "~{0}".format(convert_minutes_to_hours(self.average_play_time))
 
 
 class ItemBaseTags(models.Model):

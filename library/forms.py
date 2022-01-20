@@ -128,7 +128,8 @@ class ItemTaggitForm(autocomplete.FutureModelForm):
             'condition', 'type', 'image',
             'is_borrowable', 'high_demand',
             'min_players', 'max_players',
-            'play_time', 'notes'
+            'min_play_time', 'max_play_time', 'average_play_time',
+            'notes'
         )
 
 

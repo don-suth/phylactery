@@ -13,29 +13,19 @@
             <tr class="">
                 <td class="pl-2" colspan="{{ colspan }}"><b>Type:</b> {{ item.get_type_display }}</td>
             </tr>
-            {% if item.players_display and item.play_time_display %}
+            {% if item.players_display %}
                 <tr class="">
-                    <td class="half-cell">
+                    <td colspan="{{ colspan }}">
                         <i class="bi-people-fill" role="img" aria-label="Players"></i><br />
                         {{ item.players_display }}
                     </td>
-                    <td>
+                </tr>
+            {% endif %}
+            {% if item.play_time_display %}
+                <tr class="">
+                    <td colspan="{{ colspan }}">
                         <i class="bi-clock" role="img" aria-label="Play Time"></i><br />
-                        {{ item.play_time_display }}
-                    </td>
-                </tr>
-            {% elif item.players_display %}
-                <tr class="">
-                    <td colspan="{{ colspan }}">
-                        <i class="bi-people-fill"role="img" aria-label="Players"></i><br />
-                        {{ item.players_display }}
-                    </td>
-                </tr>
-            {% elif item.play_time_display %}
-                <tr class="">
-                    <td colspan="{{ colspan }}">
-                        <i class="bi-clock"role="img" aria-label="Play Time"></i><br />
-                        {{ item.play_time_display }}
+                        {{ item.play_time_display|safe }}
                     </td>
                 </tr>
             {% endif %}
