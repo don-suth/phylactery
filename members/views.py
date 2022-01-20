@@ -7,13 +7,14 @@ from django.contrib.auth.views import (
 )
 from .forms import (
 	SignupForm, LoginForm, NewMembershipForm,
-	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm
+	OldMembershipForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm,
+	EmailPreferencesForm, SendEmailPrefsLinkForm
 )
 
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.template.loader import render_to_string
-from .tokens import account_activation_token
+from .tokens import account_activation_token, email_preference_token
 from phylactery.tasks import send_single_email_task, compose_html_email
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
@@ -412,5 +413,72 @@ class MemberAutocomplete(autocomplete.Select2QuerySetView):
 		return qs
 
 
-def unsubscribe_view(*args, **kwargs):
-	return HttpResponse("Under construction")
+def email_preferences_view(request, uidb64=None, token=None):
+	"""
+		Handles the updating of email preferences of members.
+		Doesn't need them to have an account.
+	"""
+	try:
+		uid = force_text(urlsafe_base64_decode(uidb64))
+		member = Member.objects.get(pk=uid)
+	except(TypeError, ValueError, OverflowError, AttributeError, Member.DoesNotExist):
+		member = None
+	if member is not None and email_preference_token.check_token(member, token):
+		valid_token = True
+	else:
+		valid_token = False
+
+	if request.method == 'GET':
+		# If we have an ID and a valid token, display the change form.
+		# Otherwise show the request form.
+		if valid_token:
+			# Show change form
+			email_prefs_form = EmailPreferencesForm(member=member)
+			return render(request, 'members/email_preferences_change_form.html', {
+				'form': email_prefs_form, 'uid': uidb64, 'token': token, 'member': member
+			})
+		else:
+			send_email_form = SendEmailPrefsLinkForm()
+			return render(request, 'members/email_preferences_send_link_form.html', {'form': send_email_form})
+			pass
+	elif request.method == 'POST':
+		if valid_token:
+			# Handle the actual changing of the form.
+			email_prefs_form = EmailPreferencesForm(request.POST, member=member)
+			if email_prefs_form.is_valid():
+				email_prefs_form.apply_email_preferences()
+				messages.info(request, 'Email preferences updated.')
+				email_prefs_form = EmailPreferencesForm(member=member)
+			else:
+				messages.error(request, 'There was a problem with your request, please try again.')
+			return render(request, 'members/email_preferences_change_form.html', {
+				'form': email_prefs_form, 'uid': uidb64, 'token': token
+			})
+		else:
+			# Handle the request and send an email
+			send_email_form = SendEmailPrefsLinkForm(request.POST)
+			if send_email_form.is_valid():
+				email = send_email_form.cleaned_data['email']
+				try:
+					member = Member.objects.get(email_address=email)
+				except (Member.DoesNotExist, Member.MultipleObjectsReturned):
+					member = None
+				if member is not None:
+					context = {
+						'uid': urlsafe_base64_encode(force_bytes(member.pk)),
+						'token': email_preference_token.make_token(member)
+					}
+					email_subject = 'Change your Email Preferences'
+					body, html_body = compose_html_email('members/email_preferences_change_email.html', context)
+					send_single_email_task.delay(
+						member.email_address,
+						email_subject,
+						body,
+						html_message=html_body,
+						log=False
+					)
+				messages.info(request, 'Request submitted successfully. Please check your email for further instructions.')
+				return redirect('home')
+			else:
+				messages.error(request, 'There was an error in your submission.')
+				return render(request, 'members/email_preferences_send_link_form.html', {'form': send_email_form})

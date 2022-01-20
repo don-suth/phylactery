@@ -1,0 +1,12 @@
+{% extends "phylactery/base.html" %}
+
+{% block title %}Change Email Preferences - {% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+
+<form action="{% url 'members:email-prefs' %}" method="post">
+{% csrf_token %}
+{% crispy form %}
+</form>
+{% endblock %}

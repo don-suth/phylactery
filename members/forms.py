@@ -7,6 +7,7 @@ from django.contrib.auth.forms import (
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.db.models import Q
 from django.template import loader
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
@@ -195,7 +196,6 @@ class NewMembershipForm(OldMembershipForm):
         self.helper.layout[0][1][0][0][1].insert(3, 'is_fresher')
 
 
-
 class SignupForm(UserCreationForm):
     """
     Renders the signup form for gatekeepers.
@@ -342,7 +342,6 @@ class MyPasswordResetForm(PasswordResetForm):
 
         send_single_email_task.delay(to_email, subject, message, html_message=html_message)
 
-
     @staticmethod
     def get_user_by_username(username):
         active_users = UnigamesUser.objects.filter(
@@ -400,6 +399,88 @@ class MySetPasswordForm(SetPasswordForm):
                         """),
                     'new_password1',
                     'new_password2',
+                    Submit('submit', 'Submit', css_class='btn-primary'),
+                )
+            )
+        )
+
+
+class EmailPreferencesForm(forms.Form):
+    receive_emails = forms.BooleanField(
+        required=False,
+        label='Receive emails from Unigames?'
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.member = kwargs.pop('member', None)
+        super().__init__(*args, **kwargs)
+        if self.member is None:
+            raise ValueError('No member provided to the form.')
+        self.initial['receive_emails'] = self.member.receive_emails
+        self.extra_fields = []
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Editing email notification settings for {{ member.email_address }}',
+                    HTML('<p>Uncheck the following box to disable most Unigames emails.</p>'),
+                    HTML('<p>We will still email you if you interact with the library. (i.e If you borrow items.)</p>'),
+                    'receive_emails',
+                    HTML('<hr>'),
+                    HTML('<p>Check or uncheck the boxes below to update what we will email you about.</p>'),
+                ),
+                Submit('submit', 'Save Changes and Submit', css_class='btn-primary'),
+            )
+        )
+        for flag in MemberFlag.objects.filter(Q(active=True) | Q(member=self.member)).distinct('pk'):
+            deactivated_flags = False
+            flag_desc = flag.description
+            if flag.active is False:
+                flag_desc += " #"
+                deactivated_flags = True
+            field_name = 'flag_' + str(flag.pk)
+            self.extra_fields.append(flag.pk)
+            self.fields[field_name] = forms.BooleanField(label=flag_desc, required=False)
+            self.initial[field_name] = flag in self.member.flags.all()
+            self.helper.layout[0][0].append(field_name)
+            if deactivated_flags:
+                self.helper.layout[0][0].append(HTML("<p>Flags marked with # cannot be added again once removed.</p>"))
+
+    def apply_email_preferences(self):
+        # Applies the settings that have been specified in the form.
+        if self.is_valid():
+            if 'receive_emails' in self.changed_data:
+                self.member.receive_emails = self.cleaned_data['receive_emails']
+                self.member.save()
+            flags_to_set = []
+            for flag_pk in self.extra_fields:
+                if self.cleaned_data['flag_'+str(flag_pk)] is True:
+                    flags_to_set.append(MemberFlag.objects.get(pk=flag_pk))
+            self.member.flags.set(flags_to_set)
+
+
+class SendEmailPrefsLinkForm(forms.Form):
+    email = forms.EmailField(
+        label='Email',
+        max_length=254,
+        widget=forms.EmailInput(attrs={'autocomplete': 'email'}),
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                Fieldset(
+                    'Change your Email Preferences',
+                    HTML("""
+                        <p>To update your email preferences, 
+                        enter your email address below.</p>
+                    """),
+                    'email',
                     Submit('submit', 'Submit', css_class='btn-primary'),
                 )
             )

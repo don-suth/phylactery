@@ -1,0 +1,35 @@
+{% extends 'phylactery/base.html' %}
+
+{% block title %}{{ blogpost.title }} - {% endblock %}
+
+{% load markdownify %}
+
+{% block content %}
+<div class="card mb-3{% if not blogpost.is_published %} border-danger{% endif %}">
+    <h1 class="card-header{% if not blogpost.is_published %} border-danger{% endif %}">
+        {{ blogpost.title }}
+        {% if user.is_staff %}
+            <button class="btn btn-outline-secondary float-right btn-lg dropdown-toggle" type="button" id="blogOptionsDropdown" data-toggle="dropdown" aria-expanded="false">
+                <i class="bi-gear"></i> Post Options</a>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="blogOptionsDropdown" style="">
+                <a class="dropdown-item" href="{% url 'admin:blog_blogpost_change' blogpost.id %}"><i class="bi-pencil-square"></i> Edit this Post</a>
+                <div class="dropdown-divider"></div>
+                <span class="dropdown-item disabled">There {{ blogpost.get_number_of_emailorders|pluralize:"is,are" }} {{ blogpost.get_number_of_emailorders }} email order{{ blogpost.get_number_of_emailorders|pluralize:'s' }} for this post.</span>
+                <a class="dropdown-item" href="{% url 'admin:blog_emailorder_add' %}"><i class="bi-envelope-exclamation"></i> Email this Post</a>
+            </div>
+        {% endif %}
+    </h1>
+    <h6 class="card-header{% if not blogpost.is_published %} border-danger{% endif %}">
+        by {{ blogpost.author }}
+        <span class="float-right{% if not blogpost.is_published %} text-danger{% endif %}">
+            {{ blogpost.get_pretty_timestamp }}
+        </span></h6>
+    <div class="card-body">
+        <p class="card-text">
+            {{ blogpost.body|markdownify }}
+        </p>
+    </div>
+</div>
+
+{% endblock %}

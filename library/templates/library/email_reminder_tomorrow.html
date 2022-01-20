@@ -22,3 +22,5 @@ these items on time, please contact the Librarian as soon as possible.</p>
 <p>Regards, <br />
 Unigames</p>
 {% endblock %}
+
+{% block unsubscribe_footer %}<br> These reminder emails can't be disabled, but you can <br /> manage your other email preferences <a href="{{ protocol }}{{ domain }}{% url 'members:email-prefs' %}">here</a>.{% endblock %}

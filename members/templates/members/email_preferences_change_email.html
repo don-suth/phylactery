@@ -1,0 +1,37 @@
+{% extends override_base|default:'phylactery/email_base.html' %}
+
+
+{% block title %}Change Email Preferences{% endblock %}
+{% block email_title %}Change Email Preferences{% endblock %}
+
+{% block preheader %}Hi there {{ member.first_name }}, you can update your email preferences here.{% endblock %}
+
+{% block content %}
+<p>Hi there {{ member.first_name }}</p>
+<p>You are receiving this email because you requested to change your email preferences on the Unigames website.</p>
+<p>Please click on the button below to change your preferences.</p>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+    <tbody>
+    <tr>
+        <td align="left">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr>
+                    <td> <a href="{{ protocol }}{{ domain }}{% url 'members:email-prefs-token' uidb64=uid token=token %}" target="_blank">Change Email Preferences</a> </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p>Alternatively, please use the following link: {{ protocol }}{{ domain }}{% url 'members:email-prefs-token' uidb64=uid token=token %}</p>
+<p>This link will remain active for three days.</p>
+<p>If you didn't make this request, don't worry. You can safely delete this email.</p>
+
+<p>Regards,</p>
+<p>Unigames</p>
+{% endblock %}
+
+{% block unsubscribe_footer %} <br /> Manage your email preferences <a href="{{ protocol }}{{ domain }}{% url 'members:email-prefs-token' uidb64=uid token=token %}">here</a>.
+<br />Or, y'know, just use the big button above.{% endblock %}

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'dal_select2',
     'members.apps.MembersConfig',
     'library.apps.LibraryConfig',
+    'blog.apps.BlogConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -184,9 +185,10 @@ MESSAGE_TAGS = {
 
 MARKDOWNIFY_STRIP = False
 MARKDOWNIFY_WHITELIST_TAGS = [
- 'a', 'p',
- 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
- 'ul', 'li', 'span',
+    'a', 'p',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
+    'ul', 'li', 'span', 'ol',
+    'em', 'strong', 'pre', 'code', 'blockquote'
 ]
 
 # Celery Stuff
