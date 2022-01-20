@@ -14,3 +14,5 @@
 <p>Regards, <br />
 Unigames</p>
 {% endblock %}
+
+{% block unsubscribe_footer %}<br> Don't like these emails? <br /> Manage your email preferences <a href="{{ protocol }}{{ domain }}{% url 'members:email-prefs-token' uidb64=uid token=token %}">here</a>.{% endblock %}

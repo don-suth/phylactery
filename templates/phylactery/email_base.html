@@ -374,7 +374,7 @@
                   <td class="content-block">
                     Love from Unigames - The UWA traditional games club
                     <br><a href="bit.ly/unigamesdiscord">Join our Discord Server!</a>
-                    <br> Don't like these emails? <a href="{{ protocol }}{{ domain }}{% url 'members:unsubscribe' %}">Unsubscribe</a>.
+                    {% block unsubscribe_footer %}<br> Manage your email preferences <a href="{{ protocol }}{{ domain }}{% url 'members:email-prefs' %}">here</a>.{% endblock %}
                   </td>
                 </tr>
               </table>

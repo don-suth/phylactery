@@ -3,6 +3,9 @@ from celery.utils.log import get_task_logger
 from django.template import loader
 from django.core.mail import get_connection
 from phylactery.tasks import send_single_email_task, send_mass_email_task, compose_html_email
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from members.tokens import email_preference_token
 import datetime
 
 from .models import EmailOrder
@@ -29,13 +32,24 @@ def send_pending_email_order_task():
     for order in email_orders:
         if order.is_ready:
             email_subject = '{0} - Unigames News'.format(order.post.title)
-            member_email_addresses = order.get_members_to_send_to().values_list('email_address', flat=True)
+            members_to_email_to = order.get_members_to_send_to()
             context = {
                 'blogpost': order.post
             }
-            body, html_body = compose_html_email('blog/email_blog_post.html', context)
-            # Do the thing!
-            send_mass_email_task(member_email_addresses, email_subject, body, html_message=html_body)
+            connection = get_connection()
+            connection.open()
+            for member in members_to_email_to:
+                context['uid'] = urlsafe_base64_encode(force_bytes(member.pk))
+                context['token'] = email_preference_token.make_token(member)
+                body, html_body = compose_html_email('blog/email_blog_post.html', context)
+                send_single_email_task(
+                    member.email_address,
+                    email_subject,
+                    body,
+                    html_message=html_body,
+                    connection=connection,
+                    log=False
+                )
             order.email_sent = True
             order.save()
     return
