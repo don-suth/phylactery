@@ -136,7 +136,7 @@ class Item(models.Model):
         self.compute_tags()
 
     def get_absolute_url(self):
-        return reverse('library:detail-slug', args=[self.slug])
+        return reverse('library:detail', args=[self.slug])
 
     def __str__(self):
         return self.name
@@ -293,14 +293,14 @@ class Item(models.Model):
         else:
             if self.min_play_time is not None and self.max_play_time is not None:
                 # All three are set, display all three.
-                return "{0} to {1}<br />Avg: ~{2}".format(
+                return "<i>{0}</i> to <i>{1}</i><br />Avg: ~<i>{2}</i>".format(
                     convert_minutes_to_hours(self.min_play_time),
                     convert_minutes_to_hours(self.max_play_time),
                     convert_minutes_to_hours(self.average_play_time)
                 )
             else:
                 # Simply display the average:
-                return "~{0}".format(convert_minutes_to_hours(self.average_play_time))
+                return "~<i>{0}</i>".format(convert_minutes_to_hours(self.average_play_time))
 
 
 class ItemBaseTags(models.Model):

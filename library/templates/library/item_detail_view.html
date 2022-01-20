@@ -11,11 +11,11 @@
     <table class="table table-sm mb-0 text-center">
         <tbody>
             <tr class="">
-                <td class="pl-2" colspan="{{ colspan }}"><b>Type:</b> {{ item.get_type_display }}</td>
+                <td class="pl-2"><b>Type:</b> {{ item.get_type_display }}</td>
             </tr>
             {% if item.players_display %}
                 <tr class="">
-                    <td colspan="{{ colspan }}">
+                    <td>
                         <i class="bi-people-fill" role="img" aria-label="Players"></i><br />
                         {{ item.players_display }}
                     </td>
@@ -23,7 +23,7 @@
             {% endif %}
             {% if item.play_time_display %}
                 <tr class="">
-                    <td colspan="{{ colspan }}">
+                    <td>
                         <i class="bi-clock" role="img" aria-label="Play Time"></i><br />
                         {{ item.play_time_display|safe }}
                     </td>
@@ -32,25 +32,25 @@
         </tbody>
         <tbody>
             <tr class="">
-                <td class="pl-2" colspan="{{ colspan }}"><b>Borrowing status:</b></td>
+                <td class="pl-2"><b>Borrowing status:</b></td>
             </tr>
             <tr class="">
                 {% if item_info.is_available is True and item.high_demand is True %}
-                    <td class="pl-2 table-warning" colspan="{{ colspan }}">Available to borrow!<br />(High Demand Item)</td>
+                    <td class="pl-2 table-warning">Available to borrow!<br />(High Demand Item)</td>
                 {% elif item_info.is_available is True %}
-                    <td class="pl2 table-success" colspan="{{ colspan }}">Available to borrow!</td>
+                    <td class="pl2 table-success">Available to borrow!</td>
                 {% else %}
-                    <td class="pl-2 table-danger" colspan="{{ colspan }}">Unavailable to borrow</td>
+                    <td class="pl-2 table-danger">Unavailable to borrow</td>
                 {% endif %}
             </tr>
             <tr class="">
-                <td class="pl-2" colspan="{{ colspan }}"><b>Clubroom status:</b></td>
+                <td class="pl-2"><b>Clubroom status:</b></td>
             </tr>
             <tr class="">
                 {% if item_info.in_clubroom is True %}
-                    <td class="pl-2 table-success" colspan="{{ colspan }}">Available in the clubroom!</td>
+                    <td class="pl-2 table-success">Available in the clubroom!</td>
                 {% else %}
-                    <td class="pl-2 table-danger" colspan="{{ colspan }}">Due back
+                    <td class="pl-2 table-danger">Due back
                         {% if today %}
                             today
                         {% elif tomorrow %}
@@ -61,7 +61,7 @@
                 {% endif %}
             </tr>
             <tr class="">
-                <td class="" colspan="{{ colspan }}"><a href="{% url 'library:detail-id' item.pk %}">Permalink</a></td>
+                <td class=""><a href="{% url 'library:detail' item.slug %}">Permalink</a></td>
             </tr>
         </tbody>
     </table>

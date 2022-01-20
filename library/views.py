@@ -58,7 +58,6 @@ class ItemDetailView(generic.DetailView):
         tomorrow = today+datetime.timedelta(days=1)
         context['today'] = (today == context['item_info']['expected_availability_date'])
         context['tomorrow'] = (tomorrow == context['item_info']['expected_availability_date'])
-        context['colspan'] = 2 if (self.object.players_display and self.object.play_time_display) else 1
         return context
 
 

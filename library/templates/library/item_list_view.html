@@ -12,11 +12,11 @@
         <div class="card mb-3 item-list-card">
           <div class="row no-gutters">
             <div class="col-4 col-md-3">
-                <a href="{% url 'library:detail-id' item.pk %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
+                <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
             </div>
             <div class="col-8">
               <div class="card-body">
-                  <h5 class="card-title"><a href="{% url 'library:detail-id' item.pk %}">{{ item.name }}</a></h5>
+                  <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
                 <p class="card-text">{{ item.description|un_markdownify|truncatewords:25 }}</p>
               </div>
             </div>
