@@ -19,6 +19,19 @@ from phylactery.tasks import compose_html_email, send_single_email_task
 # Create your views here.
 
 
+class LibraryHomeView(generic.ListView):
+    template_name = 'library/home_view.html'
+    context_object_name = 'items_list'
+    model = Item
+    featured_tag_name = 'Featured'
+
+    def get_queryset(self):
+        return Item.objects.filter(
+            Q(base_tags__base_tags__name__in=[self.featured_tag_name]) |
+            Q(computed_tags__computed_tags__name__in=[self.featured_tag_name])
+        ).distinct().order_by('name')
+
+
 class AllItemsView(generic.ListView):
     template_name = 'library/item_list_view.html'
     context_object_name = 'items_list'

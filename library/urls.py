@@ -19,5 +19,6 @@ urlpatterns = [
     path('return/<int:pk>/', views.return_item_view, name='return-items'),
     path('request/', views.external_borrow_request_view, name='external-request'),
     path('form/<int:pk>/', views.external_borrow_form_view, name='form-view'),
-    path('', views.AllItemsView.as_view(), name='library-home'),
+    path('list/', views.AllItemsView.as_view(), name='list'),
+    path('', views.LibraryHomeView.as_view(), name='library-home'),
 ]
