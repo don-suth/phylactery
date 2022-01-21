@@ -8,7 +8,6 @@ Static Pages:
 
 Control Panel:
     - TODO: Change website theme (President, VP)
-    - TODO: Export list of emails for mailing list (President, VP, Secretary)
 
 Members:
 
@@ -23,7 +22,6 @@ Cron-Jobs:
     - TODO: Check for expired membership permissions each day
     - TODO: Delete old borrowing records after one year.
     - TODO: Delete membership records upon two years of inactivity
-    - TODO: Send emails about borrowed items the day before/the day that they are due.
 
 ---
 
@@ -42,6 +40,9 @@ Completed tasks:
         - DONE: Webkeeper Purge (President, VP)
         - DONE: Library Overview (Gatekeeper+) (moved away from the control panel)
         - DONE: Replace Committee Member(s) (President, VP)
+        - Obsolete: Export list of emails for mailing list (President, VP, Secretary)
+            - Now we can use the blog feature.
+
 
     Membership:
         - DONE: (Members) Make the gatekeeper sign-up/login form work again
@@ -69,6 +70,8 @@ Completed tasks:
             - If max is null and min is X, display "X+ players".
             - If min is null and max is X, display "1 - X players."
             - If min is X and max is Y, display "X - Y players"
+        - DONE: Send emails about borrowed items the day before/the day that they are due.
+
 
     Emails:
         - DONE: Have an email queue/use threads for emailing so page load times don't leak information
