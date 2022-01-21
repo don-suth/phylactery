@@ -43,6 +43,9 @@
                         </div>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'blog:blog-home' %}">News</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'library:library-home' %}">Our Library</a>
                     </li>
                     <li class="nav-item dropdown">
@@ -116,7 +119,7 @@
             {% endblock %}
         </div>
     </main>
-    <footer class="footer">
+    <footer class="footer mt-3">
         <div class="container footer-container">
             <span class="text-muted">Unigames is an affiliated club of the UWA Student Guild.</span>
         </div>
