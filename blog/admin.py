@@ -3,7 +3,7 @@ from django.forms import ModelForm
 
 # Register your models here.
 from .models import BlogPost, EmailOrder
-
+from members.models import MemberFlag
 
 class BlogPostAdminForm(ModelForm):
     model = BlogPost
@@ -19,8 +19,18 @@ class BlogPostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug_title': ('title',)}
 
 
+class MemberFlagsInline(admin.TabularInline):
+    model = MemberFlag.emailorders.through
+    verbose_name = 'Flag to send emails to'
+    verbose_name_plural = 'Flag(s) to send emails to:'
+    extra = 1
+
+
+
 class EmailOrderAdmin(admin.ModelAdmin):
     model = EmailOrder
+    inlines = [MemberFlagsInline]
+    exclude = ('flags',)
 
 
 admin.site.register(BlogPost, BlogPostAdmin)

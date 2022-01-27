@@ -238,6 +238,7 @@ JAZZMIN_SETTINGS = {
         'taggit',
         'django_celery_beat', 'django_celery_beat.PeriodicTask',
     ],
+    "changeform_format_overrides": {'blog.EmailOrder': 'single'},
 }
 
 JAZZMIN_UI_TWEAKS = {
