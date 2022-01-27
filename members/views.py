@@ -452,7 +452,7 @@ def email_preferences_view(request, uidb64=None, token=None):
 			else:
 				messages.error(request, 'There was a problem with your request, please try again.')
 			return render(request, 'members/email_preferences_change_form.html', {
-				'form': email_prefs_form, 'uid': uidb64, 'token': token
+				'form': email_prefs_form, 'uid': uidb64, 'token': token, 'member': member,
 			})
 		else:
 			# Handle the request and send an email
