@@ -6,52 +6,54 @@
 {% load static %}
 
 {% block content %}
-<div class="card text-left mb-3">
-    <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 300px; object-fit: cover; object-position: 0 0;">
-    <div class="card-body">
-        <h3 class="card-title">The Unigames Library</h3>
-        <p class="card-text">
-            The pride and joy of Unigames, and also its greatest asset, the library contains our vast collection
-            of board games, card games, RPG source books, and wargaming terrain.
-        </p>
-        <p class="card-text">
-            All of the library items can be used while in the clubroom, and members can also borrow the vast majority
-            of items for use at events or their own RPG groups!
-        </p>
-        <p>
-            If you are a member and wish to borrow an item, swing by the clubroom when it's open and ask one of our
-            friendly gatekeepers!
-        </p>
-        <p>
-            Unigames also allows other clubs, organisations and people to borrow items for their events.
-            If you wish to do so, please submit an 'External Borrowing Request Form', located <a href="#">here</a>.
-        </p>
-        <a href="#" class="btn btn-primary">See all Library Items</a>
-    </div>
-</div>
-<h4>Featured Items:</h4>
 <div class="row">
-    {% for item in items_list %}
-    <div class="col-lg-6">
-        <div class="card mb-3 item-list-card">
-          <div class="row no-gutters">
-            <div class="col-4 col-md-3">
-                <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
+    <div class="col-md">
+        <div class="card text-left mb-3">
+            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 300px; object-fit: cover; object-position: 0 0;">
+            <div class="card-body">
+                <h3 class="card-title">The Unigames Library</h3>
+                <p class="card-text">
+                    The pride and joy of Unigames, and also its greatest asset, the library contains our vast collection
+                    of board games, card games, RPG source books, and wargaming terrain.
+                </p>
+                <p class="card-text">
+                    All of the library items can be used while in the clubroom, and members can also borrow the vast majority
+                    of items for use at events or their own RPG groups!
+                </p>
+                <p>
+                    If you are a member and wish to borrow an item, swing by the clubroom when it's open and ask one of our
+                    friendly gatekeepers!
+                </p>
+                <p>
+                    Unigames also allows other clubs, organisations and people to borrow items for their events.
+                    If you wish to do so, please submit an 'External Borrowing Request Form', located <a href="#">here</a>.
+                </p>
+                <a href="#" class="btn btn-primary">See all Library Items</a>
             </div>
-            <div class="col-8">
-              <div class="card-body">
-                  <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                <p class="card-text">{{ item.description|un_markdownify|truncatewords:25 }}</p>
-              </div>
-            </div>
-          </div>
         </div>
     </div>
-        {% if forloop.counter|divisibleby:"2" %}
+    {% if items_list %}
+    <div class="col-md">
+        <h4>Featured Items:</h4>
+        {% for item in items_list %}
+        <div class="card mb-2 item-list-card">
+            <div class="row no-gutters">
+                <div class="col-4 col-md-3">
+                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
+                </div>
+                <div class="col-8">
+                    <div class="card-body">
+                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
+                        <p class="card-text">{{ item.description|un_markdownify|truncatewords:25 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="w-100"></div>
-        {% endif %}
-    {% empty %}
-    <h4>There are no results for your query.</h4>
-    {% endfor %}
+        {% empty %}
+        <h4>There are no results for your query.</h4>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
