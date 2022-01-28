@@ -143,3 +143,13 @@ body {
     width: 50%;
     border-right: 1px solid #dee2e6;
 }
+
+.big-card-columns {
+    column-count: 2;
+}
+
+@media (max-width: 576px) {
+    .big-card-columns {
+        column-count: 1;
+    }
+}
