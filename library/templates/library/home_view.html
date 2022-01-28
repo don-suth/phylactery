@@ -6,29 +6,54 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md">
+<div class="row row-cols-2">
+    <div class="col">
         <div class="card text-left mb-3">
-            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 300px; object-fit: cover; object-position: 0 0;">
+            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 140px; object-fit: cover; object-position: 0 0;">
             <div class="card-body">
                 <h3 class="card-title">The Unigames Library</h3>
                 <p class="card-text">
                     The pride and joy of Unigames, and also its greatest asset, the library contains our vast collection
                     of board games, card games, RPG source books, and wargaming terrain.
                 </p>
+                <a href="{% url 'library:list' %}" class="btn btn-primary">See all Library Items</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-left mb-3">
+            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 100px; object-fit: cover; object-position: 0 0;">
+            <div class="card-body">
+                <h3 class="card-title">The Unigames Library</h3>
                 <p class="card-text">
                     All of the library items can be used while in the clubroom, and members can also borrow the vast majority
                     of items for use at events or their own RPG groups!
                 </p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-left mb-3">
+            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 100px; object-fit: cover; object-position: 0 0;">
+            <div class="card-body">
+                <h3 class="card-title">The Unigames Library</h3>
                 <p>
                     If you are a member and wish to borrow an item, swing by the clubroom when it's open and ask one of our
                     friendly gatekeepers!
                 </p>
+                <a href="{% url 'library:list' %}" class="btn btn-primary">See all Library Items</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-left mb-3">
+            <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 100px; object-fit: cover; object-position: 0 0;">
+            <div class="card-body">
+                <h3 class="card-title">The Unigames Library</h3>
                 <p>
                     Unigames also allows other clubs, organisations and people to borrow items for their events.
-                    If you wish to do so, please submit an 'External Borrowing Request Form', located <a href="#">here</a>.
+                    If you wish to do so, please submit an 'External Borrowing Request Form', located <a href="{% url 'library:external-request' %}">here</a>.
                 </p>
-                <a href="#" class="btn btn-primary">See all Library Items</a>
             </div>
         </div>
     </div>
