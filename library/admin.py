@@ -9,12 +9,16 @@ from .forms import ItemTaggitForm, BaseTagForm, ComputedTagForm
 class ItemBaseTagInline(admin.TabularInline):
     model = ItemBaseTags
     form = BaseTagForm
+    verbose_name = 'item base tags'
+    verbose_name_plural = 'item base tags'
 
 
 class ItemComputedTagInline(admin.TabularInline):
     model = ItemComputedTags
     form = ComputedTagForm
     readonly_fields = ('computed_tags',)
+    verbose_name = 'item computed tags'
+    verbose_name_plural = 'itme computed tags'
 
 
 class ItemAdmin(admin.ModelAdmin):

@@ -65,6 +65,8 @@ class MemberListAdmin(admin.ModelAdmin):
 class RanksInline(admin.TabularInline):
     model = Rank.member.through
     extra = 1
+    verbose_name = 'rank assignment'
+    verbose_name_plural = 'rank assignments'
 
 
 class MembershipInline(admin.TabularInline):
@@ -75,7 +77,9 @@ class MembershipInline(admin.TabularInline):
 
 class MemberFlagsInline(admin.TabularInline):
     model = MemberFlag.member.through
-    extra = 4
+    extra = 2
+    verbose_name = 'email flag'
+    verbose_name_plural = 'email flags'
 
 
 class MemberAdmin(admin.ModelAdmin):
