@@ -32,6 +32,7 @@
                     <li class="list-group-item">123+ Board Games</li>
                     <li class="list-group-item">420+ Books</li>
                     <li class="list-group-item">Other stats for nerds here</li>
+                    <li class="list-group-item">Other stats for nerds here</li>
                 </ul>
             </div>
             <div class="card text-center mb-3">
@@ -56,6 +57,9 @@
                         Unigames also allows other clubs, organisations and people to borrow items for their events. Whether you
                         need one board game or several, Unigames is here to help!
                     </p>
+                    <p>
+                        Submit a request form with at least 2-3 weeks notice, and we'll get back to you!
+                    </p>
                     <a href="{% url 'library:external-request' %}" class="btn btn-primary">External Borrowing Request Form</a>
                 </div>
             </div>
@@ -64,24 +68,27 @@
     {% if items_list %}
     <div class="col-lg-4">
         <h4>Featured Items:</h4>
-        {% for item in items_list %}
-        <div class="card mb-2 item-list-card">
-            <div class="row no-gutters">
-                <div class="col-4 col-md-3">
-                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
-                </div>
-                <div class="col-8">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                        <p class="card-text">{{ item.description|un_markdownify|truncatewords:25 }}</p>
+        <div class="row">
+            {% for item in items_list %}
+            <div class="col-sm-12 col-md-6 col-lg-12 col-xl-12">
+                <div class="card mb-3 text-center">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4">
+                            <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
+                                <p class="card-text"><small class="text-muted">{{ item.get_type_display }}</small></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            {% empty %}
+            <h4>There are no results for your query.</h4>
+            {% endfor %}
         </div>
-        <div class="w-100"></div>
-        {% empty %}
-        <h4>There are no results for your query.</h4>
-        {% endfor %}
     </div>
     {% endif %}
 </div>
