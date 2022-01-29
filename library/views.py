@@ -27,8 +27,7 @@ class LibraryHomeView(generic.ListView):
 
     def get_queryset(self):
         return Item.objects.filter(
-            Q(base_tags__base_tags__name__in=[self.featured_tag_name]) |
-            Q(computed_tags__computed_tags__name__in=[self.featured_tag_name])
+            Q(base_tags__base_tags__name__in=[self.featured_tag_name])
         ).distinct().order_by('name')
 
 
