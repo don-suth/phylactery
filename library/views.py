@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from .models import Item, BorrowRecord, ExternalBorrowingForm
+from .models import Item, BorrowRecord, ExternalBorrowingForm, \
+    BOOK, BOARD_GAME, CARD_GAME, OTHER
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
     ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm, ExternalBorrowingReturningForm
@@ -29,6 +30,14 @@ class LibraryHomeView(generic.ListView):
         return Item.objects.filter(
             Q(base_tags__base_tags__name__in=[self.featured_tag_name])
         ).distinct().order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['number_of_books'] = Item.objects.filter(type=BOOK).count()
+        context['number_of_cardgames'] = Item.objects.filter(type=CARD_GAME).count()
+        context['number_of_boardgames'] = Item.objects.filter(type=BOARD_GAME).count()
+        context['number_of_other'] = Item.objects.filter(type=OTHER).count()
+        return context
 
 
 class AllItemsView(generic.ListView):

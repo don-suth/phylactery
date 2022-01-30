@@ -29,11 +29,16 @@
                     </p>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">123+ Board Games</li>
-                    <li class="list-group-item">420+ Books</li>
-                    <li class="list-group-item">Other stats for nerds here</li>
-                    <li class="list-group-item">Other stats for nerds here</li>
+                    {% if number_of_boardgames > 0 %}<li class="list-group-item">{{ number_of_boardgames }} Board Games</li>{% endif %}
+                    {% if number_of_books > 0 %}<li class="list-group-item">{{ number_of_books }} Books</li>{% endif %}
+                    {% if number_of_cardgames > 0 %}li class="list-group-item">{{ number_of_cardgames }} Card Games</li>{% endif %}
+                    {% if number_of_other > 0 %}<li class="list-group-item">And {{ number_of_other }} other library items!</li>{% endif %}
                 </ul>
+                <div class="card-body">
+                    <p class="card-text">
+                        and counting!
+                    </p>
+                </div>
             </div>
             <div class="card text-center mb-3">
                 <img class="card-img-top" src="{% static 'phylactery/images/unigames_library.jpg' %}" style="height: 100px; object-fit: cover; object-position: 0 0;">
