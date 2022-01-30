@@ -327,8 +327,8 @@ class BorrowRecord(models.Model):
         on_delete=models.SET_NULL,
         related_name='borrowed'
     )
-    member_address = models.CharField(max_length=200)
-    member_phone_number = models.CharField(max_length=20)
+    member_address = models.CharField(max_length=200, null=True)
+    member_phone_number = models.CharField(max_length=20, null=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='borrow_records')
     date_borrowed = models.DateField(default=timezone.now)
     auth_gatekeeper_borrow = models.ForeignKey(
@@ -364,6 +364,14 @@ class BorrowRecord(models.Model):
             return '(RETURNED)'+str(self.borrowing_member)+' - '+str(self.item)
         else:
             return str(self.borrowing_member)+' - '+str(self.item)+' (Due '+self.due_date.strftime('%a %b %d')+')'
+
+    def clear_personal_data(self):
+        self.borrowing_member = None
+        self.member_address = None
+        self.member_phone_number = None
+        self.auth_gatekeeper_borrow = None
+        self.auth_gatekeeper_return = None
+        self.save()
 
 
 class ExternalBorrowingForm(models.Model):
