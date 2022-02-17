@@ -13,7 +13,7 @@
             <div class="card-body p-2"></div>
             <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
             <div class="card-body p-2"></div>
-            <div class="card-footer">
+            <div class="card-footer bg-white border-top-0">
                 <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
                 <p class="card-text text-muted">{{ item.get_type_display }}</p>
             </div>
