@@ -8,27 +8,8 @@
     margin-right: -30px;
 }
 
-.item-detail-card {
-    min-width: 288px;
-    float: right;
-    margin-left: 10px;
-    margin-bottom: 10px;
-}
-
 .item-list-card {
     height: 220px;
-}
-
-@media (max-width: 576px) {
-    .item-detail-card {
-        width: 100%;
-        float: none;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .item-card-img {
-        max-width: 288px;
-    }
 }
 
 .item-detail-img {
