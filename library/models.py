@@ -28,15 +28,19 @@ class TagParent(models.Model):
     def __str__(self):
         return 'Parents of '+str(self.child_tag)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    def compute_descendant_tags(self):
         # We find all items with the child_tag in their base or computed tags, and re_save them
         for item in Item.objects.filter(
-            Q(base_tags__base_tags__name__in=[self.child_tag.name]) |
-            Q(computed_tags__computed_tags__name__in=[self.child_tag.name])) \
-            .distinct() \
-            .order_by('name'):
-            item.compute_tags()
+                Q(base_tags__base_tags__name__in=[self.child_tag.name]) |
+                Q(computed_tags__computed_tags__name__in=[self.child_tag.name])) \
+                .distinct() \
+                .order_by('name'):
+            item.compute_tags(recursion=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.compute_descendant_tags()
+
 
 
 class Item(models.Model):
@@ -94,7 +98,7 @@ class Item(models.Model):
             computed_tags = ItemComputedTags.objects.create(item=self).computed_tags
         return computed_tags
 
-    def compute_tags(self):
+    def compute_tags(self, recursion=True):
         # Takes the base tags and computes all parent tags
         base_tags = self.get_base_tags
         computed_tags = self.get_computed_tags
@@ -122,6 +126,8 @@ class Item(models.Model):
             tag_parents = TagParent.objects.create(child_tag=tag)
 
         tag_parents.parent_tag.set(list(base_tags.all())+list(already_searched))
+        if recursion:
+            tag_parents.compute_descendant_tags()
 
     def compute_playtime(self):
         # On item save, calculate playtime.
