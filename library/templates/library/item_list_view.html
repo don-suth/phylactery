@@ -10,73 +10,12 @@
     {% for item in items_list %}
     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-4 mb-3">
         <div class="card text-center h-100">
-            <div class="row no-gutters">
-                <div class="col-12">
-                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
-                </div>
-                <div class="col-12">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                        <p class="card-text"><small class="text-muted">{{ item.get_type_display }}</small></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <h4>There are no results for your query.</h4>
-    {% endfor %}
-    {% for item in items_list %}
-    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="row no-gutters">
-                <div class="col-12">
-                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
-                </div>
-                <div class="col-12">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                        <p class="card-text"><small class="text-muted">{{ item.get_type_display }}</small></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <h4>There are no results for your query.</h4>
-    {% endfor %}
-    {% for item in items_list %}
-    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="row no-gutters">
-                <div class="col-12">
-                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
-                </div>
-                <div class="col-12">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                        <p class="card-text"><small class="text-muted">{{ item.get_type_display }}</small></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <h4>There are no results for your query.</h4>
-    {% endfor %}
-    {% for item in items_list %}
-    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-4 mb-3">
-        <div class="card text-center h-100">
-            <div class="row no-gutters">
-                <div class="col-12">
-                    <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
-                </div>
-                <div class="col-12">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                        <p class="card-text"><small class="text-muted">{{ item.get_type_display }}</small></p>
-                    </div>
-                </div>
+            <div class="card-body p-2"></div>
+            <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
+            <div class="card-body p-2"></div>
+            <div class="card-footer">
+                <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
+                <p class="card-text text-muted">{{ item.get_type_display }}</p>
             </div>
         </div>
     </div>
@@ -84,32 +23,6 @@
     <h4>There are no results for your query.</h4>
     {% endfor %}
 </div>
-<!--
-<div class="row">
-    {% for item in items_list %}
-    <div class="col-lg-6">
-        <div class="card mb-3 item-list-card">
-          <div class="row no-gutters">
-            <div class="col-4">
-                <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" alt="{{ item.name }}"></a>
-            </div>
-            <div class="col-8">
-              <div class="card-body">
-                  <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
-                <p class="card-text">{{ item.description|un_markdownify|truncatewords:25 }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-    </div>
-        {% if forloop.counter|divisibleby:"2" %}
-        <div class="w-100"></div>
-        {% endif %}
-    {% empty %}
-    <h4>There are no results for your query.</h4>
-    {% endfor %}
-</div>
--->
 <div class="mx-auto" style="width: 280px;">
     <nav aria-label="Page navigation">
         <ul class="pagination">
