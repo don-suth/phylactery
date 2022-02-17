@@ -18,7 +18,7 @@ class ItemComputedTagInline(admin.TabularInline):
     form = ComputedTagForm
     readonly_fields = ('computed_tags',)
     verbose_name = 'item computed tags'
-    verbose_name_plural = 'itme computed tags'
+    verbose_name_plural = 'item computed tags'
 
 
 class ItemAdmin(admin.ModelAdmin):
