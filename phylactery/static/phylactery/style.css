@@ -8,6 +8,17 @@
     margin-right: -30px;
 }
 
+.unigames-big-brand {
+    font-family: newRocker;
+    font-size: 4.1rem;
+    -webkit-text-stroke-color: white;
+    -webkit-text-stroke-width: 1px;
+}
+
+.unigames-big-logo {
+    margin-bottom: -30px;
+}
+
 .item-list-card {
     height: 220px;
 }

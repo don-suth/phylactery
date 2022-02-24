@@ -5,6 +5,11 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.text import slugify
 from django.contrib.auth.models import Group
+from django.views.generic import TemplateView
+from blog.models import BlogPost
+from library.models import Item
+from django.utils import timezone
+
 
 CONTROL_PANEL_FORMS = [
     'PurgeAllGatekeepers',
@@ -73,3 +78,24 @@ def control_panel_view(request):
         'phylactery/control_panel.html',
         {'rendered_forms': rendered_forms}
     )
+
+class HomeView(TemplateView):
+    template_name = 'phylactery/home.html'
+    featured_tag_name = 'Featured'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        featured_items = Item.objects.filter(
+            Q(base_tags__base_tags__name__in=[self.featured_tag_name])
+        ).distinct().order_by('name')
+
+        most_recent_blogposts = BlogPost.objects.filter(
+            publish_on__lte=timezone.now()
+        ).order_by('-publish_on')[:3]
+
+        context['featured_items'] = featured_items
+        context['recent_blogposts'] = most_recent_blogposts
+
+        return context
+

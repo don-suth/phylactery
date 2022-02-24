@@ -3,26 +3,102 @@
 
 {% block title %}Home - {% endblock %}
 
-{% block content %}
-<h1 class="mt-3">Welcome to Unigames!</h1>
-<p>Unigames is the table-top gaming club at the University of Western Australia.
-    We do roleplaying, wargaming, board and card gaming and indeed gaming in all forms (except video games, try next door at UCC for that).
-    Whether it's D&D, Magic the Gathering, Warhammer 40K, or any of our dozens of other systems and games, we've got you covered.
-    We also have some chess sets, Mahjong, and at least 2 sets of Monopoly just in case.
-    Check out our Library.</p>
-<p>Membership costs $5 per year for Guild Members (but $7 for everyone else) and entitles you to vote at the annual committee elections, join one of our many long-running campaigns, borrow our books and games, and receive a 10% discount when you buy from our generous sponsor Tactics.
-    We also keep a well stocked fridge in our clubroom for all your mid-game snacking needs.
-    Our snacks are some of the cheapest on campus!</p>
-<p>The clubroom is currently located on the top level of Cameron Hall, which is above the Tavern.
-    Ask for directions at the Guild Student Centre (ground floor in Guild Village).</p>
-<p>A good place to start looking for information is the Frequently Asked Questions.
-    Otherwise, pick something interesting from the bar up top!</p>
+{% load static %}
 
-{% if user.is_authenticated %}
-    <p>Hi {{ user.username }}!</p>
-    <p><a href="{% url 'account:logout' %}">Logout</a> </p>
-{% else %}
-    <p>You are not logged in.</p>
-    <a href="{% url 'account:login' %}">Login</a>
-{% endif %}
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <div class="card text-center" style="min-height: 350px; background-color: #bd9dd3;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-4"></div>
+                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-4">
+                        <img src="{% static 'phylactery/images/unigames-logo-2022.svg' %}" class="img-fluid unigames-big-logo">
+                        <span class="unigames-big-brand">Unigames</span>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-4"></div>
+                </div>
+                <h3 class="card-title">UWA's traditional gaming club</h3>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="card-link btn btn-light">Who are we?<i class="bi bi-caret-right"></i></a>
+                <a href="#" class="card-link btn btn-light">What do we do?<i class="bi bi-caret-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-md-2">
+    <div class="col mb-3">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Latest news:</h3>
+                <a href="{% url 'blog:blog-home' %}" class="btn btn-link">View archive</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for post in recent_blogposts %}
+                <a href="{{ post.get_absolute_url }}" class="list-group-item list-group-item-action" aria-current="true">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h3 class="mb-1">{{ post.title }}</h3>
+                    </div>
+                    <p class="mb-1">{{ post.short_description }}</p>
+                    <div class="d-flex w-100 justify-content-between">
+                        <small>by {{ post.author }}</small>
+                        <small>{{ post.get_pretty_timestamp }}</small>
+                    </div>
+
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col mb-3">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Featured games:</h3>
+                <div>
+                    <a href="{% url 'library:list' %}" class="btn btn-link">Library</a>
+                    <a href="{% url 'library:list' %}" class="btn btn-link">All items</a>
+                </div>
+            </div>
+            <div id="featuredItemCarousel" class="carousel slide h-100" data-ride="carousel">
+                <ol class="carousel-indicators" style="bottom: -20px">
+                    {% for item in featured_items %}
+                    <li style="background-color: darkgrey;" data-target="#featuredItemCarousel" data-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+                    {% endfor %}
+                </ol>
+                <div class="carousel-inner">
+                    {% for item in featured_items %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="card text-center border-light">
+                            <div class="card-body p-1"></div>
+                            <a href="{% url 'library:detail' item.slug %}"><img src="{{ item.image.url }}" class="card-img list-card-image" style="object-position: center;" alt="{{ item.name }}"></a>
+                            <div class="card-body p-1"></div>
+                            <div class="card-footer bg-white border-top-0">
+                                <h5 class="card-title"><a href="{% url 'library:detail' item.slug %}">{{ item.name }}</a></h5>
+                                <p class="card-text text-muted">{{ item.get_type_display }}</p>
+                            </div>
+                            <div class="card-body p-3"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-target="#featuredItemCarousel" data-slide="prev">
+                    <span class="bi bi-caret-left-fill" aria-hidden="true" style="color: black"></span>
+                    <span class="sr-only">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-target="#featuredItemCarousel" data-slide="next">
+                    <span class="bi bi-caret-right-fill" aria-hidden="true" style="color: black"></span>
+                    <span class="sr-only">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="card text-center" style="min-height: 100px;">
+            <p class="card-text">Discord, Facebook Links here</p>
+        </div>
+    </div>
+</div>
 {% endblock %}
