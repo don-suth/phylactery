@@ -168,7 +168,7 @@ MEDIA_URL = '/media/'
 # Use light for light background colours and dark for dark background colours.
 # NAVBAR_COLOUR: The colour of the navbar you want.
 NAVBAR_THEME = 'dark'
-NAVBAR_COLOUR = '#911f71 '
+NAVBAR_COLOUR = '#39559b'
 
 TAGGIT_CASE_INSENSITIVE = True
 
