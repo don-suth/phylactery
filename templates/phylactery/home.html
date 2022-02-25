@@ -21,8 +21,8 @@
                 <h3 class="card-title">UWA's traditional gaming club</h3>
             </div>
             <div class="card-footer">
-                <a href="#" class="card-link btn btn-light">Who are we?<i class="bi bi-caret-right"></i></a>
-                <a href="#" class="card-link btn btn-light">What do we do?<i class="bi bi-caret-right"></i></a>
+                <a href="{% url 'faq' %}" class="card-link btn btn-light">Who are we?<i class="bi bi-caret-right"></i></a>
+                <a href="{% url 'events' %}" class="card-link btn btn-light">What do we do?<i class="bi bi-caret-right"></i></a>
             </div>
         </div>
     </div>
@@ -96,8 +96,11 @@
 </div>
 <div class="row">
     <div class="col">
-        <div class="card text-center" style="min-height: 100px;">
-            <p class="card-text">Discord, Facebook Links here</p>
+        <div class="card text-center">
+            <div class="card-body">
+                <a class="btn btn-primary" href="https://discord.gg/xE5CWZr">Join our Discord Server!</a>
+                <a class="btn btn-primary" href="https://www.facebook.com/groups/uwa.unigames/">Join our Facebook Group!</a>
+            </div>
         </div>
     </div>
 </div>
