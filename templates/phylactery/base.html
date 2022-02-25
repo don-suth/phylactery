@@ -37,9 +37,9 @@
                             <a class="dropdown-item" href="{% url 'events' %}">Events</a>
                             <a class="dropdown-item" href="{% url 'roleplaying' %}">What is Roleplaying?</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Our Committee</a>
-                            <a class="dropdown-item" href="#">Life Members</a>
-                            <a class="dropdown-item" href="#">Contact Us</a>
+                            <a class="dropdown-item" href="{% url 'committee' %}">Our Committee</a>
+                            <a class="dropdown-item" href="{% url 'life_members' %}">Life Members</a>
+                            <a class="dropdown-item" href="{% url 'contact' %}">Contact Us</a>
                         </div>
                     </li>
                     <li class="nav-item">
@@ -53,12 +53,12 @@
                             Operations
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarOperationsDropdown">
-                            <a class="dropdown-item" href="#">Constitution</a>
-                            <a class="dropdown-item" href="#">Regulations</a>
-                            <a class="dropdown-item" href="#">Minutes</a>
+                            <a class="dropdown-item" href="{% url 'constitution' %}">Constitution</a>
+                            <a class="dropdown-item" href="{% url 'regulations' %}">Regulations</a>
+                            <a class="dropdown-item" href="https://unigames.ucc.asn.au/minutes.php">Minutes <i class="bi bi-box-arrow-up-right"></i></a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Archives</a>
-                            <a class="dropdown-item" href="#">Webcams</a>
+                            <a class="dropdown-item" href="https://unigames.ucc.asn.au/opdocs/">Archives <i class="bi bi-box-arrow-up-right"></i></a>
+                            <a class="dropdown-item" href="https://webcam.ucc.asn.au/">Webcams <i class="bi bi-box-arrow-up-right"></i></a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
