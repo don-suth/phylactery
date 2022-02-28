@@ -4,10 +4,10 @@
 {% block title %}Change Email Preferences{% endblock %}
 {% block email_title %}Change Email Preferences{% endblock %}
 
-{% block preheader %}Hi there {{ member.first_name }}, you can update your email preferences here.{% endblock %}
+{% block preheader %}Hi there {{ member.preferred_name }}, you can update your email preferences here.{% endblock %}
 
 {% block content %}
-<p>Hi there {{ member.first_name }}</p>
+<p>Hi there {{ member.preferred_name }}</p>
 <p>You are receiving this email because you requested to change your email preferences on the Unigames website.</p>
 <p>Please click on the button below to change your preferences.</p>
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">

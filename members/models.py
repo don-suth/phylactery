@@ -179,7 +179,7 @@ class Member(models.Model):
 
 
 	class Meta:
-		ordering = ['first_name', 'last_name']
+		ordering = ['preferred_name', 'last_name']
 
 
 class Membership(models.Model):

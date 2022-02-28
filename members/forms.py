@@ -130,20 +130,20 @@ class OldMembershipForm(forms.Form):
                         Div(
                             Div(
                                 HTML('''<h5 class="modal-title" id="confirmModalLabel">
-                                Please pass the device back to {{ user.member.first_name }}.</h5>'''),
+                                Please pass the device back to {{ user.member.preferred_name }}.</h5>'''),
                                 StrictButton('&times;', css_class='btn-close', data_dismiss='modal', aria_label='Close'),
                                 css_class="modal-header"
                             ),
                             Div(
                                 HTML('''
-                                <p>{{ user.member.first_name }}, please fill out the following:</p>
+                                <p>{{ user.member.preferred_name }}, please fill out the following:</p>
                                 <p>Note: Make sure this process is 100% done and the form is 
                                 submitted before the member departs.</p>
                                 '''),
                                 PrependedText('amount_paid', '$'),
                                 'sticker_received',
                                 HTML('''
-                                <p>By clicking the submit button below, you ({{ user.member.first_name }})
+                                <p>By clicking the submit button below, you ({{ user.member.preferred_name }})
                                 verify that this information is correct to the best of your knowledge.'''),
                                 css_class="modal-body"
                             ),

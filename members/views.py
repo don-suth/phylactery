@@ -290,7 +290,7 @@ def old_membership_view(request, pk=None):
 
 		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
 		form.add_error('is_guild', 'Please verify that this is still correct.')
-		form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
+		form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.preferred_name }}."
 		request.session['editing_member_id'] = pk
 		return render(request, 'members/old_membership_form.html', {'form': form, 'member': member})
 	if request.method == 'POST':
@@ -320,7 +320,7 @@ def old_membership_view(request, pk=None):
 				if form.cleaned_data['email'] != member.email_address:
 					if Member.objects.filter(email_address=form.cleaned_data['email']).exists():
 						form.add_error('email', "This email is already in use. Are you sure you're a fresher?")
-						form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
+						form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.preferred_name }}."
 						return render(request, 'members/old_membership_form.html', {'form': form})
 				if form.has_changed():
 					member.first_name = form.cleaned_data['first_name']
@@ -355,10 +355,10 @@ def old_membership_view(request, pk=None):
 					elif flag_val is True:
 						MemberFlag.objects.get(pk=flag_pk).member.add(member)
 
-				messages.success(request, "New membership added for {0}!".format(member.first_name))
+				messages.success(request, "New membership added for {0}!".format(member.preferred_name))
 				return redirect('members:profile', pk=pk)
 			else:
-				form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.first_name }}."
+				form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.preferred_name }}."
 				return render(request, 'members/old_membership_form.html', {'form': form})
 
 

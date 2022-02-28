@@ -4,10 +4,10 @@
 {% block title %}Unigames Library Borrowing Receipt{% endblock %}
 {% block email_title %}Unigames Library Borrowing Receipt{% endblock %}
 
-{% block preheader %}Hi there {{ member.first_name }}, here's your receipt for the items you borrowed today.{% endblock %}
+{% block preheader %}Hi there {{ member.preferred_name }}, here's your receipt for the items you borrowed today.{% endblock %}
 
 {% block content %}
-<p>Hi there {{ member.first_name }},</p>
+<p>Hi there {{ member.preferred_name }},</p>
 <p>Here's your receipt for the items you borrowed at Unigames today.</p>
 <p>You borrowed the following items:</p>
 <ul>

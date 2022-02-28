@@ -1,11 +1,11 @@
 {% extends "phylactery/base.html" %}
 
-{% block title %}Return items for {{ member.first_name }} - {% endblock %}
+{% block title %}Return items for {{ member.preferred_name }} - {% endblock %}
 
 {% block content %}
 
 
-<h2>Return items for {{ member }}</h2>
+<h2>Return items for {{ member.preferred_name }}</h2>
 <p>Select items to return, then click the button below.</p>
 <form method="post" action="{% url 'library:return-items' pk=member.pk %}">
     {% csrf_token %}

@@ -1,15 +1,15 @@
 {% extends "phylactery/base.html" %}
 
-{% block title %}Profile for {{ member.first_name }} - {% endblock %}
+{% block title %}Profile for {{ member.preferred_name }} - {% endblock %}
 
 {% block content %}
 
 <div class="container" style="max-width: 576px;">
-    <h2>{{ member }}</h2>
+    <h2>{{ member.preferred_name }}</h2>
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Library Items</h5>
-            <p class="card-text">{{ member.first_name }} has {{ borrowed_items|length }} item{{ borrowed_items|length|pluralize }} borrowed currently.</p>
+            <p class="card-text">{{ member.preferred_name }} has {{ borrowed_items|length }} item{{ borrowed_items|length|pluralize }} borrowed currently.</p>
         </div>
         {% if borrowed_items.exists %}
         <table class="table table-hover table-striped table-sm mb-0">
@@ -31,14 +31,14 @@
             </tbody>
         </table>
         <div class="btn-group">
-            <a href="{% url 'library:return-items' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Return items for {{ member.first_name }}</a>
+            <a href="{% url 'library:return-items' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Return items for {{ member.preferred_name }}</a>
         </div>
         {% endif %}
     </div>
     <div class="card mt-3">
         <div class="card-body">
             <h5 class="card-title">Membership</h5>
-            <p class="card-text">{{ member.first_name }} {% if member.is_financial_member %}is a current member!{% else %}is not a current member.{% endif %}</p>
+            <p class="card-text">{{ member.preferred_name }} {% if member.is_financial_member %}is a current member!{% else %}is not a current member.{% endif %}</p>
         </div>
         {% if member.memberships.exists %}
         <table class="table table-hover table-striped table-sm mb-0">
@@ -63,7 +63,7 @@
         </table>
         {% endif %}
         <div class="btn-group">
-            <a href="{% url 'members:signup-old' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Create new membership for {{ member.first_name }}</a>
+            <a href="{% url 'members:signup-old' pk=member.pk %}" class="btn btn-light btn-card-footer" role="button">Create new membership for {{ member.preferred_name }}</a>
         </div>
     </div>
 

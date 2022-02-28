@@ -263,7 +263,7 @@
                 <tbody>
                     {% for member in members_borrowing %}
                         <tr>
-                            <td>{{ member }}</td>
+                            <td>{{ member.preferred_name }}</td>
                             <td>{{ member.num_borrowed }}</td>
                             <td><a href="{% url 'members:profile' pk=member.pk %}">Profile</a></td>
                         </tr>

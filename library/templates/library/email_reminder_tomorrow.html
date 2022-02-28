@@ -4,10 +4,10 @@
 {% block title %}Reminder - Library Items Due Tomorrow{% endblock %}
 {% block email_title %}Reminder - Library Items Due Tomorrow{% endblock %}
 
-{% block preheader %}Hi there {{ first_name }}, you have library items due tomorrow.{% endblock %}
+{% block preheader %}Hi there {{ member.preferred_name }}, you have library items due tomorrow.{% endblock %}
 
 {% block content %}
-<p>Hi there {{ first_name }},</p>
+<p>Hi there {{ member.preferred_name }},</p>
 <p>This is an automated email to remind you that the following items that
 you have borrowed are due back tomorrow, {{ due_date|date:"l jS F Y" }}:</p>
 <ul>

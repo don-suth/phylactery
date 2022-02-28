@@ -42,7 +42,7 @@ def send_due_date_tomorrow_reminder_task():
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Tomorrow'
         context = {
-            'first_name': member.first_name,
+            'member': member,
             'due_date': tomorrow,
             'record_list': members_with_items[member]
         }
@@ -88,7 +88,7 @@ def send_due_date_today_reminder_task():
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Today'
         context = {
-            'first_name': member.first_name,
+            'member': member,
             'due_date': today,
             'record_list': members_with_items[member]
         }
