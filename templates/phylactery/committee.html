@@ -5,54 +5,55 @@
 
 {% block content %}
 <h1 class="mt-3">Committee</h1>
-<h3>Unigames Committee of 2021</h3>
+<h3>The Current Unigames Committee</h3>
 
 <p>
     <b>President</b><br/>
-    Alistair Langton
+    {{ President.0 }}
 </p>
 
 <p>
     <b>Vice President</b><br/>
-    Emerald Aindow
+    {{ VicePresident.0 }}
 </p>
 
 <p>
     <b>Treasurer</b><br/>
-    Jackie Shan
+    {{ Treasurer.0 }}
 </p>
 
 <p>
     <b>Secretary</b><br/>
-    Guinevere Sellner
+    {{ Secretary.0 }}
 </p>
 
 <p>
     <b>Librarian</b><br/>
-    Vikrum Sithambaram
+    {{ Librarian.0 }}
 </p>
 
 <p>
     <b>Fresher Rep</b><br/>
-    Ethan Gibson
+    {{ FresherRep.0 }}
 </p>
 
 <p>
-    <b>Ordinary Committee Members</b>
-    <br/>Alex Bennett
-    <br/>Luna
-    <br/>Christopher Leak
-    <br/>Nina MJ
+    <b>Ordinary Committee Members</b><br/>
+    {% for member in OCM %}
+        {{ member }}<br />
+    {% endfor %}
 </p>
 
+{% if IPP %}
 <p>
     <b>Immediate Past President</b><br/>
-    N/A
+    {{ IPP.0 }}
 </p>
+{% endif %}
 
 <p> To contact committee, email to <a href="mailto:uwaunigames@gmail.com">uwaunigames@gmail.com</a></p>
 
 <p>Thanks to everyone who came to the AGM to elect the new committee, and the many absentee votes of those that didn't come.<br/>
-We'll do our best to make 2021 a good year for Unigames.</p>
+We'll do our best to make this year a good year for Unigames.</p>
 
 {% endblock %}

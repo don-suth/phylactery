@@ -32,9 +32,11 @@ def form_factory(form_name, *args, **kwargs):
         return None
 
 
-FORM_LOOKUP = {}
-for control_form in CONTROL_PANEL_FORMS:
-    FORM_LOOKUP[slugify(get_form_class(control_form).form_name)] = control_form
+def get_form_lookup():
+    form_lookup = {}
+    for control_form in CONTROL_PANEL_FORMS:
+        form_lookup[slugify(get_form_class(control_form).form_name)] = control_form
+    return form_lookup
 
 
 def check_permissions(request, valid_permissions):
@@ -55,7 +57,7 @@ def control_panel_view(request):
     if request.method == 'POST':
         # Check which form we should be executing
         form_name = request.POST.get('form_slug_name', None)
-        form = get_form_class(FORM_LOOKUP.get(form_name, None))
+        form = get_form_class(get_form_lookup().get(form_name, None))
         if form is not None:
             if check_permissions(request, form.form_permissions):
                 # We have found a form that matches the name, and they have permissions to use it
@@ -67,17 +69,18 @@ def control_panel_view(request):
                     already_rendered.append(form_name)
                     rendered_forms.append(bound_form)
     # Renders all control panel segments that the user has access to
-
-    for form_slug_name in FORM_LOOKUP:
+    form_lookup = get_form_lookup()
+    for form_slug_name in form_lookup:
         if (form_slug_name not in already_rendered) and \
-                (check_permissions(request, get_form_class(FORM_LOOKUP[form_slug_name]).form_permissions)):
-            new_form = form_factory(FORM_LOOKUP[form_slug_name])
+                (check_permissions(request, get_form_class(form_lookup[form_slug_name]).form_permissions)):
+            new_form = form_factory(form_lookup[form_slug_name])
             rendered_forms.append(new_form)
     return render(
         request,
         'phylactery/control_panel.html',
         {'rendered_forms': rendered_forms}
     )
+
 
 class HomeView(TemplateView):
     template_name = 'phylactery/home.html'
@@ -99,3 +102,30 @@ class HomeView(TemplateView):
 
         return context
 
+
+class CommitteeView(TemplateView):
+    template_name = "phylactery/committee.html"
+
+    NON_OCM_POSITIONS = [
+        'President',
+        'Vice-President',
+        'Treasurer',
+        'Secretary',
+        'Librarian',
+        'Fresher-Rep',
+        'IPP',
+    ]
+
+    NUMBER_OF_OCMS = 4
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = datetime.date.today()
+        context['member'] = Member.objects.all()
+        for position in self.NON_OCM_POSITIONS + ['OCM']:
+            # Find the member with the most recent non-expired rank
+            context[position.replace('-', '')] = Member.objects.filter(
+                Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
+                ranks__rank__rank_name=position.upper()
+            )
+        return context

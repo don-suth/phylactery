@@ -19,13 +19,13 @@ from django.views.generic.base import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.i18n import JavaScriptCatalog
-from .views import control_panel_view, HomeView
+from .views import control_panel_view, HomeView, CommitteeView
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('faq/', TemplateView.as_view(template_name='phylactery/faq.html'), name='faq'),
     path('events/', TemplateView.as_view(template_name='phylactery/events.html'), name='events'),
-    path('committee/', TemplateView.as_view(template_name='phylactery/committee.html'), name='committee'),
+    path('committee/', CommitteeView.as_view(), name='committee'),
     path('contact_us/', TemplateView.as_view(template_name='phylactery/contact_us.html'), name='contact'),
     path('life_members/', TemplateView.as_view(template_name='phylactery/life_members.html'), name='life_members'),
     path('constitution/', TemplateView.as_view(template_name='phylactery/constitution.html'), name='constitution'),
