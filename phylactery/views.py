@@ -64,6 +64,7 @@ def control_panel_view(request):
                 bound_form = form(request.POST)
                 if bound_form.is_valid():
                     bound_form.submit(request)
+                    return redirect("control-panel")
                 else:
                     # The form was not valid, something wasn't right with it.
                     already_rendered.append(form_name)
