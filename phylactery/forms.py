@@ -314,18 +314,13 @@ class MakeWebkeepers(ControlPanelForm):
 class TransferCommittee(ControlPanelForm):
     form_name = 'Transfer Committee Roles'
     form_description = 'Transfers any/all roles of committee to others'
-    form_long_description = 'NOTE: Partial committee changeover is not yet implemented.'
+    form_long_description = ''
     form_permissions = ['President', 'Vice-President']
 
     full_committee_change = forms.BooleanField(
-        required=True,
-        label='Is this Committee change the result of a full committee re-election at an AGM? (currently required)',
-        initial=True
-    )
-
-    include_ipp = forms.BooleanField(
         required=False,
-        label='Add the immediate past president (IPP) to the new committee?'
+        label='Is this Committee change the result of a full committee re-election at an AGM? (defaults to True)',
+        initial=True
     )
 
     layout = Layout(
@@ -342,32 +337,47 @@ class TransferCommittee(ControlPanelForm):
 
     NUMBER_OF_OCMS = 4
 
-    def get_current_committee(self):
+    def get_current_committee(self, flat=False):
         # Find all current committee members
         # Returns a dictionary, keyed with committee rank and a list of members with that rank.
         # There should only be one committee member of each rank, plus some OCMs
         committee = {}
         today = datetime.date.today()
-        for position in self.NON_OCM_POSITIONS + ['OCM']:
-            # Find the member with the most recent non-expired rank
-            committee[position] = Member.objects.filter(
-                Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
-                ranks__rank__rank_name=position.upper()
-            )
-        for position in committee:
-            if position == 'OCM' and len(committee[position]) != self.NUMBER_OF_OCMS:
-                warnings.warn('Committee Error - Number of current OCMs ({0}) is not correct. (Should be {1}.)'
-                              .format(len(committee['OCM']), self.NUMBER_OF_OCMS))
-            elif position != 'OCM' and len(committee[position]) != 1:
-                warnings.warn('Committee Error - Number of members with rank {0} ({1}) is not correct. (Should be 1.)'
-                              .format(position, len(committee[position])))
+        if flat is False:
+            for position in self.NON_OCM_POSITIONS + ['OCM', 'IPP']:
+                # Find the member(s) with the most recent non-expired rank
+                committee[position] = Member.objects.filter(
+                    Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
+                    ranks__rank__rank_name=position.upper()
+                )
+            for position in committee:
+                if position == 'OCM' and len(committee[position]) != self.NUMBER_OF_OCMS:
+                    warnings.warn('Committee Error - Number of current OCMs ({0}) is not correct. (Should be {1}.)'
+                                  .format(len(committee['OCM']), self.NUMBER_OF_OCMS))
+                elif position != 'OCM' and position != 'IPP' and len(committee[position]) != 1:
+                    warnings.warn(
+                        'Committee Error - Number of members with rank {0} ({1}) is not correct. (Should be 1.)'
+                        .format(position, len(committee[position])))
+                elif position == 'IPP' and len(committee[position]) > 1:
+                    warnings.warn(
+                        'Committee Error - Number of members with rank {0} ({1}) is not correct. (Should be 0 or 1.)'
+                        .format(position, len(committee[position])))
+        elif flat is True:
+            # A different format: Just returns the list of all committee members, without their positions.
+            committee = []
+            for position in self.NON_OCM_POSITIONS + ['OCM', 'IPP']:
+                committee_members = Member.objects.filter(
+                    Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
+                    ranks__rank__rank_name=position.upper()
+                )
+                committee.append(committee_members)
         return committee
 
     def get_layout(self):
         layout = Layout()
         current_committee = self.get_current_committee()
         layout.append(HTML('<p>Current Committee:</p><ul>'))
-        for position in self.NON_OCM_POSITIONS + ['OCM']:
+        for position in self.NON_OCM_POSITIONS + ['OCM', 'IPP']:
             layout.append(HTML('<li>' + position + ':<ul>'))
             if len(current_committee[position]) == 0:
                 layout.append(HTML('<li>None</li>'))
@@ -384,7 +394,7 @@ class TransferCommittee(ControlPanelForm):
             name = 'OCM #{0}'.format(i + 1)
             slug_name = slugify(name)
             layout.append(slug_name)
-        layout.append('include_ipp')
+        layout.append(slugify('IPP'))
 
         return layout
 
@@ -415,10 +425,21 @@ class TransferCommittee(ControlPanelForm):
                 required=True
             )
 
+        self.fields[slugify('IPP')] = forms.ModelChoiceField(
+            queryset=Member.objects.all(),
+            widget=CrispyModelSelect2(
+                url='members:autocomplete',
+                attrs={'style': 'width: 100%'}
+            ),
+            label='New IPP (if any)',
+            required=False,
+            blank=True
+        )
+
         super().__init__(self, skip_init=True)
 
     def clean(self):
-        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #'+str(i+1) for i in range(self.NUMBER_OF_OCMS)]))
+        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #'+str( i+1 ) for i in range(self.NUMBER_OF_OCMS)] + ['IPP']))
         cleaned_new_committee_fields = {field_name: self.cleaned_data[field_name] for field_name in fields}
 
         # Check if the new committee fields are unique to each other.
@@ -427,33 +448,23 @@ class TransferCommittee(ControlPanelForm):
 
         # Check if all the new committee are actual members, and if the exec are guild members
         for field_name in cleaned_new_committee_fields:
-            membership = cleaned_new_committee_fields[field_name].get_most_recent_membership()
-            if membership is not None:
-                if membership.expired is True:
+            if field_name != slugify('IPP'):
+                membership = cleaned_new_committee_fields[field_name].get_most_recent_membership()
+                if membership is not None:
+                    if membership.expired is True:
+                        self.add_error(field_name, "This member hasn't renewed their membership.")
+                    if 'ocm' not in field_name:
+                        if membership.guild_member is False:
+                            self.add_error(field_name, 'This member needs to be a guild member.')
+                else:
                     self.add_error(field_name, "This member doesn't have a valid membership.")
-                if 'ocm' not in field_name:
-                    if membership.guild_member is False:
-                        self.add_error(field_name, 'This member needs to be a guild member.')
-            else:
-                self.add_error(field_name, "This member doesn't have a valid membership.")
-
-        # If IPP is ticked, so must the complete refresh
-        if self.cleaned_data['include_ipp'] is True and self.cleaned_data['full_committee_change'] is False:
-            self.add_error('include_ipp', "You can't include the IPP if it isn't a full committee changeover.")
 
     def submit(self, request):
-        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #' + str(i + 1) for i in range(self.NUMBER_OF_OCMS)]))
+        fields = list(map(slugify, self.NON_OCM_POSITIONS + ['OCM #' + str(i + 1) for i in range(self.NUMBER_OF_OCMS)] + ['IPP']))
         cleaned_new_committee_fields = {field_name: self.cleaned_data[field_name] for field_name in fields}
         committee = self.get_current_committee()
-        include_ipp = self.cleaned_data['include_ipp']
-        if include_ipp:
-            future_ipp = committee['President']
-        else:
-            future_ipp = Member.objects.none()
 
         full_committee_change = self.cleaned_data['full_committee_change']
-
-        today = datetime.date.today()
 
         if full_committee_change is True:
             # Expire all old committee ranks (Committee + Position)
@@ -462,16 +473,19 @@ class TransferCommittee(ControlPanelForm):
                     # Non-OCMs
                     field_name = slugify(position)
                     old_position_holder = committee[position].first()
-                    committee_rank = old_position_holder.get_recent_rank('COMMITTEE')
-                    if committee_rank:
-                        committee_rank.expire()
-                    position_rank = old_position_holder.get_recent_rank(position)
-                    if position_rank:
-                        position_rank.expire()
+                    if old_position_holder:
+                        # Remove their Committee and Position ranks
+                        committee_rank = old_position_holder.get_recent_rank('COMMITTEE')
+                        if committee_rank:
+                            committee_rank.expire()
+                        position_rank = old_position_holder.get_recent_rank(position)
+                        if position_rank:
+                            position_rank.expire()
 
                     new_position_holder = cleaned_new_committee_fields[field_name]
-                    new_position_holder.add_rank(position)
-                    new_position_holder.add_rank('COMMITTEE')
+                    if new_position_holder:
+                        new_position_holder.add_rank(position)
+                        new_position_holder.add_rank('COMMITTEE')
                 else:
                     # This is the OCMs
                     for i in range(self.NUMBER_OF_OCMS):
@@ -489,7 +503,7 @@ class TransferCommittee(ControlPanelForm):
                         new_position_holder.add_rank('OCM')
                         new_position_holder.add_rank('COMMITTEE')
 
-            messages.success(request, 'Successfully changed committee.')
+            messages.success(request, 'Successfully completed a full change of committee.')
         else:
             # Expire only the old ranks (Position only)
             # Example, if the secretary quits, an OCM takes their place, and then a new OCM is elected
@@ -497,4 +511,72 @@ class TransferCommittee(ControlPanelForm):
             #   - expire the old secretary rank (Committee + Secretary)
             #   - expire the OCM rank, keep the Committee rank, and add the Secretary rank
             #   - add a new Committee and OCM rank to the incoming member.
-            pass
+            # Check the lists of people in committee. If there's people missing, remove the Committee and Position
+            # role from them. If there's new people, add the Committee role to them. Then run through the list and change the Position ranks.
+
+            new_committee = set(cleaned_new_committee_fields.values())
+            old_committee = set(self.get_current_committee(flat=True))
+            for position in committee:
+                if position in self.NON_OCM_POSITIONS + ['IPP']:
+                    # Non-OCMs
+                    field_name = slugify(position)
+                    old_position_holder = committee[position].first()
+                    new_position_holder = cleaned_new_committee_fields[field_name]
+                    if new_position_holder == old_position_holder:
+                        # In this case, we do nothing.
+                        pass
+                    else:
+                        if old_position_holder not in new_committee and old_position_holder is not None:
+                            # Remove their committee rank.
+                            committee_rank = old_position_holder.get_recent_rank('COMMITTEE')
+                            if committee_rank:
+                                committee_rank.expire()
+                        if new_position_holder not in old_committee and new_position_holder is not None:
+                            # Add their committee rank
+                            new_position_holder.add_rank('COMMITTEE')
+
+                        # Now transfer the position.
+                        if old_position_holder is not None:
+                            position_rank = old_position_holder.get_recent_rank(position)
+                            if position_rank:
+                                position_rank.expire()
+                        if new_position_holder is not None:
+                            new_position_holder.add_rank(position)
+                else:
+                    # This is the OCMs
+                    # For the equality check, we need to check whether the old OCM is in any of the OCM slots.
+                    ocm_fields = [slugify('OCM #'+str(i+1)) for i in range(self.NUMBER_OF_OCMS)]
+                    new_ocms = {cleaned_new_committee_fields[x] for x in ocm_fields}
+                    old_ocms = set(committee[position])
+
+                    if new_ocms == old_ocms:
+                        # Nothing needed to be done.
+                        print("OCMs are equal, doing nothing.")
+                        pass
+                    else:
+                        departing_ocms = old_ocms - new_ocms
+                        arriving_ocms = new_ocms - old_ocms
+                        for ocm in departing_ocms:
+                            # Check if they are still in committee
+                            if ocm not in new_committee:
+                                # Remove their Committee and Position rank
+                                committee_rank = ocm.get_recent_rank('COMMITTEE')
+                                if committee_rank:
+                                    committee_rank.expire()
+                                position_rank = ocm.get_recent_rank('OCM')
+                                if position_rank:
+                                    position_rank.expire()
+                            else:
+                                # Remove their Position rank, but keep the Committee rank.
+                                position_rank = ocm.get_recent_rank('OCM')
+                                if position_rank:
+                                    position_rank.expire()
+                        for ocm in arriving_ocms:
+                            # Check if they were in committee
+                            if ocm not in old_committee:
+                                # Give them the Committee+OCM rank.
+                                ocm.add_rank('OCM')
+                                ocm.add_rank('COMMITTEE')
+                            else:
+                                # Give them the OCM rank only
+                                ocm.add_rank('OCM')
