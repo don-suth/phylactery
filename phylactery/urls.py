@@ -36,6 +36,7 @@ urlpatterns = [
     path('library/', include('library.urls')),
     path('blog/', include('blog.urls')),
     path('control-panel/', control_panel_view, name='control-panel'),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('jsi18n/', JavaScriptCatalog.as_view())
     ]

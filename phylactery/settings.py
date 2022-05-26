@@ -34,6 +34,7 @@ SITE_ID = 1
 
 INSTALLED_APPS = [
     'jazzmin',
+    'django.contrib.admindocs',
     'taggit',
     'dal',
     'dal_select2',
