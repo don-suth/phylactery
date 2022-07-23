@@ -44,6 +44,9 @@ class TagParent(models.Model):
 
 
 class Item(models.Model):
+    """
+        Stores a single library item.
+    """
     BOOK = BOOK
     BOARD_GAME = BOARD_GAME
     CARD_GAME = CARD_GAME
@@ -82,7 +85,7 @@ class Item(models.Model):
 
     @property
     def get_base_tags(self):
-        # Returns the base tag TaggableManager, or creates it if it doesn't exist
+        """ Returns the base tag TaggableManager, or creates it if it doesn't exist. """
         try:
             base_tags = self.base_tags.base_tags
         except ObjectDoesNotExist:
@@ -91,7 +94,7 @@ class Item(models.Model):
 
     @property
     def get_computed_tags(self):
-        # Returns the computed tag TaggableManager, or creates it if it doesn't exist
+        """ Returns the computed tag TaggableManager, or creates it if it doesn't exist """
         try:
             computed_tags = self.computed_tags.computed_tags
         except ObjectDoesNotExist:
@@ -99,7 +102,7 @@ class Item(models.Model):
         return computed_tags
 
     def compute_tags(self, recursion=True):
-        # Takes the base tags and computes all parent tags
+        """ Takes the base tags and computes all parent tags. """
         base_tags = self.get_base_tags
         computed_tags = self.get_computed_tags
 
@@ -130,13 +133,13 @@ class Item(models.Model):
             tag_parents.compute_descendant_tags()
 
     def compute_playtime(self):
-        # On item save, calculate playtime.
+        """ Function to compute the playtime of the item. Called when saving. """
         if self.average_play_time is None and (self.min_play_time is not None and self.max_play_time is not None):
             # Set average to be equal to average of min and max.
             self.average_play_time = (self.min_play_time + self.max_play_time) // 2
 
     def save(self, *args, **kwargs):
-        # On item save, compute the tags as well
+        """ Computes the playtime and tags upon saving. """
         self.compute_playtime()
         super(Item, self).save(*args, **kwargs)
         self.compute_tags()
@@ -148,11 +151,13 @@ class Item(models.Model):
         return self.name
 
     def get_availability_info(self):
-        # Returns a dict, containing keys
-        # 'in_clubroom', 'is_available', 'expected_availability_date', 'max_due_date'
-        # If is_available is True, or if the item is never borrowable,
-        # then expected_availability_date will be None
-        # For this, we assume that if you can't borrow an item overnight, then it's not available
+        """
+        Returns a dict, containing keys:
+        'in_clubroom', 'is_available', 'expected_availability_date', 'max_due_date'
+        If is_available is True, or if the item is never borrowable,
+        then expected_availability_date will be None
+        For this, we assume that if you can't borrow an item overnight, then it's not available.
+        """
         info = {
             'in_clubroom': True,
             'is_available': True,
@@ -237,8 +242,10 @@ class Item(models.Model):
 
     @property
     def is_available(self):
-        # Returns True if the item is both borrowable and available
-        # Otherwise returns False
+        """
+        Returns True if the item is both borrowable and available
+        Otherwise returns False
+        """
         if not self.is_borrowable:
             return False
         now = timezone.now()
