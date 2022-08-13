@@ -3,8 +3,8 @@ from library.forms import CrispyModelSelect2, CrispyModelSelect2Multiple
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, HTML, Div, Submit
-from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText
+from crispy_forms.layout import Layout, Field, Fieldset, HTML, Div, Submit
+from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText, Accordion, AccordionGroup
 from django.utils.text import slugify
 from django.contrib.admin import widgets
 from django.shortcuts import reverse
@@ -332,9 +332,9 @@ class CommitteeTransfer(ControlPanelForm):
     ]
 
     RADIO_CHOICES = [
-        ('1', 'Retain previous committee member'),
-        ('2', 'Elect new committee member'),
-        ('3', 'Remove the committee member from this position, with no replacement')
+        ('retain', 'Retain previous committee member'),
+        ('elect', 'Elect new committee member'),
+        ('remove', 'Remove the committee member from this position, with no replacement')
     ]
 
     def get_current_committee(self, flat=False):
@@ -349,7 +349,7 @@ class CommitteeTransfer(ControlPanelForm):
                 committee[position] = Member.objects.filter(
                     Q(ranks__expired_date__gt=today) | Q(ranks__expired_date=None),
                     ranks__rank__rank_name=position.upper()
-                )
+                ).order_by('pk')
         else:
             # A different format: Just returns the list of all committee members, without their positions.
             committee = []
@@ -361,8 +361,50 @@ class CommitteeTransfer(ControlPanelForm):
                 committee.append(committee_members)
         return committee
 
+    def check_valid_for_position(self, field, member, position):
+        # Returns True if the given member is eligible for the position.
+        # All committee members have to have a valid membership.
+        # Execs also have to be guild members.
+        exec_positions = [
+            'President',
+            'Vice-President',
+            'Treasurer',
+            'Secretary',
+            'Librarian'
+        ]
+        if member is None:
+            self.add_error(field, "You haven't selected anyone to elect to this position.")
+            return False
+        membership = member.get_most_recent_membership()
+        if membership is None or membership.expired is True:
+            # Obviously not valid
+            self.add_error(field, "This member doesn't have a valid membership.")
+            return False
+        elif position in exec_positions and membership.guild_member is False:
+            self.add_error(field, "This member is not currently a Guild member.")
+            return False
+        else:
+            return True
+
+    def check_for_duplicate_committee_members(self, committee):
+        # Given a dict of committee positions and members,
+        duplicate_check = []
+        duplicates = []
+
+        for position in self.COMMITTEE_POSITIONS:
+            for committee_member in committee[position]:
+                if committee_member in duplicate_check and committee_member not in duplicates:
+                    duplicates.append(committee_member)
+                else:
+                    duplicate_check.append(committee_member)
+
+        return duplicates
+
     def __init__(self, *args, **kwargs):
         forms.Form.__init__(self, *args, **kwargs)
+
+        self.cleaned_new_committee = None
+        self.cleaned_current_committee = None
 
         current_committee = self.get_current_committee()
 
@@ -379,22 +421,142 @@ class CommitteeTransfer(ControlPanelForm):
                     slug_name = slugify(position+str(i+1))
 
                 assigned_field_name = 'assigned_' + slug_name
+                try:
+                    initial_val = current_committee[position][i]
+                except IndexError:
+                    initial_val = None
                 self.fields[assigned_field_name] = forms.ModelChoiceField(
                     queryset=Member.objects.all(),
                     widget=CrispyModelSelect2(
                         url='members:autocomplete',
-                        attrs={'style': 'width: 100%', 'disabled': 'disabled'}
+                        attrs={'style': 'width: 100%',}
                     ),
                     label='Assigned ' + position,
                     required=False,
-                    initial=current_committee[position][i]
+                    initial=initial_val
                 )
-
                 radio_field_name = 'options_' + slug_name
                 self.fields[radio_field_name] = forms.ChoiceField(
                     widget=forms.RadioSelect,
                     choices=self.RADIO_CHOICES,
+                    label="",
+                    initial='retain'
                 )
+
+        super().__init__(self, skip_init=True)
+
+    def get_layout(self):
+        layout = Layout()
+        current_committee = self.get_current_committee()
+        layout.append(HTML('<p>Current Committee:</p><ul>'))
+
+        for position in self.COMMITTEE_POSITIONS:
+            layout.append(HTML('<li>' + position + '<ul>'))
+            if len(current_committee[position]) == 0:
+                layout.append(HTML('<li>None</li>'))
+            else:
+                for committee_member in current_committee[position]:
+                    layout.append(HTML('<li>' + str(committee_member) + '</li>'))
+            layout.append(HTML('</ul></li>'))
+
+        layout.append(HTML('</ul>'))
+        new_accordion = Accordion()
+        for position in self.COMMITTEE_POSITIONS:
+            if position == 'OCM':
+                number_of_repeats = self.NUMBER_OF_OCMS
+            else:
+                number_of_repeats = 1
+
+            for i in range(number_of_repeats):
+                if number_of_repeats == 1:
+                    slug_name = slugify(position)
+                    legend_title = position
+                else:
+                    slug_name = slugify(position+str(i+1))
+                    legend_title = position + ' #' + str(i+1)
+
+                assigned_field_name = 'assigned_' + slug_name
+                radio_field_name = 'options_' + slug_name
+
+                new_accordion.append(
+                    AccordionGroup(
+                        legend_title,
+                        Field(radio_field_name),
+                        Field(assigned_field_name),
+                    )
+                )
+        layout.append(new_accordion)
+        return layout
+
+    def clean(self):
+        # We need to check that:there are no duplicate members.
+        # While doing so, we'll also get the data ready and cleaned up.
+        super().clean()
+
+        new_committee = {}
+        old_committee = self.get_current_committee()
+
+        for position in self.COMMITTEE_POSITIONS:
+            if position != "OCM":
+                # Only one member of each position
+
+                slug_name = slugify(position)
+                assigned_field_name = 'assigned_' + slug_name
+                radio_field_name = 'options_' + slug_name
+
+                if self.cleaned_data[radio_field_name] == 'retain':
+                    new_committee[position] = old_committee[position]
+                elif self.cleaned_data[radio_field_name] == 'remove':
+                    new_committee[position] = []
+                elif self.cleaned_data[radio_field_name] == 'elect':
+                    position_elect = self.cleaned_data[assigned_field_name]
+                    if self.check_valid_for_position(assigned_field_name, position_elect, position):
+                        new_committee[position] = [position_elect]
+
+            elif position == "OCM":
+                new_committee[position] = []
+
+                for i in range(self.NUMBER_OF_OCMS):
+                    # Have to handle multiples
+
+                    slug_name = slugify(position + str(i + 1))
+                    assigned_field_name = 'assigned_' + slug_name
+                    radio_field_name = 'options_' + slug_name
+
+                    number_of_current_ocms = len(old_committee[position])
+
+                    if self.cleaned_data[radio_field_name] == 'retain':
+                        # Old committee and the form will generate the list of OCMs in the same order
+                        # So we can just use the old committee list.
+                        if i < number_of_current_ocms:
+                            new_committee[position].append(old_committee[position][i])
+                        else:
+                            pass
+                    elif self.cleaned_data[radio_field_name] == 'remove':
+                        # We just skip this field entirely.
+                        pass
+                    elif self.cleaned_data[radio_field_name] == 'elect':
+                        position_elect = self.cleaned_data[assigned_field_name]
+                        if self.check_valid_for_position(assigned_field_name, position_elect, position):
+                            new_committee[position].append(position_elect)
+
+        errors = []
+        for duplicate in self.check_for_duplicate_committee_members(new_committee):
+            errors.append(
+                ValidationError(
+                    "%(member) is listed more than once in the new committee.",
+                    params={'member', str(duplicate)},
+                    code='duplicate'
+                )
+            )
+        if errors:
+            raise ValidationError(errors)
+
+        self.cleaned_new_committee = new_committee
+
+        return new_committee
+
+
 
 
 
