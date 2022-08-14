@@ -99,6 +99,8 @@ class Member(models.Model):
 			return False
 
 	def get_recent_rank(self, rank_name):
+		# Returns the most recent, non-expired rank of the provided type that this member has.
+		# Returns None if no such rank exists.
 		today = datetime.date.today()
 		ranks = RankAssignments.objects \
 			.exclude(expired_date__lte=today) \
