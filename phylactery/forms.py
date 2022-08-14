@@ -6,6 +6,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText, Accordion, AccordionGroup
 from django.utils.text import slugify
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 from django.contrib.admin import widgets
 from django.shortcuts import reverse
 from django.forms import ValidationError
@@ -400,6 +402,36 @@ class CommitteeTransfer(ControlPanelForm):
 
         return duplicates
 
+    def check_for_committee_differences(self, old_committee, new_committee):
+        committee_changes = []
+        # To this list, we append sub-lists, of the form [Member, old_position, new_position]
+        # If old_position is None, they are a new member to committee.
+        # If new_position is None, they are leaving committee.
+
+        def find_committee_member_index(member):
+            # Searches committee_changes for the specified member.
+            # Returns the index, or -1 if they aren't there.
+            for i in range(len(committee_changes)):
+                if committee_changes[i][0] == member:
+                    return i
+            return -1
+
+        for position in self.COMMITTEE_POSITIONS:
+            for committee_member in old_committee[position]:
+                committee_changes.append([committee_member, position, None])
+        for position in self.COMMITTEE_POSITIONS:
+            for committee_member in new_committee[position]:
+                # Check if they're already in the changelist
+                committee_index = find_committee_member_index(committee_member)
+                if committee_index != -1:
+                    # They're here, change the new_position
+                    committee_changes[committee_index][2] = position
+                else:
+                    # They're new, put them in.
+                    committee_changes.append([committee_member, None, position])
+
+        return committee_changes
+
     def __init__(self, *args, **kwargs):
         forms.Form.__init__(self, *args, **kwargs)
 
@@ -553,12 +585,64 @@ class CommitteeTransfer(ControlPanelForm):
             raise ValidationError(errors)
 
         self.cleaned_new_committee = new_committee
+        self.cleaned_current_committee = old_committee
 
         return new_committee
 
+    def submit(self, request):
+        success_add = []
+        success_remove = []
+        success_change = []
+        changelist = self.check_for_committee_differences(self.cleaned_current_committee, self.cleaned_new_committee)
 
-
-
+        for member, old_position, new_position in changelist:
+            # If the old_position and new_position is the same, we ignore it.
+            if old_position == new_position:
+                pass
+            # If the old_position is None, then we add them to committee.
+            elif old_position is None and new_position is not None:
+                member.add_rank('COMMITTEE')
+                member.add_rank(new_position)
+                success_add.append(conditional_escape('appointed {0} to {1}'.format(member, new_position)))
+            # If it's the other way around, then we remove them from committee.
+            elif new_position is None and old_position is not None:
+                committee_rank = member.get_recent_rank('COMMITTEE')
+                position_rank = member.get_recent_rank(old_position)
+                if committee_rank:
+                    committee_rank.expire()
+                if position_rank:
+                    position_rank.expire()
+                if committee_rank or position_rank:
+                    success_remove.append(conditional_escape('{0}, from {1}'.format(member, old_position)))
+            # Otherwise we remove their old position and put in the new one.
+            elif old_position is not None and new_position is not None:
+                position_rank = member.get_recent_rank(old_position)
+                if position_rank:
+                    position_rank.expire()
+                member.add_rank(new_position)
+                # Double check that they have the committee rank.
+                committee_rank = member.get_recent_rank('COMMITTEE')
+                if committee_rank is None:
+                    member.add_rank('COMMITTEE')
+                success_change.append(conditional_escape('{0}, from {1} to {2}'.format(member, old_position, new_position)))
+        success_message = ''
+        if success_remove:
+            success_message += 'Successfully removed the following committee members:<uL>'
+            for removal in success_remove:
+                success_message += '<li>'+removal+'</li>'
+            success_message += '</ul>'
+        if success_change:
+            success_message += 'Successfully changed the following committee positions:<ul>'
+            for change in success_change:
+                success_message += '<li>'+change+'</li'
+            success_message += '</ul>'
+        if success_add:
+            success_message += 'Successfully added the following members to committee:<ul>'
+            for addition in success_add:
+                success_message += '<li>'+addition+'</li>'
+            success_message += '</ul>'
+        success_message = mark_safe(success_message)
+        messages.success(request, success_message)
 
 
 class FullCommitteeTrasnfer(ControlPanelForm):
