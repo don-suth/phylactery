@@ -16,6 +16,7 @@ CONTROL_PANEL_FORMS = [
     'ExpireMemberships',
     'MakeGatekeepers',
     'MakeWebkeepers',
+    'AddRemoveRanks',
     'CommitteeTransfer',
 ]
 

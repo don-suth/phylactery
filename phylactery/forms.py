@@ -32,6 +32,16 @@ def expire_active_ranks(rank_name):
         rank.save()
     return len(active_ranks)
 
+def expire_specific_ranks(member, rank_name):
+    today = datetime.date.today()
+    ranks = RankAssignments.objects \
+        .exclude(expired_date__lte=today) \
+        .filter(rank__rank_name__iexact=rank_name, member=member) \
+        .order_by('assignment_date')
+    if ranks.exists():
+        for assignment in ranks:
+            assignment.expire()
+
 
 class ControlPanelForm(forms.Form):
     # Base class for control panel forms.
@@ -311,6 +321,55 @@ class MakeWebkeepers(ControlPanelForm):
         if success_webkeeper:
             messages.success(request, 'The following members were successfully added as webkeepers: '+', '.join(success_webkeeper))
 
+class AddRemoveRanks(ControlPanelForm):
+    form_name = 'Selectively Add or Remove Ranks'
+    form_description = 'Gives or Removes ranks for a single member. '\
+                       'Useful for removing the Gatekeeper rank from a single member. '
+    form_long_description = 'This form cannot be used for committee rank transfer. ' \
+                            'Use the Committee Transfer Form for that.'
+    form_media = True
+
+    form_permissions = ['President', 'Vice-President', 'Secretary']
+
+    member_to_alter = forms.ModelChoiceField(
+        queryset=Member.objects.all(),
+        widget=CrispyModelSelect2(url='members:autocomplete', attrs={'style': 'width:100%'})
+    )
+
+    add_or_remove = forms.ChoiceField(
+        choices=[('ADD', 'Add Rank'), ('REMOVE', 'Remove Rank')],
+        widget=forms.RadioSelect
+    )
+
+    rank_to_alter = forms.ModelChoiceField(
+        queryset=Rank.objects.filter(rank_name__in=['EXCLUDED', 'GATEKEEPER', 'WEBKEEPER', 'LIFE-MEMBER']),
+        widget=CrispyModelSelect2(attrs={'style':'width:100%'})
+    )
+
+    def get_layout(self):
+        return Layout(
+            'member_to_alter',
+            'add_or_remove',
+            'rank_to_alter'
+        )
+
+    def submit(self, request):
+        clean_member, clean_rank, clean_mode = self.cleaned_data['member_to_alter'], \
+            self.cleaned_data['rank_to_alter'], self.cleaned_data['add_or_remove']
+        if clean_mode == 'ADD':
+            # Check if the member has that rank already.
+            if clean_member.has_rank(clean_rank.rank_name):
+                messages.warning(request, '{0} was already {1}'.format(clean_member, clean_rank))
+            else:
+                clean_member.add_rank(clean_rank.rank_name)
+                messages.success(request, '{0} was successfully made {1}'.format(clean_member, clean_rank))
+        elif clean_mode == 'REMOVE':
+            # Check if they are that rank
+            if clean_member.has_rank(clean_rank.rank_name):
+                expire_specific_ranks(clean_member, clean_rank.rank_name)
+                messages.success(request, '{0} successfully had their {1} rank removed.'.format(clean_member, clean_rank))
+            else:
+                messages.warning(request, '{0} already did not have the {1} rank.'.format(clean_member, clean_rank))
 
 class CommitteeTransfer(ControlPanelForm):
     form_name = 'Committee Transfer'
