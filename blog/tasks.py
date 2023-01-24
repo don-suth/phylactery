@@ -42,13 +42,13 @@ def send_pending_email_order_task():
                 context['uid'] = urlsafe_base64_encode(force_bytes(member.pk))
                 context['token'] = email_preference_token.make_token(member)
                 body, html_body = compose_html_email('blog/email_blog_post.html', context)
-                send_single_email_task(
+                send_single_email_task.delay(
                     member.email_address,
                     email_subject,
                     body,
                     html_message=html_body,
                     connection=connection,
-                    log=False
+                    log=True
                 )
             order.email_sent = True
             order.save()

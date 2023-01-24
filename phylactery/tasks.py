@@ -15,6 +15,8 @@ from cssutils import log as css_log
 
 from django.contrib.sites.models import Site
 
+from smtplib import SMTPException
+
 logger = get_task_logger(__name__)
 
 
@@ -38,7 +40,17 @@ def send_single_email_task(email_address, subject, message, html_message=None, c
     """
         Sends an email to a single email address asynchronously.
     """
-    send_mail(subject, message, None, [email_address], html_message=html_message, connection=connection)
+    if connection is None:
+        connection = get_connection()
+        connection.open()
+    try:
+        send_mail(subject, message, None, [email_address], html_message=html_message, connection=connection)
+    except SMTPException:
+        # Get a new connection and try one more time
+        connection = get_connection()
+        connection.open()
+        send_mail(subject, message, None, [email_address], html_message=html_message, connection=connection)
+        connection.close()
     if log:
         logger.info("Sent email to "+email_address)
 
