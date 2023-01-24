@@ -43,6 +43,9 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 class TagParentAdmin(admin.ModelAdmin):
+    list_display = ('__str__',)
+    ordering = ('child_tag',)
+    search_fields = ('child_tag__name',)
     filter_horizontal = ('parent_tag',)
 
     def save_related(self, request, form, formsets, change):
