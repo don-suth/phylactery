@@ -1,7 +1,6 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.template import loader
-from django.core.mail import get_connection
 from phylactery.tasks import send_single_email_task, send_mass_email_task, compose_html_email
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -36,8 +35,6 @@ def send_pending_email_order_task():
             context = {
                 'blogpost': order.post
             }
-            connection = get_connection()
-            connection.open()
             for member in members_to_email_to:
                 context['uid'] = urlsafe_base64_encode(force_bytes(member.pk))
                 context['token'] = email_preference_token.make_token(member)
@@ -47,7 +44,6 @@ def send_pending_email_order_task():
                     email_subject,
                     body,
                     html_message=html_body,
-                    connection=connection,
                     log=True
                 )
             order.email_sent = True

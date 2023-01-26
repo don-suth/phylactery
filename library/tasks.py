@@ -1,7 +1,6 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.template import loader
-from django.core.mail import get_connection
 from phylactery.tasks import send_single_email_task, compose_html_email
 import datetime
 
@@ -36,9 +35,6 @@ def send_due_date_tomorrow_reminder_task():
             members_with_items[record.borrowing_member] = []
         members_with_items[record.borrowing_member].append(record)
 
-    connection = get_connection()
-    connection.open()
-
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Tomorrow'
         context = {
@@ -48,8 +44,7 @@ def send_due_date_tomorrow_reminder_task():
         }
         body, html_body = compose_html_email('library/email_reminder_tomorrow.html', context)
         email_address = member.email_address
-        send_single_email_task(email_address, email_subject, body, html_message=html_body, connection=connection)
-    connection.close()
+        send_single_email_task.delay(email_address, email_subject, body, html_message=html_body)
     number_of_emails = len(members_with_items)
     logger.info(
         'Sent "due-tomorrow" reminders to {0} member{1}.'.format(number_of_emails, "" if number_of_emails == 1 else "s")
@@ -83,8 +78,6 @@ def send_due_date_today_reminder_task():
             members_with_items[record.borrowing_member] = []
         members_with_items[record.borrowing_member].append(record)
 
-    connection = get_connection()
-    connection.open()
     for member in members_with_items:
         email_subject = 'Unigames - Items Due Today'
         context = {
@@ -94,8 +87,7 @@ def send_due_date_today_reminder_task():
         }
         body, html_body = compose_html_email('library/email_reminder_today.html', context)
         email_address = member.email_address
-        send_single_email_task(email_address, email_subject, body, html_message=html_body, connection=connection)
-    connection.close()
+        send_single_email_task.delay(email_address, email_subject, body, html_message=html_body)
     number_of_emails = len(members_with_items)
     logger.info(
         'Sent "due-today" reminders to {0} member{1}.'.format(number_of_emails, "" if number_of_emails == 1 else "s")
