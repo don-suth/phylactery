@@ -35,7 +35,7 @@ def compose_html_email(template_name, context, request=None):
     return plaintext_message, html_message
 
 
-@shared_task(name="send_single_email_task")
+@shared_task(name="send_single_email_task", rate_limit="1/s")
 def send_single_email_task(email_address, subject, message, html_message=None, connection=None, log=True):
     """
         Sends an email to a single email address asynchronously.
