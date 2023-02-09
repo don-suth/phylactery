@@ -39,6 +39,7 @@ class LibraryHomeView(generic.ListView):
         context['number_of_other'] = Item.objects.filter(type=OTHER).count()
         return context
 
+
 class AllTagsView(generic.ListView):
     template_name = 'library/tag_list_view.html'
     context_object_name = 'tags_list'
@@ -50,6 +51,7 @@ class AllTagsView(generic.ListView):
             .annotate(num_items=Count('itemcomputedtags')) \
             .order_by('-num_items', 'name')
         return qs
+
 
 class AllItemsView(generic.ListView):
     template_name = 'library/item_list_view.html'
@@ -121,7 +123,6 @@ class SearchView(generic.ListView):
     context_object_name = 'items_list'
     model = Item
     paginate_by = 24
-
 
     def get_queryset(self):
         q = self.request.GET.get('q', '')
@@ -484,12 +485,12 @@ def external_borrow_form_view(request, pk):
                 'Borrowed by {0} on {1}. Authorised by {2}.\n' \
                 'Returned by {3} on {4}. Authorised by {5}' \
                     .format(
-                    item_record.borrower_name,
-                    str(item_record.date_borrowed),
-                    str(item_record.auth_gatekeeper_borrow),
-                    item_record.returner_name,
-                    str(item_record.date_returned),
-                    str(item_record.auth_gatekeeper_return)
+                        item_record.borrower_name,
+                        str(item_record.date_borrowed),
+                        str(item_record.auth_gatekeeper_borrow),
+                        item_record.returner_name,
+                        str(item_record.date_returned),
+                        str(item_record.auth_gatekeeper_return)
                 )
             status = 'Returned'
         item_data.append((item_record, status, actions, details))
