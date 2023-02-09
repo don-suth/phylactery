@@ -62,7 +62,7 @@ class AllItemsByTag(generic.ListView):
     template_name = 'library/item_list_view.html'
     context_object_name = 'items_list'
     model = Item
-    paginate_by = 20
+    paginate_by = 24
 
     def get_queryset(self):
         self.tag_name = get_object_or_404(Tag, pk=self.kwargs['pk']).name
@@ -120,7 +120,8 @@ class SearchView(generic.ListView):
     template_name = 'library/item_list_view.html'
     context_object_name = 'items_list'
     model = Item
-    paginate_by = 20
+    paginate_by = 24
+
 
     def get_queryset(self):
         q = self.request.GET.get('q', '')
