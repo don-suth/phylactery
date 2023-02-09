@@ -55,7 +55,7 @@ class AllItemsView(generic.ListView):
     template_name = 'library/item_list_view.html'
     context_object_name = 'items_list'
     model = Item
-    paginate_by = 20
+    paginate_by = 24
 
 
 class AllItemsByTag(generic.ListView):
