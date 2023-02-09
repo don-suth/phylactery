@@ -20,5 +20,6 @@ urlpatterns = [
     path('request/', views.external_borrow_request_view, name='external-request'),
     path('form/<int:pk>/', views.external_borrow_form_view, name='form-view'),
     path('list/', views.AllItemsView.as_view(), name='list'),
+    path('tags/', views.AllTagsView.as_view(), name='all-tags'),
     path('', views.LibraryHomeView.as_view(), name='library-home'),
 ]

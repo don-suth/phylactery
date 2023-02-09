@@ -39,6 +39,17 @@ class LibraryHomeView(generic.ListView):
         context['number_of_other'] = Item.objects.filter(type=OTHER).count()
         return context
 
+class AllTagsView(generic.ListView):
+    template_name = 'library/tag_list_view.html'
+    context_object_name = 'tags_list'
+    model = Tag
+
+    def get_queryset(self):
+        qs = Tag.objects.all() \
+            .exclude(name__startswith="Item: ") \
+            .annotate(num_items=Count('itemcomputedtags')) \
+            .order_by('-num_items', 'name')
+        return qs
 
 class AllItemsView(generic.ListView):
     template_name = 'library/item_list_view.html'

@@ -17,7 +17,10 @@
                         The pride and joy of Unigames, and also its greatest asset, the library contains our vast collection
                         of board games, card games, RPG source books, and wargaming terrain.
                     </p>
-                    <a href="{% url 'library:list' %}" class="btn btn-primary">See all Library Items</a>
+                    <p>See all:
+                        <a href="{% url 'library:list' %}" class="btn btn-primary">Library Items</a>
+                        <a href="{% url 'library:all-tags' %}" class="btn btn-primary">Tags</a>
+                    </p>
                 </div>
             </div>
             <div class="card text-center mb-3">
