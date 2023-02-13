@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from .models import Item, BorrowRecord, ExternalBorrowingForm, \
+from .models import Item, BorrowRecord, ExternalBorrowingForm, TagParent, \
     BOOK, BOARD_GAME, CARD_GAME, OTHER
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
@@ -67,16 +67,20 @@ class AllItemsByTag(generic.ListView):
     paginate_by = 24
 
     def get_queryset(self):
-        self.tag_name = get_object_or_404(Tag, pk=self.kwargs['pk']).name
+        self.tag = get_object_or_404(Tag, pk=self.kwargs['pk'])
+
         return Item.objects.filter(
-            Q(base_tags__base_tags__name__in=[self.tag_name]) |
-            Q(computed_tags__computed_tags__name__in=[self.tag_name])) \
+            Q(base_tags__base_tags__name__in=[self.tag.name]) |
+            Q(computed_tags__computed_tags__name__in=[self.tag.name])) \
             .distinct() \
             .order_by('name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "All items with the tag {0}".format(self.tag_name)
+        context['page_title'] = "All items with the tag {0}".format(self.tag.name)
+        context['parent_tags'] = Tag.objects.filter(children__child_tag=self.tag).exclude(name__startswith="Item:")
+        context['child_tags'] = Tag.objects.filter(parents__parent_tag=self.tag).exclude(name__startswith="Item:")
+
         return context
 
 
