@@ -8,7 +8,7 @@
 <h2 class="mt-3">{{ page_title|default:"All items:" }}</h2>
 {% if parent_tags or child_tags %}
 <div class="row">
-    {% if parent_tags and child_tags %}
+    {% if parent_tags.count and child_tags.count %}
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 mb-3">
             <h5>Immediate parents: {% for tag in parent_tags %}<a href="{% url 'library:tag-list' tag.pk %}" role="button" class="btn btn-outline-dark mr-1">{{ tag }}</a>{% endfor %}</h5>
         </div>
