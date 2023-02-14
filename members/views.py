@@ -290,6 +290,7 @@ def old_membership_view(request, pk=None):
 
 		form.errors['phone_number'] = ['For your privacy, please enter your phone number again.']
 		form.add_error('is_guild', 'Please verify that this is still correct.')
+		form.add_error('is_student', 'Please verify that this is still correct.')
 		form.helper.layout[0][0].legend = "Check that your details are correct, {{ member.preferred_name }}."
 		request.session['editing_member_id'] = pk
 		return render(request, 'members/old_membership_form.html', {'form': form, 'member': member})

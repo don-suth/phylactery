@@ -49,16 +49,21 @@ class OldMembershipForm(forms.Form):
         required=False,
         label="Are you a current Guild Member?"
     )
+    is_student = forms.BooleanField(
+        required=False,
+        label="Are you currently a student at UWA?"
+    )
     student_number = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={"type": "tel"}),
         validators=[number_validator],
         max_length=10,
+        label="If so, please enter your student number:"
     )
     email = forms.EmailField(
         required=True,
         validators=[no_student_number],
-        label='Non-Student Email: '
+        label='Please enter a non-UWA email address:'
     )
     phone_number = forms.CharField(
         required=True,
@@ -119,8 +124,9 @@ class OldMembershipForm(forms.Form):
                             onclick='$("#pronounField").val("They / Them")'
                         ),
                     ),
-                    'is_guild',
+                    'is_student',
                     'student_number',
+                    'is_guild',
                     'email',
                     'receive_emails',
                     'phone_number',
@@ -171,11 +177,15 @@ class OldMembershipForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        is_student = cleaned_data.get('is_student')
         is_guild = cleaned_data.get('is_guild')
         student_number = cleaned_data.get('student_number')
         amount_paid = cleaned_data.get('amount_paid')
-        if is_guild is True and not student_number:
+        if is_student is True and not student_number:
             self.add_error('student_number', 'If you are a guild member, a student number is required.')
+        if is_student is False and student_number is not None:
+            self.add_error('is_student', '')
+            self.add_error('student_number', 'If you are not a student, then please leave the student number field blank.')
         if is_guild is True and amount_paid is not None and amount_paid != 5:
             self.add_error('is_guild', 'If you are a guild member, you should be paying $5')
             self.add_error('amount_paid', 'If you are a guild member, you should be paying $5')
