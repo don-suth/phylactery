@@ -441,7 +441,12 @@ class CommitteeTransfer(ControlPanelForm):
             # Obviously not valid
             self.add_error(field, "This member doesn't have a valid membership.")
             return False
-        elif position in exec_positions and membership.guild_member is False:
+        if member.student_number == "" or member.student_number is None:
+            # As of Feb 13th 2023, all Committee Members must be students.
+            # (This is checked for by requiring a student number)
+            self.add_error(field, "This member doesn't appear to be a student.")
+            return False
+        if position in exec_positions and membership.guild_member is False:
             self.add_error(field, "This member is not currently a Guild member.")
             return False
         else:
