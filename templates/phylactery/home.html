@@ -8,7 +8,7 @@
 {% block content %}
 <div class="row">
     <div class="col-12 mb-3">
-        <div class="card text-center" style="min-height: 350px; background-color: #ab5454">
+        <div class="card text-center" style="min-height: 350px; background-color: #ab6060">
             <div class="card-body">
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-4"></div>
@@ -32,7 +32,7 @@
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3>Latest news:</h3>
-                <a href="{% url 'blog:blog-home' %}" class="btn btn-link">View archive</a>
+                <a href="{% url 'blog:blog-home' %}" class="btn btn-outline-danger">View archive</a>
             </div>
             <div class="list-group list-group-flush">
                 {% for post in recent_blogposts %}
@@ -56,8 +56,8 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3>Featured games:</h3>
                 <div>
-                    <a href="{% url 'library:list' %}" class="btn btn-link">Library</a>
-                    <a href="{% url 'library:list' %}" class="btn btn-link">All items</a>
+                    <a href="{% url 'library:list' %}" class="btn btn-outline-danger">Library</a>
+                    <a href="{% url 'library:list' %}" class="btn btn-outline-danger">All items</a>
                 </div>
             </div>
             <div id="featuredItemCarousel" class="carousel slide h-100" data-ride="carousel">
@@ -98,8 +98,8 @@
     <div class="col">
         <div class="card text-center">
             <div class="card-body">
-                <a class="btn btn-primary" href="https://discord.gg/xE5CWZr">Join our Discord Server!</a>
-                <a class="btn btn-primary" href="https://www.facebook.com/groups/uwa.unigames/">Join our Facebook Group!</a>
+                <a class="btn btn-danger" href="https://discord.gg/xE5CWZr">Join our Discord Server!</a>
+                <a class="btn btn-danger" href="https://www.facebook.com/groups/uwa.unigames/">Join our Facebook Group!</a>
             </div>
         </div>
     </div>
