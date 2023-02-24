@@ -41,7 +41,7 @@
     <tbody>
         {% for member in page_obj %}
             <tr>
-                <th scope="row"><a href="{% url 'members:profile' pk=member.pk %}">{{ member.preferred_name }}</a></th>
+                <th scope="row"><a href="{% url 'members:profile' pk=member.pk %}">{{ member.preferred_name }} {{ member.last_name }}</a></th>
                 <td>{{ member.pronouns }}</td>
                 <td>{{ member.is_fresher }}</td>
                 <td>{{ member.is_financial_member }}</td>

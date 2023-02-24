@@ -183,7 +183,7 @@ class OldMembershipForm(forms.Form):
         amount_paid = cleaned_data.get('amount_paid')
         if is_student is True and not student_number:
             self.add_error('student_number', 'If you are a current student, a student number is required.')
-        if is_student is False and student_number is not None:
+        if is_student is False and student_number != "":
             self.add_error('is_student', '')
             self.add_error('student_number', 'If you are not a student, then please leave the student number field blank.')
         if is_guild is True and amount_paid is not None and amount_paid != 5:

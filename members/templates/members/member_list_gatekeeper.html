@@ -33,7 +33,7 @@
             {% for member in members %}
                 {% if request.GET.gatekeeper == '1' and member.is_gatekeeper or request.GET.gatekeeper == '0' and not member.is_gatekeeper %}
                     <tr>
-                        <th scope="row">{{ member.preferred_name }}</th>
+                        <th scope="row">{{ member.preferred_name }} {{ member.last_name }}</th>
                         <td>{{ member.pronouns }}</td>
                         <td>{{ member.is_fresher }}</td>
                         <td>(not implemented){# member.is_member #}</td>
