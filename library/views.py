@@ -5,8 +5,9 @@ from .models import Item, BorrowRecord, ExternalBorrowingForm, TagParent, \
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
     ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm, ExternalBorrowingReturningForm
+from .serializers import ItemSerialiser
 from members.models import Member
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.forms import formset_factory
 from django.views import generic
 from dal import autocomplete
@@ -543,3 +544,12 @@ def external_borrow_form_view(request, pk):
         context['form'] = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
 
     return render(request, 'library/external_form_view.html', context)
+
+
+def item_list_api(request):
+    if request.method == 'GET':
+        items = Item.objects.all()
+        serialiser = ItemSerialiser(items, many=True)
+        return JsonResponse(serialiser.data, safe=False)
+    else:
+        pass
