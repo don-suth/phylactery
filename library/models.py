@@ -150,6 +150,10 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def availability(self):
+        return self.get_availability_info()
+
     def get_availability_info(self):
         """
         Returns a dict, containing keys:
@@ -243,6 +247,11 @@ class Item(models.Model):
     @property
     def is_available(self):
         """
+        March 31st 2023: I don't believe this function is used by anything.
+        Use get_availability_info above.
+
+        --
+
         Returns True if the item is both borrowable and available
         Otherwise returns False
         """
@@ -259,7 +268,7 @@ class Item(models.Model):
         # Since external borrowing requires items to be back one day prior,
         # it's also unavailable if that is the case
         tomorrow = now + datetime.timedelta(days=1)
-        if self.ext_borrow_records.filter(requested_borrow_date=tomorrow).exists():
+        if self.ext_borrow_records.filter(form__requested_borrow_date=tomorrow).exists():
             return False
         return True
 
