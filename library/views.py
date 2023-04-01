@@ -18,6 +18,8 @@ from members.decorators import gatekeeper_required
 import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from phylactery.tasks import compose_html_email, send_single_email_task
+import random
+
 # Create your views here.
 
 
@@ -544,12 +546,3 @@ def external_borrow_form_view(request, pk):
         context['form'] = ExternalBorrowingLibrarianForm(display_form=external_borrow_form)
 
     return render(request, 'library/external_form_view.html', context)
-
-
-def item_list_api(request):
-    if request.method == 'GET':
-        items = Item.objects.all()
-        serialiser = ItemSerialiser(items, many=True)
-        return JsonResponse(serialiser.data, safe=False)
-    else:
-        pass
