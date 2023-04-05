@@ -144,6 +144,10 @@ class Item(models.Model):
         super(Item, self).save(*args, **kwargs)
         self.compute_tags()
 
+    @property
+    def url(self):
+        return self.get_absolute_url()
+
     def get_absolute_url(self):
         return reverse('library:detail', args=[self.slug])
 
