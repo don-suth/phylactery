@@ -31,7 +31,7 @@ urlpatterns = [
     path('constitution/', TemplateView.as_view(template_name='phylactery/constitution.html'), name='constitution'),
     path('regulations/', TemplateView.as_view(template_name='phylactery/regulations.html'), name='regulations'),
     path('roleplaying/', TemplateView.as_view(template_name='phylactery/roleplaying.html'), name='roleplaying'),
-    path('api/library/', include(('library.api_urls', 'library'), namespace='api-library')),
+    path('api/items/', include(('library.api_urls', 'library'), namespace='api-library')),
     path('members/', include(('members.membership_urls', 'members'), namespace='members')),
     path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),
