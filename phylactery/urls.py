@@ -32,6 +32,7 @@ urlpatterns = [
     path('regulations/', TemplateView.as_view(template_name='phylactery/regulations.html'), name='regulations'),
     path('roleplaying/', TemplateView.as_view(template_name='phylactery/roleplaying.html'), name='roleplaying'),
     path('api/items/', include(('library.api_urls', 'library'), namespace='api-library')),
+    path('api/', TemplateView.as_view(template_name='phylactery/api.html'), name='api-home'),
     path('members/', include(('members.membership_urls', 'members'), namespace='members')),
     path('account/', include(('members.account_urls', 'members'), namespace='account')),
     path('library/', include('library.urls')),

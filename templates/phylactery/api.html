@@ -1,0 +1,60 @@
+<!-- 'phylactery/api' -->
+
+{% extends 'phylactery/base.html' %}
+
+{% block title %}API - {% endblock %}
+
+{% block content %}
+<h1 class="mt-3">The API</h1>
+<h3>Library Items</h3>
+<p>The items in the Unigames Library can be queried using the API. At the moment, this is mainly used for the Discord bot.</p>
+
+<p>An Item object contains the following information:</p>
+<ul>
+    <li><code>'id'</code> - The ID of the item.</li>
+    <li><code>'name'</code> - The item's name.</li>
+    <li><code>'description'</code> - The description of the item.</li>
+    <li><code>'url'</code> - The URL of the item as it exists on the Unigames website.</li>
+    <li>
+        <code>'type'</code> - Indicates the type of the item. Will either be:
+        <ul>
+            <li><code>'BK'</code> - Book</li>
+            <li><code>'BG'</code> - Board Game</li>
+            <li><code>'CG'</code> - Card Game</li>
+            <li><code>'??'</code> - Other</li>
+        </ul>
+    </li>
+    <li><code>'is_borrowable'</code> - Boolean indicating whether the item can be borrowed.</li>
+    <li><code>'image'</code> - The URL of the image of this item.</li>
+    <li>
+        <code>'availability'</code> - Another JSON object representing the availability of the object. Contains the following:
+        <ul>
+            <li><code>'in_clubroom'</code> - Boolean indicating whether the item is in the clubroom.</li>
+            <li><code>'is_available'</code> - Boolean indicating whether the item is available to be borrowed.</li>
+            <li><code>'expected_availability_date'</code> - If the item is unavailable and can be available, this will show the date that it should be returned by. Another will be None.</li>
+            <li><code>'max_due_date'</code> - If the item can be borrowed, what's the maximum date you could borrow it until. Otherwise will be None.</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>Endpoints</h4>
+<p>There are four endpoints you can use to access library items at this time.</p>
+<ul>
+    <li><code>/api/items/random/any</code></li>
+    <ul>
+        <li>Returns a random item from the library.</li>
+    </ul>
+    <li><code>/api/items/random/book</code></li>
+    <ul>
+        <li>Returns a random item of the Book type from the library.</li>
+    </ul>
+    <li><code>/api/items/random/boardgame</code></li>
+    <ul>
+        <li>Returns a random item of the Board Game type from the library.</li>
+    </ul>
+    <li><code>/api/items/random/cardgame</code></li>
+    <ul>
+        <li>Returns a random item of the Card Game type from the library.</li>
+    </ul>
+</ul>
+{% endblock %}
