@@ -467,10 +467,18 @@ def external_borrow_form_view(request, pk):
             # Item is not borrowed yet
             if today == external_borrow_form.requested_borrow_date:
                 # Item is borrowable
-                status = 'Awaiting Pickup'
+                status = 'Awaiting Pickup Today'
                 actions = 'b'
                 all_return = False
                 any_borrow = True
+            elif today < external_borrow_form.requested_borrow_date:
+                # Item is not borrowable until the requested date.
+                status = 'Awaiting pickup on {0}'.format(
+                    external_borrow_form.requested_borrow_date
+                )
+            else:
+                # Borrow date has passed.
+                status = 'Not Borrowable - Pickup date has passed.'
         elif item_record.date_returned is None:
             # Item has been borrowed and not returned
             actions = 'r'
@@ -489,8 +497,8 @@ def external_borrow_form_view(request, pk):
         else:
             # Item has been borrowed and returned.
             details = \
-                'Borrowed by {0} on {1}. Authorised by {2}.\n' \
-                'Returned by {3} on {4}. Authorised by {5}' \
+                'Borrowed by {0} on {1}.\nAuthorised by {2}.\n\n' \
+                'Returned by {3} on {4}.\nAuthorised by {5}' \
                     .format(
                         item_record.borrower_name,
                         str(item_record.date_borrowed),
