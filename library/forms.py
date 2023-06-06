@@ -306,6 +306,9 @@ class ExternalBorrowingRequestForm(forms.Form):
                     be submitted with a minimum of two weeks notice, with ideally three weeks notice.</p>
                     <p>Make sure the contact information you enter is correct, as the Librarian will
                     contact you to discuss your request.</p>
+                    <p>Please note: Items will only be available to borrow on the date you request. 
+                    If your plans change after submitting this form, please 
+                    <a href="{% url 'contact' %}">contact the committee</a>.</p>
                 """),
                 Div(
                     Div(
