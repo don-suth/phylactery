@@ -23,6 +23,7 @@ class ItemComputedTagInline(admin.TabularInline):
 
 class ItemAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
+    search_fields = ['name']
     form = ItemTaggitForm
     inlines = [ItemBaseTagInline, ItemComputedTagInline]
 

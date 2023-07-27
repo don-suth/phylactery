@@ -92,7 +92,7 @@
                     <td>{{ item_record.item.name }}</td>
                     {% if form_data.form_status in 'AC' %}
                     <td class="">{{ status }}</td>
-                    <td class="">{{ details }}</td>
+                    <td class="">{{ details|linebreaks }}</td>
                     {% endif %}
                     {% if form_data.form_status == 'A' and any_actions %}
                     <td class="">
