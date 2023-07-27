@@ -150,7 +150,10 @@ class SearchView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "Results for the search '{0}'".format(self.request.GET.get('q', ''))
+        query = self.request.GET.get('q', '')
+        context['page_title'] = "Results for the search '{0}'".format(query)
+        context['parameter_sep'] = '&q='
+        context['query'] = query
         return context
 
 
