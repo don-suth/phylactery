@@ -18,6 +18,7 @@ CONTROL_PANEL_FORMS = [
     'MakeWebkeepers',
     'AddRemoveRanks',
     'CommitteeTransfer',
+    'GetMembershipInfo',
 ]
 
 
@@ -64,8 +65,14 @@ def control_panel_view(request):
                 # We have found a form that matches the name, and they have permissions to use it
                 bound_form = form(request.POST)
                 if bound_form.is_valid():
-                    bound_form.submit(request)
-                    return redirect("control-panel")
+                    # Normally we just redirect back to the control panel page.
+                    # However, the form may want to provide an alternate response
+                    # such as downloading a file. This enables that.
+                    response = bound_form.submit(request)
+                    if response is None:
+                        return redirect("control-panel")
+                    else:
+                        return response
                 else:
                     # The form was not valid, something wasn't right with it.
                     already_rendered.append(form_name)

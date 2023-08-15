@@ -2,6 +2,7 @@ from members.models import Member, UnigamesUser, Rank, RankAssignments, MemberFl
 from library.forms import CrispyModelSelect2, CrispyModelSelect2Multiple
 from django import forms
 from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpResponse
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Fieldset, HTML, Div, Submit
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton, PrependedText, Accordion, AccordionGroup
@@ -14,6 +15,7 @@ from django.forms import ValidationError
 from django.contrib import messages
 from django.db.models import Q
 import datetime
+import csv
 import warnings
 
 
@@ -707,3 +709,46 @@ class CommitteeTransfer(ControlPanelForm):
             success_message += '</ul>'
         success_message = mark_safe(success_message)
         messages.success(request, success_message)
+
+class GetMembershipInfo(ControlPanelForm):
+    form_name = 'Get Membership CSV'
+    form_description = 'Get a CSV of membership data for a date range (useful for O-Day information)'
+    form_long_description = 'This will output a CSV containing the name, student number, guild status of each membership purchased on the selected date.'
+    form_permissions = ['President', 'Vice-President', 'Secretary']
+
+    membership_date = forms.DateField(label="Date of membership: ", required=True, widget=widgets.AdminDateWidget)
+    only_guild = forms.BooleanField(label="Only show memberships from Guild members?", required=False)
+
+    def get_layout(self):
+        return Layout(
+            'membership_date',
+            'only_guild'
+        )
+
+    def clean_membership_date(self):
+        today = datetime.date.today()
+        date = self.cleaned_data['membership_date']
+        if date > today:
+            raise ValidationError('Date cannot be in the future.', code='future')
+        return date
+
+    def submit(self, request):
+        memberships = Membership.objects.filter(
+            date=self.cleaned_data['membership_date']
+        )
+        if self.cleaned_data['only_guild']:
+            memberships = memberships.filter(
+                guild_member=True
+            )
+        if memberships.count() > 0:
+            datestring = self.cleaned_data['membership_date'].isoformat()
+            data = memberships.values_list('member__first_name', 'member__last_name', 'member__student_number', 'guild_member')
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={"Content-Disposition": f'attachment; filename="{datestring}-memberships.csv"'}
+            )
+            writer = csv.writer(response)
+            writer.writerows(data)
+            return response
+        else:
+            messages.warning(request, "No memberships exist for the chosen date.")
