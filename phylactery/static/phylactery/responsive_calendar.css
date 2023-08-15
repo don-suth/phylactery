@@ -1,3 +1,10 @@
+:root {
+    --accent: #f5dd5d;
+    --body-fg: #333;
+    --body-bg: #fff;
+    --hairline-color: #e8e8e8;
+}
+
 .calendarbox {
     z-index: 2000;
 }
