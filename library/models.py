@@ -453,3 +453,18 @@ class ExternalBorrowingItemRecord(models.Model):
         default=None,
     )
     date_returned = models.DateField(blank=True, null=True, default=None)
+
+
+class Reservation(models.Model):
+    borrower_name = models.CharField(max_length=100)
+    contact_info = models.TextField()  # Email, or email + phone
+    reserved_items = models.ManyToManyField(Item, related_name="reservations")  # Items to be reserved.
+    date_from = models.DateField()  # Date that the items shall be collected
+    date_to = models.DateField()  # Date that the items should be returned on.
+
+    active = models.BooleanField(default=False)  # Whether the reservation is "active".
+    # Defaults to False. Librarian approving a form sets this to True.
+    # Reservation is ignored by all logic if active is False or date_from is in the past.
+
+    item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True)  # Links the reservation to the BorrowRecords for it.
+
