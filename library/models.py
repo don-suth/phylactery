@@ -476,3 +476,20 @@ class Reservation(models.Model):
 
     item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True)  # Links the reservation to the BorrowRecords for it.
 
+
+class InternalReservationRequest(models.Model):
+    """
+    This model handles reservations for Unigames members.
+    Non-members should be handled using ExternalReservationRequest.
+    """
+    borrower = models.ForeignKey(Member, null=True, on_delete=models.SET_NULL, default=None)
+    from_date = models.DateField()
+    to_date = models.DateField()
+    details = models.TextField()
+
+    submitted = models.DateTimeField(auto_now_add=True)
+
+    approval_statys = models.CharField
+
+
+
