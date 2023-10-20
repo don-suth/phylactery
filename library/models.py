@@ -21,17 +21,6 @@ CARD_GAME = 'CG'
 OTHER = '??'
 
 
-def two_weeks_from_now():
-    return timezone.now() + datetime.timedelta(weeks=2)
-
-
-def next_weekday():
-    next_day = timezone.now() + datetime.timedelta(days=1)
-    while next_day.weekday() not in [0, 1, 2, 3, 4]:
-        next_day += datetime.timedelta(days=1)
-    return next_day
-
-
 class TagParent(models.Model):
     child_tag = models.OneToOneField(Tag, on_delete=models.CASCADE, related_name='parents')
     parent_tag = models.ManyToManyField(Tag, related_name='children', blank=True)
@@ -375,9 +364,12 @@ class BorrowRecord(models.Model):
         related_name='authorised_borrowing'
     )
 
+    def default_due_date():
+        return timezone.now() + datetime.timedelta(weeks=2)
+
     # Due date can be manually set, but is automatically set for two weeks from now
     # (other factors may modify the due date)
-    due_date = models.DateField(default=two_weeks_from_now)
+    due_date = models.DateField(default=default_due_date)
 
     # These are filled out upon return of the item
     date_returned = models.DateField(blank=True, null=True, default=None)
