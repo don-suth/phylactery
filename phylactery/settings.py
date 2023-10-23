@@ -183,14 +183,18 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
 }
 
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            'a', 'p',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
+            'ul', 'li', 'span', 'ol',
+            'em', 'strong', 'pre', 'code', 'blockquote'
+        ],
+        "STRIP": False
+    },
+}
 
-MARKDOWNIFY_STRIP = False
-MARKDOWNIFY_WHITELIST_TAGS = [
-    'a', 'p',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
-    'ul', 'li', 'span', 'ol',
-    'em', 'strong', 'pre', 'code', 'blockquote'
-]
 
 # Celery Stuff
 CELERY_BROKER_URL = 'redis://localhost:6379'
