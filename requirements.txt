@@ -16,12 +16,12 @@ cssutils==2.3.0
 Deprecated==1.2.13
 Django==4.2.6
 django-autocomplete-light==3.9.7
-django-celery-beat==2.2.1
+django-celery-beat==2.5.0
 django-crispy-forms==1.13.0
 django-jazzmin==2.4.9
 django-markdownify==0.9.3
 django-taggit==4.0.0
-django-timezone-field==4.2.1
+django-timezone-field==6.0.1
 djangorestframework==3.14.0
 docutils==0.18.1
 freezegun==1.1.0
