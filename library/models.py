@@ -9,6 +9,10 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
 # External Borrowing Form Statuses
+STATUS_PENDING = "?", "Pending"
+STATUS_APPROVED = "A", "Approved"
+STATUS_DENIED = "X", "Denied"
+STATUS_COMPLETED = "!", "Completed"
 UNAPPROVED = 'U'
 DENIED = 'D'
 APPROVED = 'A'
@@ -456,11 +460,18 @@ class ExternalBorrowingItemRecord(models.Model):
 
 
 class Reservation(models.Model):
-    borrower_name = models.CharField(max_length=100)
-    contact_info = models.TextField()  # Email, or email + phone
+    """
+    This model stores reservations in general.
+
+    Both the internal and external requests link to this model.
+    """
+    borrower_name = models.CharField(max_length=200)
+    contact_email = models.CharField(max_length=50)
+    contact_phone = models.CharField(max_length=15)
     reserved_items = models.ManyToManyField(Item, related_name="reservations")  # Items to be reserved.
     date_from = models.DateField()  # Date that the items shall be collected
     date_to = models.DateField()  # Date that the items should be returned on.
+    is_external = models.BooleanField(editable=False)
 
     active = models.BooleanField(default=False)  # Whether the reservation is "active".
     # Defaults to False. Librarian approving a form sets this to True.
@@ -474,14 +485,37 @@ class InternalReservationRequest(models.Model):
     This model handles reservations for Unigames members.
     Non-members should be handled using ExternalReservationRequest.
     """
-    borrower = models.ForeignKey(Member, null=True, on_delete=models.SET_NULL, default=None)
+    class RequestStatusCodes(models.TextChoices):
+        PENDING = STATUS_PENDING
+        APPROVED = STATUS_APPROVED
+        DENIED = STATUS_DENIED
+        COMPLETED = STATUS_COMPLETED
+
+    borrower = models.ForeignKey(Member, on_delete=models.SET_DEFAULT, default=None)
     from_date = models.DateField()
     to_date = models.DateField()
     details = models.TextField()
 
-    submitted = models.DateTimeField(auto_now_add=True)
+    submitted_on = models.DateTimeField(auto_now_add=True)
 
-    approval_statys = models.CharField
+    approval_status = models.CharField(
+        max_length=1,
+        choices=RequestStatusCodes.choices,
+        default=RequestStatusCodes.PENDING,
+    )
+    status_last_changed_on = models.DateTimeField(auto_now_add=True)
 
+    reservation = models.OneToOneField(
+        Reservation,
+        on_delete=models.SET_DEFAULT,
+        default=None,
+    )
 
-
+    def request_set_approved(self):
+        """
+        Helper function - sets the request and the associated reservation to approved.
+        """
+        self.approval_status = self.RequestStatusCodes.APPROVED
+        self.reservation.active = True
+        self.reservation.savw()
+        self.save()
