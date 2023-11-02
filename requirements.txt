@@ -14,7 +14,7 @@ click-repl==0.2.0
 cssselect==1.1.0
 cssutils==2.3.0
 Deprecated==1.2.13
-Django==4.2.6
+Django==4.2.7
 django-autocomplete-light==3.9.7
 django-celery-beat==2.5.0
 django-crispy-forms==1.13.0
