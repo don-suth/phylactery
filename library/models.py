@@ -465,57 +465,39 @@ class Reservation(models.Model):
 
     Both the internal and external requests link to this model.
     """
-    borrower_name = models.CharField(max_length=200)
-    contact_email = models.CharField(max_length=50)
-    contact_phone = models.CharField(max_length=15)
-    reserved_items = models.ManyToManyField(Item, related_name="reservations")  # Items to be reserved.
-    date_from = models.DateField()  # Date that the items shall be collected
-    date_to = models.DateField()  # Date that the items should be returned on.
-    is_external = models.BooleanField(editable=False)
-
-    active = models.BooleanField(default=False)  # Whether the reservation is "active".
-    # Defaults to False. Librarian approving a form sets this to True.
-    # Reservation is ignored by all logic if active is False or date_from is in the past.
-
-    item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True)  # Links the reservation to the BorrowRecords for it.
-
-
-class InternalReservationRequest(models.Model):
-    """
-    This model handles reservations for Unigames members.
-    Non-members should be handled using ExternalReservationRequest.
-    """
-    class RequestStatusCodes(models.TextChoices):
+    class ReservationStatusCodes(models.TextChoices):
         PENDING = STATUS_PENDING
         APPROVED = STATUS_APPROVED
         DENIED = STATUS_DENIED
         COMPLETED = STATUS_COMPLETED
 
-    borrower = models.ForeignKey(Member, on_delete=models.SET_DEFAULT, default=None)
-    from_date = models.DateField()
-    to_date = models.DateField()
-    details = models.TextField()
+    is_external = models.BooleanField(editable=False)  # Whether this reservation is internal (for Unigames members) or external.
+    internal_member = models.ForeignKey(Member, blank=True, null=True, on_delete=models.SET_NULL)  # A link to the borrowing member if it's internal.
 
-    submitted_on = models.DateTimeField(auto_now_add=True)
+    borrower_name = models.CharField(max_length=200)  # The name of the borrower, or the borrowing entity
+    contact_info = models.TextField()  # Will contain the contact information for the reserving entity.
+
+    reserved_items = models.ManyToManyField(Item, related_name="reservations")  # Items to be reserved.
+
+    date_to_borrow = models.DateField()  # Date that the items shall be collected
+    date_to_return = models.DateField()  # Date that the items should be returned on.
+
+    additional_details = models.TextField(blank=True)  # A place for any additional details/comments/remarks from the reserving entity.
+
+    submitted_datetime = models.DateTimeField(auto_now_add=True)  # This field is automatically set when submitted a reservation request.
 
     approval_status = models.CharField(
         max_length=1,
-        choices=RequestStatusCodes.choices,
-        default=RequestStatusCodes.PENDING,
-    )
-    status_last_changed_on = models.DateTimeField(auto_now_add=True)
+        choices=ReservationStatusCodes.choices,
+        default=ReservationStatusCodes.PENDING,
+    )  # This tracks the approval status of the reservation.
+    # Reservation is ignored by all logic if approval_status is not Approved or date_from is in the past.
 
-    reservation = models.OneToOneField(
-        Reservation,
-        on_delete=models.SET_DEFAULT,
-        default=None,
-    )
+    status_update_datetime = models.DateTimeField(blank=True)  # This timestamp is updated whenever the approval status is updated.
 
-    def request_set_approved(self):
-        """
-        Helper function - sets the request and the associated reservation to approved.
-        """
-        self.approval_status = self.RequestStatusCodes.APPROVED
-        self.reservation.active = True
-        self.reservation.savw()
-        self.save()
+    librarian_comments = models.TextField(blank=True)  # A space for the librarian to write any comments.
+
+    active = models.BooleanField(default=False)  # Whether the reservation is "active".
+    # Defaults to False. Librarian approving a form sets this to True.
+
+    item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True)  # Links the reservation to the BorrowRecords for it.
