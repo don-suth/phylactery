@@ -405,6 +405,9 @@ class BorrowRecord(models.Model):
 
 
 class ExternalBorrowingForm(models.Model):
+    """
+    DEPRECATED
+    """
     UNAPPROVED = UNAPPROVED
     DENIED = DENIED
     APPROVED = APPROVED
@@ -417,25 +420,28 @@ class ExternalBorrowingForm(models.Model):
         (COMPLETED, 'Completed'),
     ]
 
-    applicant_name = models.CharField(max_length=200)
-    applicant_org = models.CharField(max_length=200, blank=True)
-    event_details = models.TextField()
-    contact_phone = models.CharField(max_length=20)
-    contact_email = models.EmailField()
-    form_submitted_date = models.DateField(default=datetime.date.today)
-    requested_borrow_date = models.DateField()
+    applicant_name = models.CharField(max_length=200, editable=False)
+    applicant_org = models.CharField(max_length=200, blank=True, editable=False)
+    event_details = models.TextField(editable=False)
+    contact_phone = models.CharField(max_length=20, editable=False)
+    contact_email = models.EmailField(editable=False)
+    form_submitted_date = models.DateField(default=datetime.date.today, editable=False)
+    requested_borrow_date = models.DateField(editable=False)
 
-    form_status = models.CharField(max_length=1, choices=STATUS_CHOICES)
-    due_date = models.DateField(blank=True, null=True, default=None)
-    librarian_comments = models.TextField(blank=True)
+    form_status = models.CharField(max_length=1, choices=STATUS_CHOICES, editable=False)
+    due_date = models.DateField(blank=True, null=True, default=None, editable=False)
+    librarian_comments = models.TextField(blank=True, editable=False)
 
 
 class ExternalBorrowingItemRecord(models.Model):
-    form = models.ForeignKey(ExternalBorrowingForm, on_delete=models.CASCADE, related_name='requested_items')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records')
+    """
+    DEPRECATED
+    """
+    form = models.ForeignKey(ExternalBorrowingForm, on_delete=models.CASCADE, related_name='requested_items', editable=False)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='ext_borrow_records', editable=False)
 
     # These fields are set when the borrower collects the item
-    borrower_name = models.CharField(max_length=200, blank=True)
+    borrower_name = models.CharField(max_length=200, blank=True, editable=False)
     auth_gatekeeper_borrow = models.ForeignKey(
         Member,
         blank=True,
@@ -443,11 +449,12 @@ class ExternalBorrowingItemRecord(models.Model):
         related_name='authorised_borrowing_ext',
         on_delete=models.SET_NULL,
         default=None,
+        editable=False
     )
-    date_borrowed = models.DateField(blank=True, null=True, default=None)
+    date_borrowed = models.DateField(blank=True, null=True, default=None, editable=False)
 
     # These fields are set when the borrower returns the item
-    returner_name = models.CharField(max_length=200, blank=True)
+    returner_name = models.CharField(max_length=200, blank=True, editable=False)
     auth_gatekeeper_return = models.ForeignKey(
         Member,
         blank=True,
@@ -455,8 +462,9 @@ class ExternalBorrowingItemRecord(models.Model):
         related_name='authorised_returning_ext',
         on_delete=models.SET_NULL,
         default=None,
+        editable=False
     )
-    date_returned = models.DateField(blank=True, null=True, default=None)
+    date_returned = models.DateField(blank=True, null=True, default=None, editable=False)
 
 
 class Reservation(models.Model):
