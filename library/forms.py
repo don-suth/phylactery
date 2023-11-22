@@ -255,6 +255,9 @@ class ReturnItemsForm(forms.Form):
 
 
 class ExternalBorrowingRequestForm(forms.Form):
+    """
+    DEPRECATED
+    """
     applicant_name = forms.CharField(
         required=True,
         label='Your name',
@@ -372,6 +375,9 @@ class ExternalBorrowingRequestForm(forms.Form):
 
 
 class ExternalBorrowingLibrarianForm(forms.Form):
+    """
+    DEPRECATED
+    """
     librarian_comments = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'rows': '3'}),
@@ -443,6 +449,9 @@ class ExternalBorrowingLibrarianForm(forms.Form):
 
 
 class ExternalBorrowingReturningForm(forms.Form):
+    """
+    DEPRECATED
+    """
     borrower_returner_name = forms.CharField(
         required=True,
     )
@@ -495,3 +504,32 @@ class ExternalBorrowingReturningForm(forms.Form):
                 item_record.save()
                 success_return += 1
         return success_borrow, success_return
+
+
+class ExternalReservationRequestForm(forms.Form):
+    """
+    A form for external entities to request item reservation.
+    """
+    pass
+
+
+class InternalReservationRequestForm(forms.Form):
+    """
+    A form that allows for Unigames members to request item reservation.
+    """
+    pass
+
+
+class ReservationLibrarianForm(forms.Form):
+    """
+    A form that allows the Librarian to inspect, approve, or otherwise manage reservations.
+    """
+    pass
+
+
+class ReservationReturnForm(forms.Form):
+    """
+    A form that allows the return of items borrowed via a reservation.
+    """
+    pass
+
