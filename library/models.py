@@ -483,6 +483,7 @@ class Reservation(models.Model):
     internal_member = models.ForeignKey(Member, blank=True, null=True, on_delete=models.SET_NULL)  # A link to the borrowing member if it's internal.
 
     borrower_name = models.CharField(max_length=200)  # The name of the borrower, or the borrowing entity
+    contact_email = models.EmailField()
     contact_info = models.TextField()  # Will contain the contact information for the reserving entity.
 
     reserved_items = models.ManyToManyField(Item, related_name="reservations")  # Items to be reserved.

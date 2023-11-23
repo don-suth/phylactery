@@ -1,7 +1,8 @@
 from django import forms
 from dal import autocomplete
 from .models import Item, ItemBaseTags, ItemComputedTags, \
-    BorrowRecord, ExternalBorrowingForm
+    BorrowRecord, ExternalBorrowingForm, \
+    Reservation
 from members.models import Member
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Fieldset, HTML, Submit, Hidden
@@ -510,7 +511,134 @@ class ExternalReservationRequestForm(forms.Form):
     """
     A form for external entities to request item reservation.
     """
-    pass
+    applicant_name = forms.CharField(
+        required=True,
+        label='Your name',
+    )
+    applicant_org = forms.CharField(
+        required=False,
+        label='Your organisation name (optional)',
+    )
+    event_details = forms.CharField(
+        required=True,
+        label='Enter additional details about your event and organisation (if applicable) here.',
+        widget=forms.Textarea(attrs={'rows': '5'}),
+    )
+    contact_phone = forms.CharField(
+        required=True,
+        label='Contact Phone Number',
+        widget=forms.TextInput(attrs={'type': 'tel'})
+    )
+    contact_email = forms.EmailField(
+        required=True,
+        label='Contact Email',
+    )
+    requested_borrow_date = forms.DateField(
+        required=True,
+        widget=widgets.AdminDateWidget,
+    )
+    requested_return_date = forms.DateField(
+        required=True,
+        widget=widgets.AdminDateWidget,
+    )
+    requested_items = forms.ModelMultipleChoiceField(
+        queryset=Item.objects.all(),
+        widget=CrispyModelSelect2Multiple(url='library:item-autocomplete', attrs={'style': 'width: 100%;'})
+    )
+
+    confirmed = forms.BooleanField(
+        required=True,
+        label='I agree to the above'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.include_media = False
+        self.helper.layout = Layout(
+            Fieldset(
+                'External Borrowing Request Form',
+                HTML("""
+                    <p>Unigames allows other clubs, organisations and people to borrow items for their events.
+                    This is a form to request items to borrow for such an event.</p>
+                    <p>To guarantee that we can provide all items that your request, we ask that this form 
+                    be submitted with a minimum of two weeks notice, with ideally three weeks notice.</p>
+                    <p>Make sure the contact information you enter is correct, as the Librarian will
+                    contact you to discuss your request.</p>
+                    <p>Please note: Items will only be available to borrow on the date you request. 
+                    If your plans change after submitting this form, please 
+                    <a href="{% url 'contact' %}">contact the committee</a>.</p>
+                """),
+                Div(
+                    Div(
+                        'applicant_name',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'applicant_org',
+                        css_class='col-md'
+                    ),
+                    css_class='form-row'
+                ),
+                'event_details',
+                Div(
+                    Div(
+                        'contact_phone',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'contact_email',
+                        css_class='col-md'
+                    ),
+                    Div(
+                        'requested_borrow_date',
+                        css_class='col-md',
+                    ),
+                    Div(
+                        'requested_return_date',
+                        css_class='col-md',
+                    ),
+                    css_class='form-row'
+                ),
+                'requested_items',
+                HTML('''
+                <p>By checking this box, you understand and agree to the following:
+                    <ul>
+                        <li>That a Unigames representative will contact you to discuss details about this 
+                            borrowing request with you, and that this reqeust isn't valid until approved.</li>
+                        <li>Unigames has the full right to approve or deny this request for any reason.</li>
+                        <li>It may not be possible to get you all the games that you request.</li>
+                        <li>You/Your organisation will be responsible for all costs in the event that any items or 
+                            their components are damaged or not returned.</li>
+                    </ul>
+                </p>
+                '''),
+                'confirmed',
+                Submit('submit', 'Submit', css_class='btn-primary'),
+            ),
+        )
+
+    def submit(self):
+        other_contact_info = f"Contact phone number: {self.cleaned_data['contact_phone']}."
+        initial_librarian_comments = \
+            f"""
+            ----- ^ Insert comments above this line ^ -----
+            Form originally submitted by: {self.cleaned_data["applicant_name"]}
+            Organisation: {self.cleaned_data["applicant_org"]}"""
+        new_reservation = Reservation.objects.create(
+            is_external=True,
+            internal_member=None,
+            borrower_name=self.cleaned_data['applicant_name'],
+            contact_email=self.cleaned_data['contact_email'],
+            contact_info=other_contact_info,
+            date_to_borrow=self.cleaned_data["requested_borrow_date"],
+            date_to_return=self.cleaned_data["requested_return_date"],
+            additional_details=self.cleaned_data["event_details"],
+            librarian_comments=initial_librarian_comments,
+        )
+        new_reservation.reserved_items.set(self.cleaned_data["requested_items"])
+        new_reservation.save()
 
 
 class InternalReservationRequestForm(forms.Form):
