@@ -65,19 +65,28 @@ class ExternalBorrowingFormAdmin(admin.ModelAdmin):
 
 
 class ReservationItems(admin.TabularInline):
+    verbose_name = "Reserved item"
     model = Item.reservations.through
     extra = 0
+    readonly_fields = ["item"]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ReservationBorrowRecords(admin.TabularInline):
+    verbose_name = "Associated borrow record"
     model = BorrowRecord.reservations.through
     extra = 0
+    readonly_fields = ["borrowrecord"]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ReservationAdmin(admin.ModelAdmin):
     model = Reservation
     readonly_fields = ['submitted_datetime', 'is_external', 'internal_member', 'status_update_datetime']
-
     fields = [
         'submitted_datetime',
         ('is_external', 'internal_member'),
@@ -90,6 +99,34 @@ class ReservationAdmin(admin.ModelAdmin):
         'librarian_comments',
         'active',
     ]
+
+    def get_fields(self, request, obj=None):
+        if obj.is_external:
+            return [
+                'submitted_datetime',
+                'is_external',
+                'borrower_name',
+                'contact_email',
+                'contact_info',
+                ('date_to_borrow', 'date_to_return'),
+                'additional_details',
+                ('approval_status', 'status_update_datetime'),
+                'librarian_comments',
+                'active',
+            ]
+        else:
+            return [
+                'submitted_datetime',
+                ('is_external', 'internal_member'),
+                'borrower_name',
+                'contact_email',
+                'contact_info',
+                ('date_to_borrow', 'date_to_return'),
+                'additional_details',
+                ('approval_status', 'status_update_datetime'),
+                'librarian_comments',
+                'active',
+            ]
 
     inlines = [ReservationItems, ReservationBorrowRecords]
 
