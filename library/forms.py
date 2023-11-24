@@ -621,11 +621,9 @@ class ExternalReservationRequestForm(forms.Form):
 
     def submit(self):
         other_contact_info = f"Contact phone number: {self.cleaned_data['contact_phone']}."
-        initial_librarian_comments = \
-            f"""
-            ----- ^ Insert comments above this line ^ -----
-            Form originally submitted by: {self.cleaned_data["applicant_name"]}
-            Organisation: {self.cleaned_data["applicant_org"]}"""
+        initial_librarian_comments = "\n----- ^ Insert comments above this line ^ -----"
+        initial_librarian_comments += f"\nForm originally submitted by: {self.cleaned_data['applicant_name']}"
+        initial_librarian_comments += f"\nOrganisation: {self.cleaned_data['applicant_org']}"
         new_reservation = Reservation.objects.create(
             is_external=True,
             internal_member=None,
