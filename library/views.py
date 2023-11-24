@@ -4,7 +4,8 @@ from .models import Item, BorrowRecord, ExternalBorrowingForm, TagParent, \
     BOOK, BOARD_GAME, CARD_GAME, OTHER
 from members.models import switch_to_proxy
 from .forms import ItemSelectForm, ItemDueDateForm, MemberBorrowDetailsForm, VerifyReturnForm, ReturnItemsForm, \
-    ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm, ExternalBorrowingReturningForm
+    ExternalBorrowingRequestForm, ExternalBorrowingLibrarianForm, ExternalBorrowingReturningForm, \
+    ExternalReservationRequestForm
 from .serializers import ItemSerialiser
 from members.models import Member
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -445,6 +446,19 @@ def external_borrow_request_view(request):
             return redirect('library:library-home')
         else:
             return render(request, 'library/external_borrow_form.html', {'form': form})
+
+def external_reservation_request_view(request):
+    if request.method == 'GET':
+        form = ExternalReservationRequestForm()
+        return render(request, 'library/external_reservation_request_form.html', {'form': form})
+    elif request.method == 'POST':
+        form = ExternalReservationRequestForm(request.POST)
+        if form.is_valid():
+            form.submit()
+            messages.success(request, 'Your form was successfully submitted! We will get in touch soon.')
+            return redirect('library:library-home')
+        else:
+            return render(request, 'library/external_reservation_request_form.html', {'form': form})
 
 
 @gatekeeper_required

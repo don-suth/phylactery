@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Item, BorrowRecord, ExternalBorrowingForm, ExternalBorrowingItemRecord, \
-    ItemBaseTags, ItemComputedTags, TagParent
+    ItemBaseTags, ItemComputedTags, TagParent, Reservation
 from .forms import ItemTaggitForm, BaseTagForm, ComputedTagForm
 
 
@@ -64,8 +64,38 @@ class ExternalBorrowingFormAdmin(admin.ModelAdmin):
     inlines = [ExternalBorrowingItemRecordAdmin]
 
 
+class ReservationItems(admin.TabularInline):
+    model = Item.reservations.through
+    extra = 0
+
+
+class ReservationBorrowRecords(admin.TabularInline):
+    model = BorrowRecord.reservations.through
+    extra = 0
+
+
+class ReservationAdmin(admin.ModelAdmin):
+    model = Reservation
+    readonly_fields = ['submitted_datetime', 'is_external', 'internal_member', 'status_update_datetime']
+
+    fields = [
+        'submitted_datetime',
+        ('is_external', 'internal_member'),
+        'borrower_name',
+        'contact_email',
+        'contact_info',
+        ('date_to_borrow', 'date_to_return'),
+        'additional_details',
+        ('approval_status', 'status_update_datetime'),
+        'librarian_comments',
+        'active',
+    ]
+
+    inlines = [ReservationItems, ReservationBorrowRecords]
+
 
 admin.site.register(Item, ItemAdmin)
 admin.site.register(BorrowRecord)
 admin.site.register(ExternalBorrowingForm, ExternalBorrowingFormAdmin)
+admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(TagParent, TagParentAdmin)

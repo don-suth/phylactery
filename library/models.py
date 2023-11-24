@@ -502,11 +502,11 @@ class Reservation(models.Model):
     )  # This tracks the approval status of the reservation.
     # Reservation is ignored by all logic if approval_status is not Approved or date_from is in the past.
 
-    status_update_datetime = models.DateTimeField(blank=True)  # This timestamp is updated whenever the approval status is updated.
+    status_update_datetime = models.DateTimeField(auto_now_add=True)  # This timestamp is updated whenever the approval status is updated.
 
     librarian_comments = models.TextField(blank=True)  # A space for the librarian to write any comments.
 
     active = models.BooleanField(default=False)  # Whether the reservation is "active".
     # Defaults to False. Librarian approving a form sets this to True.
 
-    item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True)  # Links the reservation to the BorrowRecords for it.
+    item_borrow_records = models.ManyToManyField(BorrowRecord, blank=True, related_name="reservations")  # Links the reservation to the BorrowRecords for it.
