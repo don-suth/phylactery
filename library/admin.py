@@ -56,12 +56,41 @@ class TagParentAdmin(admin.ModelAdmin):
 
 class ExternalBorrowingItemRecordAdmin(admin.TabularInline):
     model = ExternalBorrowingItemRecord
-    extra = 1
+    extra = 0
+    readonly_fields = [
+        'item',
+        'borrower_name', 'auth_gatekeeper_borrow', 'date_borrowed',
+        'returner_name', 'auth_gatekeeper_return', 'date_returned',
+    ]
+
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ExternalBorrowingFormAdmin(admin.ModelAdmin):
     model = ExternalBorrowingForm
     inlines = [ExternalBorrowingItemRecordAdmin]
+    readonly_fields = [
+        'applicant_name', 'applicant_org', 'event_details',
+        'contact_phone', 'contact_email', 'form_submitted_date',
+        'requested_borrow_date', 'form_status', 'due_date',
+        'librarian_comments',
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ReservationItems(admin.TabularInline):
