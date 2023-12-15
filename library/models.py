@@ -46,7 +46,6 @@ class TagParent(models.Model):
         self.compute_descendant_tags()
 
 
-
 class Item(models.Model):
     """
         Stores a single library item.
@@ -333,6 +332,8 @@ class Item(models.Model):
                 return "~<i>{0}</i>".format(convert_minutes_to_hours(self.average_play_time))
 
 
+# These two are separate models because you can't have more than one TaggableManager linked to the same model.
+# Maybe will fix in the future.
 class ItemBaseTags(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='base_tags')
     base_tags = TaggableManager(blank=True)
